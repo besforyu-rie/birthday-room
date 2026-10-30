@@ -5,8 +5,11 @@
 /* ===== EDIT BAGIAN INI ===== */
 const EX={
  radio:[{n:"lagu 1",src:"music.mp3"}], /* tambah {n:"nama",src:"file.mp3"} kalau sudah upload lagu lain */
- lock:{code:"2512",openAt:"2026-11-07T22:00:00+07:00",hint:"when r we meet?",msg:"Cie ultah ni yaa, selamat tambah dewasa. stop panggil aku plup meong zzz."},
- letter:{title:"Surat dari aku",body:"Halo Aqsa,\n\nTulis surat panjangmu di sini.\n\nBaris kosong = paragraf baru.\n\n— developer"},
+ lock:{code:"2512",hint:"when r we meet?",msg:"Cie ultah ni yaa, selamat tambah dewasa. stop panggil aku plup meong zzz."},
+letter: {
+  title: "Surat dari aku",
+  body: "Halo Aqsa,\n\nSelamat ulang tahun yaa. Semoga di umur yang sekarang kamu selalu diberi kesehatan, kebahagiaan, dan kemudahan dalam segala hal. Semoga apa pun yang sedang kamu usahakan sekarang bisa berjalan dengan baik dan mendapatkan hasil yang kamu harapkan.\n\nSebenarnya aku agak bingung mau nulis apa, karena aku bukan orang yang pandai menyampaikan sesuatu lewat kata-kata. Tapi rasanya sayang kalau hari spesial seperti ini dilewatkan begitu saja tanpa ucapan. Jadi, aku mau menyempatkan diri buat menulis sedikit pesan ini untuk kamu.\n\nSemoga ke depannya banyak hal baik yang datang. Semoga kamu bisa ketemu banyak kesempatan baru, punya pengalaman menyenangkan, dan bisa mencapai hal-hal yang selama ini kamu inginkan. Kalau ternyata ada hari-hari yang tidak berjalan sesuai rencana, semoga kamu tetap bisa melewatinya dengan baik. Tidak semua hal harus selesai dalam satu waktu, jadi jangan terlalu membebani diri sendiri.\n\nAku juga berharap kamu selalu dikelilingi orang-orang yang baik dan bisa membuat hari-hari kamu jadi lebih menyenangkan. Tetap jadi diri sendiri, tetap lakukan hal-hal yang kamu suka, dan jangan lupa menikmati waktu yang kamu punya sekarang. Kadang kita terlalu sibuk memikirkan banyak hal sampai lupa kalau hal sederhana juga bisa jadi sesuatu yang menyenangkan.\n\nTerima kasih sudah jadi teman selama ini. Mungkin aku tidak selalu bisa mengungkapkan banyak hal secara langsung, tapi aku tetap menghargai pertemanan yang ada. Semoga ke depannya kita masih bisa berteman baik, berbagi cerita, dan punya lebih banyak kenangan menyenangkan.\n\nTerakhir, semoga semua doa baik yang kamu panjatkan bisa terkabul, satu per satu. Semoga tahun ini membawa lebih banyak hal yang bisa kamu syukuri dan lebih banyak alasan untuk tersenyum.\n\nSekali lagi, happy birthday, Aqsa. Semoga hari ini menyenangkan dan kamu bisa menikmati hari spesialmu dengan baik.\n\nHave a great year ahead! ♡\n\n— plup"
+},
  memories:[
   {src:"image1.png",date:"DD Bulan 2025",title:"hari itu, ultahnya mita",story:"Tulis ceritanya di sini."},
   {src:"image2.png",date:"DD Bulan 2025",title:"tiba-tiba dia foto",story:"Tulis ceritanya di sini."},
@@ -14,6 +17,7 @@ const EX={
  ]
 };
 /* =========================== */
+window.EX_MEMORIES=EX.memories;
 function init(){
 const PAL={k:'#1f3a5f',w:'#8fd0f0',o:'#f0b070',y:'#f2c14e',n:'#c98b52',r:'#e84a5f',p:'#f4a6c0',g:'#8fd18a',d:'#8a5a34',b:'#4f8fe8',W:'#fff'};
 function spr(m,s){const c=document.createElement('canvas');c.width=m[0].length;c.height=m.length;c.style.width=c.width*s+'px';c.style.height=c.height*s+'px';const g=c.getContext('2d');m.forEach((r,y)=>[...r].forEach((ch,x)=>PAL[ch]&&R(g,PAL[ch],x,y,1,1)));return c}
@@ -104,7 +108,7 @@ const lc=spr(IC.lamp,4);lc.className='lampc';lb.firstChild.appendChild(lc);lb.fi
 const sb=$('#stickyBtn');sb.textContent='+ sticky';lb.appendChild(sb);
 function deco(side,cv,fn,label,off){const b=document.createElement('button');b.className='deco';b.style[side]=(off||8)+'px';b.setAttribute('aria-label',label);b.appendChild(cv);b.onclick=fn;fl.appendChild(b)}
 deco('left',spr(AR,4),game,'game',58);
-deco('left',spr(MB,4),()=>page(EX.letter.title,`<div class="paper">${esc(EX.letter.body)}</div>`),'surat dari developer');
+deco('left',spr(MB,4),letter,'surat dari developer');
 const door=document.createElement('canvas');door.width=10;door.height=16;(g=>{R(g,'#1f3a5f',0,0,10,16);R(g,'#8a5a34',1,1,8,15);R(g,'#a8743f',2,2,6,5);R(g,'#a8743f',2,9,6,5);R(g,'#f2c14e',7,8,1,1)})(door.getContext('2d'));
 door.style.cssText='width:40px;height:64px';
 deco('right',door,mem,'pintu kenangan');
@@ -116,14 +120,28 @@ for(let i=0;i<45;i++){const s=document.createElement('i');s.style.cssText=`left:
 stars.appendChild(document.createElement('b'));$('#room').prepend(stars);
 function lamp(){$('#room').classList.toggle('night');sky()}
 
+/* ---- surat: efek ketik ---- */
+let typ=0;
+function letter(){
+ const t=EX.letter.body;clearInterval(typ);
+ page(EX.letter.title,'<div class="paper" id="lt"></div><p style="font-size:18px;opacity:.6;margin-top:8px">tap kertas untuk lewati</p>',()=>clearInterval(typ));
+ const el=$('#lt');let i=0;
+ el.onclick=()=>{clearInterval(typ);el.textContent=t};
+ typ=setInterval(()=>{
+  i++;el.textContent=t.slice(0,i)+(i<t.length?'\u258c':'');
+  const ch=t[i-1];if(window.SFX&&ch!==' '&&ch!=='\n'&&i%2===0)SFX.type();
+  if(i>=t.length)clearInterval(typ);
+ },32);
+}
+
 /* ---- radio ---- */
-const au=new Audio(),T=EX.radio;let ti=0,on=false;
+const au=new Audio(),T=EX.radio;let ti=0,on=false;au.volume=.35;
 function load(i){ti=(i+T.length)%T.length;au.src=T[ti].src}
 function play(){if(!au.src)load(ti);au.play().then(()=>{on=true;ui()}).catch(()=>{on=false;ui()})}
 function pause(){au.pause();on=false;ui()}
 au.onended=()=>{load(ti+1);play()};au.onerror=()=>{if(T.length>1&&on){load(ti+1);play()}};
-addEventListener('pointerdown',()=>{if(!au.src&&T.length)play()},{once:true});
-function ui(){const n=$('#np');if(!n)return;n.textContent=(on?'> ':'')+T[ti].n;$('#pp').textContent=on?'pause':'play';
+const rf=e=>{if(e.target.closest&&e.target.closest('#rdo'))return;removeEventListener('pointerdown',rf);if(!au.src&&T.length&&ls('bday-radio')!=='0')play()};addEventListener('pointerdown',rf);
+function ui(){const rb=$('#rdo');if(rb)rb.textContent=on?'radio on':'radio off';const n=$('#np');if(!n)return;n.textContent=(on?'> ':'')+T[ti].n;$('#pp').textContent=on?'pause':'play';
  document.querySelectorAll('.tr').forEach((b,i)=>b.style.opacity=i===ti?1:.6)}
 function radioUI(){
  if(!T.length)return openM('<h2>radio</h2><p>belum ada lagu.</p>');
@@ -133,14 +151,18 @@ function radioUI(){
  document.querySelectorAll('.tr').forEach(b=>b.onclick=()=>{load(+b.dataset.i);play()});ui();
 }
 
-/* ---- pesan terkunci (kode 4 angka ATAU hitung mundur) ---- */
+/* ---- tombol radio on/off (kiri dari tombol sfx) ---- */
+const rdo=document.createElement('button');rdo.id='rdo';rdo.className='btn alt';rdo.textContent='radio off';
+rdo.style.cssText='position:fixed;bottom:8px;right:108px;z-index:15;font-size:10px;padding:9px 10px';
+rdo.onclick=()=>{if(!T.length)return;if(on){pause();ls('bday-radio','0')}else{ls('bday-radio','1');play()}};
+document.body.appendChild(rdo);
+
+/* ---- pesan terkunci (khusus yang tahu kode 4 angka) ---- */
 function gift(){
- const L=EX.lock,t0=new Date(L.openAt).getTime(),show=()=>{onClose=null;openM(`<h2>pesan untukmu</h2><p>${esc(L.msg)}</p>`)};
- if(Date.now()>=t0)return show();
- openM(`<h2>pesan terkunci</h2><p>buka dengan 4 angka, atau tunggu sampai:</p><p id="cdn" class="px" style="font-size:12px;margin:10px 0;line-height:1.8"></p><input id="pin" inputmode="numeric" maxlength="4" placeholder="0000" style="width:100%"><p class="from">${esc(L.hint||'')}</p><div class="row"><button class="btn" id="pk">buka</button></div><p id="pe"></p>`);
- const tick=()=>{let s=Math.max(0,t0-Date.now())/1000|0;const d=s/86400|0;s%=86400;$('#cdn').textContent=`${d}h ${s/3600|0}j ${(s%3600)/60|0}m ${s%60}d`};
- const iv=setInterval(()=>{Date.now()>=t0?(clearInterval(iv),show()):tick()},1000);tick();onClose=()=>clearInterval(iv);
- $('#pk').onclick=()=>{if($('#pin').value===L.code){clearInterval(iv);show()}else $('#pe').textContent='kodenya salah, coba lagi'};
+ const L=EX.lock;
+ openM(`<h2>pesan terkunci</h2><p>masukkan 4 angka untuk membuka.</p><input id="pin" inputmode="numeric" maxlength="4" placeholder="0000" style="width:100%"><p class="from">${esc(L.hint||'')}</p><div class="row"><button class="btn" id="pk">buka</button></div><p id="pe"></p>`);
+ const check=()=>{if($('#pin').value===L.code)openM(`<h2>pesan untukmu</h2><p>${esc(L.msg)}</p>`);else $('#pe').textContent='kodenya salah, coba lagi'};
+ $('#pk').onclick=check;$('#pin').onkeydown=e=>{if(e.key==='Enter')check()};
 }
 
 /* ---- ruangan kenangan (scrapbook) ---- */

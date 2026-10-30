@@ -59,6 +59,8 @@ const css=document.createElement('style');css.textContent=`
 #room.night .glow{display:none}
 #room.night .lampc{filter:grayscale(1) brightness(.55)}
 @media(max-width:520px){#table{width:160px}}
+#lampBox #stickyBtn{left:auto;right:22px;bottom:auto;top:8px;transform:none;font-size:9px;padding:8px 9px}
+#lampBox #stickyBtn:active{transform:translate(2px,2px)}
 `;document.head.appendChild(css);
 
 /* ---- halaman penuh ---- */
@@ -84,6 +86,7 @@ const side=document.createElement('div');side.id='side';
 fl.appendChild(side);
 const lb=document.createElement('div');lb.id='lampBox';lb.innerHTML='<div id="lampHang" aria-label="lampu"><i class="glow"></i><i class="cord"></i></div>';
 const lc=spr(IC.lamp,4);lc.className='lampc';lb.firstChild.appendChild(lc);lb.firstChild.onclick=lamp;$('#wall').before(lb);
+const sb=$('#stickyBtn');sb.textContent='+ sticky';lb.appendChild(sb);
 function deco(side,cv,fn,label,off){const b=document.createElement('button');b.className='deco';b.style[side]=(off||8)+'px';b.setAttribute('aria-label',label);b.appendChild(cv);b.onclick=fn;fl.appendChild(b)}
 deco('left',spr(AR,4),game,'game',58);
 deco('left',spr(MB,4),()=>page(EX.letter.title,`<div class="paper">${esc(EX.letter.body)}</div>`),'surat dari developer');

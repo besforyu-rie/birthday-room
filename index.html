@@ -148,7 +148,7 @@ const CONFIG = {
   notes: [],
   boothFooter: "happy birthday aqsa • 26",   // tulisan di bawah strip foto
   meow: "meow.mp3",                          // suara kucing (opsional). Kalau file tidak ada, dipakai suara bawaan
-  music: "music.mp3",                        // taruh file lagu di repo; kosongkan "" kalau tidak mau musik
+  music: "",                        // taruh file lagu di repo; kosongkan "" kalau tidak mau musik
   // isi dari Firebase (lihat langkah di panduan). Kalau dikosongkan, sticky hanya tersimpan di browser sendiri.
   firebase: {
     apiKey: "AIzaSyB2Uc-4dTttnFq1Xiws0cjtJsIGnqWYO2M",
@@ -414,5 +414,7 @@ if(CONFIG.music){
   m.onclick=()=>set(!on);
 }
 </script>
+
+<script src="extras.js"></script>
 </body>
 </html>

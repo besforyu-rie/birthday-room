@@ -14,6 +14,7 @@ const EX={
  ]
 };
 /* =========================== */
+function init(){
 const PAL={k:'#1f3a5f',w:'#8fd0f0',o:'#f0b070',y:'#f2c14e',n:'#c98b52',r:'#e84a5f',p:'#f4a6c0',g:'#8fd18a',d:'#8a5a34',b:'#4f8fe8',W:'#fff'};
 function spr(m,s){const c=document.createElement('canvas');c.width=m[0].length;c.height=m.length;c.style.width=c.width*s+'px';c.style.height=c.height*s+'px';const g=c.getContext('2d');m.forEach((r,y)=>[...r].forEach((ch,x)=>PAL[ch]&&R(g,PAL[ch],x,y,1,1)));return c}
 const ls=(k,v)=>{try{return v==null?localStorage.getItem(k):localStorage.setItem(k,v)}catch(e){}};
@@ -164,10 +165,32 @@ const ST={
  cake:["..y.y..","..k.k..","WWWWWWW","ppppppp","bbbbbbb","WWWWWWW"]
 };
 function stk(g,n,cx,cy){const m=ST[n],s=6,w=m[0].length;m.forEach((r,y)=>[...r].forEach((c,x)=>PAL[c]&&R(g,PAL[c],Math.round(cx-w*s/2+x*s),Math.round(cy-m.length*s/2+y*s),s,s)))}
-new MutationObserver(()=>{
- const s=$('#strip'),r=mb.querySelector('.row');
- if(s&&r&&!r.dataset.x){r.dataset.x=1;const b=document.createElement('button');b.className='btn';b.textContent='edit stiker';b.onclick=()=>edit(s.src);r.appendChild(b)}
-}).observe(mb,{childList:true,subtree:true});
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function booth(){
+ openM(`<h2>photo booth</h2><div class="cam"><video id="v" autoplay playsinline muted></video><div id="cd"></div><div id="fl"></div></div><div class="row"><button class="btn" id="go">start (4 foto)</button></div><p id="msg" style="font-size:20px;margin-top:8px"></p>`);
+ let stream;onClose=()=>{if(stream)stream.getTracks().forEach(t=>t.stop())};
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:960}},audio:false});$('#v').srcObject=stream}
+ catch(e){$('#msg').textContent='Kamera tidak bisa dibuka. Izinkan akses kamera di browser, lalu buka ulang.';$('#go').disabled=true;return}
+ $('#go').onclick=async()=>{
+  $('#go').disabled=true;const v=$('#v'),shots=[];
+  for(let i=0;i<4;i++){
+   for(let n=3;n>0;n--){if(!$('#cd'))return;$('#cd').textContent=n;await wait(900)}
+   if(!$('#cd'))return;$('#cd').textContent='';$('#fl').style.opacity=1;setTimeout(()=>{const f=$('#fl');if(f)f.style.opacity=0},120);
+   const c=document.createElement('canvas');c.width=600;c.height=480;const cg=c.getContext('2d'),vw=v.videoWidth,vh=v.videoHeight,ra=5/4;let sw=vw,sht=vw/ra;if(sht>vh){sht=vh;sw=vh*ra}
+   cg.translate(600,0);cg.scale(-1,1);cg.drawImage(v,(vw-sw)/2,(vh-sht)/2,sw,sht,0,0,600,480);shots.push(c);await wait(700);
+  }
+  const W=360,fw=312,fh=250,H=24+4*(fh+14)+80,s=document.createElement('canvas');s.width=W;s.height=H;const g=s.getContext('2d');
+  R(g,'#9cc4f0',0,0,W,H);for(let y=0;y<H;y+=24)for(let x=(y/24%2)*12;x<W;x+=24)R(g,'#b9d6f6',x,y,6,6);
+  shots.forEach((c,i)=>{const y=24+i*(fh+14);R(g,'#1f3a5f',20,y-4,fw+8,fh+8);g.drawImage(c,24,y,fw,fh)});
+  g.fillStyle='#fff';g.strokeStyle='#3b7dd8';g.lineWidth=5;g.font='14px "Press Start 2P",monospace';g.textAlign='center';
+  g.strokeText(CONFIG.boothFooter,W/2,H-38);g.fillText(CONFIG.boothFooter,W/2,H-38);
+  const url=s.toDataURL('image/png');
+  if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;onClose=null;
+  mb.innerHTML=`<h2>your strip!</h2><img id="strip" src="${url}" alt="hasil foto"><div class="row"><a class="btn" style="text-decoration:none" download="photobooth.png" href="${url}">download</a><button class="btn" id="se">edit stiker</button><button class="btn alt" id="re">retake</button></div><p style="font-size:20px;margin-top:8px">di HP: kalau download tidak jalan, tahan lama gambarnya lalu pilih simpan.</p>`;
+  $('#se').onclick=()=>edit(url);$('#re').onclick=booth;
+ };
+}
+$('#booth').onclick=booth;
 function edit(src){
  mb.innerHTML=`<h2>edit stiker</h2><div class="sw" id="sp" style="gap:6px"></div><canvas id="ec" style="max-width:100%;max-height:52vh;width:auto;height:auto;display:block;margin:0 auto;border:3px solid var(--ink);touch-action:manipulation"></canvas><p style="font-size:20px;margin-top:6px">pilih stiker, lalu tap di foto.</p><div class="row"><button class="btn alt" id="eu">undo</button><a class="btn" id="ed" style="text-decoration:none" download="photobooth-stiker.png">download</a></div>`;
  const cv=$('#ec'),g=cv.getContext('2d'),im=new Image(),P=[];let cur='heart';
@@ -178,4 +201,7 @@ function edit(src){
  $('#eu').onclick=()=>{P.pop();paint()};
  $('#ed').onclick=()=>{$('#ed').href=cv.toDataURL('image/png')};
 }
+}
+const go=()=>{try{init()}catch(e){console.error(e);const d=document.createElement('div');d.textContent='extras.js error: '+e.message;d.style.cssText='position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;padding:6px;font:12px monospace;z-index:99';document.body.appendChild(d)}};
+document.readyState==='complete'?go():addEventListener('load',go);
 })();

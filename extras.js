@@ -220,6 +220,34 @@ function edit(src){
  $('#eu').onclick=()=>{P.pop();paint()};
  $('#ed').onclick=()=>{$('#ed').href=cv.toDataURL('image/png')};
 }
+/* ---- avatar Aqsa gaya chibi: tampak depan saat diam, tampak samping saat jalan ---- */
+(function(){
+ const old=$('#aqsa');if(!old)return;
+ const FR=["....HHHHHHHH....", "..HHHHhhhHHHHH..", ".HHHhhHHHHHhHHH.", ".HHHHHHHHHHHHHH.", ".HHHHHHHHHHHHHH.", ".HHHkHHHHHHkHHH.", ".HHkkkHHHHkkkHH.", ".HHkkkkkkkkkkHH.", ".HkEEEkkkkEEEkH.", ".HkEeEkkkkEeEkH.", ".HrkkkkkkkkkkrH.", "..HkkkkppkkkkH..", "...HHkkkkkkHH...", "....bbbbbbbb....", "..bbbbbbbbbbbb..", ".bbbbWbWWbWbbbb.", ".bbbbbWWWWbbbbb.", ".kbbbbbbbbbbbbk.", "..BBBBBBBBBBBB..", "...wwwwwwwwww...", "...wwwwwwwwww...", "...wwww..wwww...", "...wwww..wwww...", "..ggggg..ggggg.."],TP=["....HHHHHHHH....", "..HHHHhhhHHHH...", ".HHHhhHHHHHHHH..", ".HHHHHHHHHHHHHH.", ".HHHHHHHHHHHHHH.", ".HHHHHHHHHkkkHH.", ".HHHHHHHkkkkkkH.", ".HHHHHHkkkkkkkH.", ".HHHHHHkkkkEEkH.", ".HHHHHHkkkkEekH.", ".HHHHHHkkkkrkkH.", "..HHHHHkkkkkpkH.", "...HHHHHkkkkkH..", ".....bbbbbb.....", "....bbbbbbbb....", "....bbWbbWbbb...", "....bbbWWbbbb...", null, "....BBBBBBBB...."],HD=["....bbbbkbbbb...", "....bbbbbbbbk...", "....bbbbkbbbb...", "...kbbbbbbbb...."],LG=[["....wwwwwwww....", "....wwwwwwww....", ".....wwwwww.....", ".....wwwwww.....", "....gggggggg...."], ["....wwwwwwww....", "....wwwwwwww....", "...wwww..wwww...", "..wwww....wwww..", ".gggg......gggg."], ["....wwwwwwww....", "....wwwwwwww....", ".....wwwwww.....", ".....wwwwww.....", "....gggggggg...."], ["....wwwwwwww....", "....wwwwwwww....", "...wwww..wwww...", "..wwww....wwww..", "..ggggg....ggggg"]];
+ const SD=LG.map((l,i)=>TP.slice(0,17).concat([HD[i],TP[18]],l));
+ const HAIR={black:{H:'#2b2630',h:'#4d4660'},brown:{H:'#6b4429',h:'#8d5f3b'},white:{H:'#f2f5fc',h:'#c5cde3'}};
+ const P=Object.assign({k:'#fbe0c8',E:'#1c2f78',e:'#4a86f0',W:'#ffffff',p:'#e07a8a',r:'#f4a6a6',b:'#1f78f0',B:'#1253c0',w:'#fcfcff',g:'#cdd5e8'},HAIR[CONFIG.hairColor]||HAIR.brown);
+ const el=document.createElement('div');el.id='aqsa';el.setAttribute('role','img');el.setAttribute('aria-label','avatar Aqsa');
+ el.innerHTML='<span class="tag px" id="tag">Aqsa</span><canvas id="avCv" width="16" height="24"></canvas>';
+ old.replaceWith(el);
+ const cv=$('#avCv'),g=cv.getContext('2d'),tag=$('#tag');
+ const draw=f=>{g.clearRect(0,0,16,24);f.forEach((row,y)=>[...row].forEach((c,x)=>P[c]&&R(g,P[c],x,y,1,1)))};
+ draw(FR);let say;
+ el.onclick=()=>{tag.textContent=CONFIG.avatarSay||'hai!';clearTimeout(say);say=setTimeout(()=>tag.textContent='Aqsa',2200)};
+ let x=70,dir=1,pause=0,t=0,fi=-1,last=performance.now();
+ (function tick(){
+  const now=performance.now();let dt=(now-last)/1000;if(!(dt>0))dt=0;if(dt>.1)dt=.1;last=now;const W=fl.clientWidth-80;
+  if(pause>0){pause-=dt;if(fi!==-1){fi=-1;draw(FR)}}
+  else{
+   x+=dir*44*dt;t+=dt;const n=Math.floor(t*6)%4;if(n!==fi){fi=n;draw(SD[n])}
+   if(x>=W){x=W;dir=-1;pause=1.2}else if(x<=0){x=0;dir=1;pause=1.2}
+   else if(Math.random()<dt*.12)pause=1.4;
+  }
+  el.style.left=x+'px';cv.style.transform=(fi!==-1&&dir<0)?'scaleX(-1)':'';
+  requestAnimationFrame(tick);
+ })();
+})();
+
 }
 const go=()=>{try{init()}catch(e){console.error(e);const d=document.createElement('div');d.textContent='extras.js error: '+e.message;d.style.cssText='position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;padding:6px;font:12px monospace;z-index:99';document.body.appendChild(d)}};
 document.readyState==='complete'?go():addEventListener('load',go);

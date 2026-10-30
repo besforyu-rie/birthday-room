@@ -84,7 +84,8 @@ function init(){
 const room=$('#room');
 const css=document.createElement('style');css.textContent=`
 #room{overflow-x:hidden;overflow-y:auto;scrollbar-width:thin}
-#wall{flex:1 0 clamp(240px,42vh,380px);flex-basis:clamp(240px,42dvh,380px)}
+#main{flex:none;min-height:100%;display:flex;flex-direction:column;position:relative}
+#wall{flex:1 1 110px;min-height:110px}
 #lounge{flex:none;position:relative;height:250px;background:var(--floor);background-image:repeating-linear-gradient(90deg,transparent 0 38px,rgba(46,82,127,.18) 38px 40px);border-top:6px solid var(--wood2);overflow:hidden}
 #lounge .lw{position:absolute;top:0;left:0;right:0;height:34px;background:#dbe9fb;border-bottom:4px solid var(--wood)}
 #lounge .lt{position:absolute;left:10px;top:12px;font-size:9px;color:var(--ink)}
@@ -113,11 +114,14 @@ const css=document.createElement('style');css.textContent=`
 .zz{position:absolute;left:70%;top:-16px;font-size:9px;color:var(--ink);font-style:normal;animation:zzf 2s ease-in infinite}
 @keyframes zzf{from{transform:translate(0,0);opacity:1}to{transform:translate(8px,-14px);opacity:0}}
 `;document.head.appendChild(css);
-$('#hint').textContent+=' · scroll ke bawah';
+
 
 /* ---- lounge ---- */
 const L=document.createElement('section');L.id='lounge';
 L.innerHTML='<div class="lw"></div><p class="lt px">lounge (10 menit)</p><button class="btn alt" id="vbtn"></button><div class="chair"></div><div class="tb"></div><div class="ltv"></div><div id="lsofa"></div><div class="tb" id="aqt"></div><div id="aq"></div><div id="vz"></div>';
+const mn=document.createElement('div');mn.id='main';
+[...room.children].forEach(c=>mn.appendChild(c));
+room.appendChild(mn);
 room.appendChild(L);
 const vb=$('#vbtn'),vz=$('#vz');
 const tvc=document.createElement('canvas');tvc.width=20;tvc.height=14;tvc.style.cssText='width:120px;height:84px;image-rendering:pixelated;display:block';

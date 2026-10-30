@@ -64,10 +64,6 @@ const css=document.createElement('style');css.textContent=`
 @keyframes fup{to{transform:translateY(-42px);opacity:0}}
 .bowl{position:absolute;left:96px;bottom:6px;border:0;background:none;padding:0;cursor:pointer;z-index:2}
 .bowl canvas{display:block;image-rendering:pixelated}
-#rxBar{position:absolute;right:22px;top:44px;display:flex;gap:4px}
-.rxb{width:30px;height:28px;border:3px solid var(--wood2);background:var(--cream);padding:0;display:grid;place-items:center;cursor:pointer}
-#rx{position:absolute;left:14px;right:14px;top:0;pointer-events:none;overflow:hidden}
-.rxs{position:absolute;transform:translate(-50%,-50%);image-rendering:pixelated}
 #win{position:relative;width:66px;height:66px;border:5px solid var(--wood);box-shadow:3px 3px 0 var(--wood2);cursor:pointer;background:var(--wood)}
 #win .sky{position:absolute;inset:0;overflow:hidden}
 #win canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
@@ -287,28 +283,6 @@ function edit(src){
   const c=cat.querySelector('canvas');c.classList.add('hop');setTimeout(()=>c.classList.remove('hop'),740);
   fed++;if(fed>=5){fed=0;tip('kenyang zzz');hearts(6)}else{tip('nyam~');hearts(3)}
  };
-})();
-
-/* ---- 3. stiker reaksi di dinding (tersimpan di Firestore 'reactions') ---- */
-(function(){
- const lb=$('#lampBox');if(!lb)return;
- function whenDb(cb,n=0){if(db&&fs)cb(true);else if(n>25)cb(false);else setTimeout(()=>whenDb(cb,n+1),400)}
- const rx=document.createElement('div');rx.id='rx';lb.appendChild(rx);
- new ResizeObserver(()=>{rx.style.height=$('#wall').offsetHeight+'px'}).observe($('#wall'));
- let rl=[];try{rl=JSON.parse(ls('bday-rx')||'[]')}catch(e){}
- function drawRx(){rx.innerHTML='';rl.slice(0,120).reverse().forEach(r=>{if(!r||!ST[r.t])return;const c=spr(ST[r.t],3);c.className='rxs';c.style.left=(+r.x||50)+'%';c.style.top=(+r.y||50)+'%';rx.appendChild(c)})}
- const bar=document.createElement('div');bar.id='rxBar';
- ['heart','star','cake'].forEach(n=>{const b=document.createElement('button');b.className='rxb';b.setAttribute('aria-label','stiker '+n);b.appendChild(spr(ST[n],3));b.onclick=()=>react(n);bar.appendChild(b)});
- lb.appendChild(bar);
- let last=0,cnt=0;
- async function react(t){
-  if(Date.now()-last<700||cnt>=25)return;last=Date.now();cnt++;
-  const r={t,x:Math.round((5+Math.random()*90)*10)/10,y:Math.round((8+Math.random()*84)*10)/10};
-  if(db&&fs){try{await fs.addDoc(fs.collection(db,'reactions'),{...r,createdAt:fs.serverTimestamp()});return}catch(e){console.warn(e)}}
-  rl.unshift(r);ls('bday-rx',JSON.stringify(rl.slice(0,60)));drawRx();
- }
- drawRx();
- whenDb(ok=>{if(!ok)return;fs.onSnapshot(fs.query(fs.collection(db,'reactions'),fs.orderBy('createdAt','desc'),fs.limit(120)),s=>{rl=s.docs.map(d=>d.data());drawRx()},e=>console.warn(e))});
 })();
 
 /* ---- 6. jendela cuaca: siang = klik untuk hujan, malam = klik untuk bintang jatuh ---- */

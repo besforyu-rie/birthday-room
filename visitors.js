@@ -8,12 +8,20 @@ const SK=['#fbe0c8','#f0c8a0','#d9a577','#a9744a','#6e4a30'];
 const HS=['pendek','poni','panjang','kuncir','cepol','keriting'];
 const AH=['tanpa','topi','pita','mahkota','kuping kucing'];
 const GN=['cowok','cewek','netral'];
+/* ===== EDIT UCAPAN DI SINI (muncul acak saat avatar pengunjung di-klik) ===== */
+const GREET=[
+ 'Happy birthday, Aqsa!','Wishing you the best year ever!','May all your wishes come true!','Stay happy and healthy, Aqsa!','Today is your day. Shine bright!','Hope your 26th is full of good things!',
+ 'アクサ、お誕生日おめでとう！','素敵な一年になりますように！','ハッピーバースデー！','いつも笑顔でいてね！','願いごとが全部叶いますように！',
+ 'Selamat ulang tahun, Aqsa!','Semoga sehat dan bahagia selalu!','Panjang umur ya!','Semoga semua harapanmu terwujud!','Makin dewasa, makin bahagia ya!','Jangan lupa traktir kuenya~',
+ '아크사, 생일 축하해!','행복한 한 해 되길 바라!','생일 축하합니다!','항상 건강하고 행복해!','소원이 다 이루어지길!'
+];
+/* ================================================================= */
 const store=(k,v)=>{try{return v===undefined?localStorage.getItem(k):localStorage.setItem(k,v)}catch(e){}};
 const did=(()=>{let d=store('bday-did');if(!d){d=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():String(Math.random()).slice(2)+Date.now();store('bday-did',d)}return String(d).replace(/[^\w-]/g,'')})();
 const ci=(v,n)=>Number.isInteger(v)&&v>=0&&v<n?v:0;
 const clean=a=>({n:String(a.n||'tamu').slice(0,12),g:ci(a.g,3),hs:ci(a.hs,6),hc:ci(a.hc,8),sc:ci(a.sc,8),sk:ci(a.sk,5),ah:ci(a.ah,5),gl:a.gl?1:0,ts:+a.ts||Date.now()});
 
-/* ---- sprite avatar 16x24 (tampak depan) ---- */
+/* ---- sprite avatar 16x24 (tampak depan). f: 0/1 jalan, 2 diam, 3 duduk ---- */
 function draw(g,a,f){
  g.clearRect(0,0,16,24);
  const H=HC[a.hc],S=SK[a.sk],C=SC[a.sc],K='#1f3a5f',r=(c,x,y,w,h)=>R(g,c,x,y,w,h);
@@ -21,14 +29,22 @@ function draw(g,a,f){
  if(a.hs===5)r(H,2,2,12,8);
  if(a.hs===3){r(H,1,7,2,6);r(H,13,7,2,6)}
  if(a.hs===4)r(H,6,0,4,3);
- const skirt=a.g===1,pc=a.g===0?'#2e527f':'#8793b8';
- [[5,f===1],[9,f===0]].forEach(([x,up])=>{const n=up?2:3;r(skirt?S:pc,x,20,2,n);r(K,x,20+n,2,1)});
- r(C,4,14,8,6);r(C,3,14,1,3);r(C,12,14,1,3);r(S,3,17,1,2);r(S,12,17,1,2);
- if(skirt)r(C,3,19,10,2);
+ const sk=a.g===1,pc=a.g===0?'#2e527f':'#8793b8',top=sk?21:20;
+ [[5,f===1],[9,f===0]].forEach(([x,up])=>{let n=(sk?2:3)-(up?1:0);if(f===3)n=1;r(sk?S:pc,x,top,2,n);r(K,x,top+n,2,1)});
+ if(sk){ /* baju cewek: gaun segitiga (A-line) */
+  r(C,4,14,8,4);r(C,3,18,10,1);r(C,2,19,12,2);
+  r(C,3,14,1,2);r(C,12,14,1,2);r(S,3,16,1,2);r(S,12,16,1,2);
+ }else{
+  r(C,4,14,8,6);r(C,3,14,1,3);r(C,12,14,1,3);r(S,3,17,1,2);r(S,12,17,1,2);
+ }
  r(S,7,13,2,1);r(S,3,5,10,8);
  r('#1c2f78',5,8,2,2);r('#1c2f78',9,8,2,2);r('#fff',5,8,1,1);r('#fff',9,8,1,1);
  r('#f4a6a6',4,10,1,1);r('#f4a6a6',11,10,1,1);r('#e07a8a',7,11,2,1);
- if(a.gl){[4,8].forEach(x=>{r(K,x,7,4,1);r(K,x,10,4,1);r(K,x,8,1,2);r(K,x+3,8,1,2)})}
+ if(a.gl){ /* kacamata bulat: 2 lensa, jembatan di tengah */
+  const F='#2b2630';
+  [4,8].forEach(x=>{r(F,x+1,7,2,1);r(F,x+1,10,2,1);r(F,x,8,1,2);r(F,x+3,8,1,2)});
+  r(F,7,8,2,1);
+ }
  if(a.hs===5){r(H,2,3,12,3);r(H,2,6,2,4);r(H,12,6,2,4);r(H,5,6,6,1)}
  else{
   r(H,4,3,8,1);r(H,3,4,10,2);
@@ -44,7 +60,7 @@ function draw(g,a,f){
 function mk(a,f,s){const c=document.createElement('canvas');c.width=16;c.height=24;c.style.cssText=`width:${16*s}px;height:${24*s}px;image-rendering:pixelated;filter:drop-shadow(2px 0 0 #1f3a5f) drop-shadow(-2px 0 0 #1f3a5f) drop-shadow(0 2px 0 #1f3a5f) drop-shadow(0 -2px 0 #1f3a5f)`;draw(c.getContext('2d'),a,f);return c}
 
 function init(){
-const room=$('#room'),fl=$('#floor');
+const room=$('#room');
 const css=document.createElement('style');css.textContent=`
 #room{overflow-x:hidden;overflow-y:auto;scrollbar-width:thin}
 #wall{flex:1 0 150px}
@@ -53,17 +69,21 @@ const css=document.createElement('style');css.textContent=`
 #lounge .lt{position:absolute;left:10px;top:12px;font-size:9px;color:var(--ink)}
 #vbtn{position:absolute;right:10px;top:44px;z-index:5;font-size:9px;padding:9px 10px}
 .tb{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);width:150px;height:16px;background:var(--wood);border:4px solid var(--wood2)}
-.ltv{position:absolute;left:50%;bottom:74px;transform:translateX(-50%)}
-#lsofa{position:absolute;left:8px;bottom:46px}
+.ltv{position:absolute;left:50%;bottom:74px;transform:translateX(-50%);cursor:pointer}
+#lsofa{position:absolute;left:8px;bottom:46px;cursor:pointer}
 #lsofa canvas{display:block;image-rendering:pixelated;width:150px;height:65px}
+.ltv:hover,#lsofa:hover{filter:brightness(1.12)}
 #lounge .chair{right:30px;left:auto}
 #vz{position:absolute;inset:0;pointer-events:none}
 .v{position:absolute;bottom:6px;width:64px;z-index:3}
-.v canvas{display:block;width:64px;height:96px;image-rendering:pixelated;filter:drop-shadow(2px 0 0 #1f3a5f) drop-shadow(-2px 0 0 #1f3a5f) drop-shadow(0 2px 0 #1f3a5f) drop-shadow(0 -2px 0 #1f3a5f)}
+.v canvas{pointer-events:auto;cursor:pointer;display:block;width:64px;height:96px;image-rendering:pixelated;filter:drop-shadow(2px 0 0 #1f3a5f) drop-shadow(-2px 0 0 #1f3a5f) drop-shadow(0 2px 0 #1f3a5f) drop-shadow(0 -2px 0 #1f3a5f)}
 .v .tag{position:absolute;left:50%;top:-18px;transform:translateX(-50%);font-size:8px;background:var(--cream);border:3px solid var(--wood);padding:3px 4px;white-space:nowrap}
+.v .say{position:absolute;left:50%;bottom:100%;margin-bottom:22px;transform:translateX(-50%);display:none;width:max-content;max-width:130px;text-align:center;background:#fff;color:var(--ink);border:3px solid var(--ink);padding:4px 6px;font:600 12px/1.3 'Noto Sans JP','Noto Sans KR',system-ui,sans-serif;z-index:2}
+.v .say.on{display:block}
 .chip{border:3px solid var(--ink);background:#fff;width:34px;height:34px;padding:0;cursor:pointer}
 .chip.t{width:auto;padding:2px 9px;font:20px 'VT323',monospace;color:var(--ink)}
 .chip.on{outline:4px solid #f2c14e;outline-offset:1px}
+@media(max-width:520px){#lsofa canvas{width:90px;height:39px}}
 `;document.head.appendChild(css);
 $('#hint').textContent+=' · scroll ke bawah';
 
@@ -72,22 +92,19 @@ const L=document.createElement('section');L.id='lounge';
 L.innerHTML='<div class="lw"></div><p class="lt px">lounge (10 menit)</p><button class="btn alt" id="vbtn"></button><div class="chair"></div><div class="tb"></div><div class="ltv"></div><div id="lsofa"></div><div id="vz"></div>';
 room.appendChild(L);
 const vb=$('#vbtn'),vz=$('#vz');
-/* TV */
 const tvc=document.createElement('canvas');tvc.width=20;tvc.height=14;tvc.style.cssText='width:120px;height:84px;image-rendering:pixelated;display:block';
 L.querySelector('.ltv').appendChild(tvc);
 const BARS=['#fff','#f2c14e','#8fd0f0','#8fd18a','#f4a6c0','#e84a5f','#4f8fe8'];let tk=0;
-function tv(){const g=tvc.getContext('2d');R(g,'#1f3a5f',0,0,20,14);R(g,'#143268',1,1,18,10);for(let i=0;i<5;i++)R(g,BARS[(i+tk)%7],2,2,0,0),R(g,BARS[(i+tk)%7],2+i*3,2,3,8);R(g,'#4f7fb8',1,11,18,2);R(g,'#f2c14e',16,12,1,1)}
+function tv(){const g=tvc.getContext('2d');R(g,'#1f3a5f',0,0,20,14);R(g,'#143268',1,1,18,10);for(let i=0;i<5;i++)R(g,BARS[(i+tk)%7],2+i*3,2,3,8);R(g,'#4f7fb8',1,11,18,2);R(g,'#f2c14e',16,12,1,1)}
 tv();setInterval(()=>{tk++;tv()},800);
-/* sofa */
 const sc=document.createElement('canvas');sc.width=30;sc.height=13;(g=>{const K='#1f3a5f';R(g,K,2,0,26,7);R(g,'#6aa6ee',3,1,24,5);R(g,K,0,3,5,9);R(g,'#4f8fe8',1,4,3,7);R(g,K,25,3,5,9);R(g,'#4f8fe8',26,4,3,7);R(g,K,4,6,22,6);R(g,'#8dbdf7',5,7,20,4);R(g,K,2,12,2,1);R(g,K,26,12,2,1)})(sc.getContext('2d'));
 $('#lsofa').appendChild(sc);
-const mq=document.createElement('style');mq.textContent='@media(max-width:520px){#lsofa canvas{width:90px;height:39px}}';document.head.appendChild(mq);
 
 /* ---- data ---- */
 let own=null,remote=[];
 try{const o=JSON.parse(store('bday-av')||'null');if(o)own=clean(o)}catch(e){}
 const V=new Map();
-function paint(v){draw(v.cv.getContext('2d'),v.a,v.f)}
+const paint=v=>draw(v.cv.getContext('2d'),v.a,v.f);
 function render(){
  const now=Date.now(),all=new Map();
  remote.forEach(a=>all.set(a.id,a));
@@ -97,24 +114,57 @@ function render(){
  V.forEach((v,id)=>{if(!ids.has(id)){v.el.remove();V.delete(id)}});
  list.forEach(a=>{
   let v=V.get(a.id);const k=JSON.stringify([a.n,a.g,a.hs,a.hc,a.sc,a.sk,a.ah,a.gl]);
-  if(!v){const el=document.createElement('div');el.className='v';el.innerHTML='<span class="tag px"></span><canvas width="16" height="24"></canvas>';vz.appendChild(el);
-   v={el,cv:el.querySelector('canvas'),x:20+Math.random()*Math.max(10,L.clientWidth-100),dir:Math.random()<.5?1:-1,pause:Math.random()*2,t:Math.random(),f:2,k:''};V.set(a.id,v)}
+  if(!v){const el=document.createElement('div');el.className='v';el.innerHTML='<span class="say"></span><span class="tag px"></span><canvas width="16" height="24"></canvas>';vz.appendChild(el);
+   v={el,cv:el.querySelector('canvas'),say:el.querySelector('.say'),x:20+Math.random()*Math.max(10,L.clientWidth-100),dir:Math.random()<.5?1:-1,pause:Math.random()*2,t:Math.random(),f:2,k:'',sayT:0,last:'',mode:null,goal:null,seat:null,watch:false};v.cv.onclick=()=>talk(v);V.set(a.id,v)}
   v.a=a;if(v.k!==k){v.k=k;v.el.querySelector('.tag').textContent=a.n;paint(v)}
  });
  btn();
 }
 function btn(){const age=own?Date.now()-own.ts:LIFE;vb.textContent=own&&age<LIFE?'avaku · '+Math.ceil((LIFE-age)/60000)+'m':'+ bikin ava'}
+
+/* ---- sofa & TV ---- */
+const seats=()=>$('#lsofa').clientWidth>=140?[16,86]:[21];
+const sitting=o=>o.mode==='sit'||(o.goal&&o.goal.mode==='sit');
+const watching=o=>o.mode==='watch'||(o.goal&&o.goal.mode==='watch');
+function who(){const m=V.get(did);if(m)return m;const f=[...V.values()].filter(v=>!v.mode&&!v.goal);return f[Math.random()*f.length|0]}
+function nudge(){const t=vb.textContent;vb.textContent='bikin ava dulu!';setTimeout(btn,1500)}
+function stand(v){v.goal=null;v.mode=null;v.seat=null;v.watch=false;v.f=2;v.pause=.8;paint(v)}
+function say(v,t,ms){clearTimeout(v.sayT);v.say.textContent=t;v.say.classList.add('on');v.sayT=setTimeout(()=>v.say.classList.remove('on'),ms||3000)}
+function talk(v){let t;do{t=GREET[Math.random()*GREET.length|0]}while(t===v.last);v.last=t;say(v,t,4500)}
+$('#lsofa').onclick=()=>{
+ const v=who();if(!v)return nudge();
+ if(sitting(v))return stand(v);
+ const S=seats(),used=[...V.values()].filter(o=>o!==v&&sitting(o)).map(o=>o.seat);
+ const i=S.findIndex((_,j)=>!used.includes(j));
+ if(i<0)return say(v,'sofa penuh');
+ v.mode=null;v.watch=false;v.seat=i;v.goal={x:S[i],mode:'sit'};
+};
+tvc.onclick=()=>{
+ const v=who();if(!v)return nudge();
+ if(v.mode==='sit'){v.watch=!v.watch;return say(v,v.watch?'nonton~':'zzz')}
+ if(watching(v))return stand(v);
+ const n=[...V.values()].filter(watching).length;
+ v.mode=null;v.goal={x:L.clientWidth/2-32+[0,-64,64][n%3],mode:'watch'};
+};
+
+/* ---- loop ---- */
 let last=performance.now();
 (function tick(now){
  const dt=Math.min(.1,(now-last)/1000||0);last=now;const W=L.clientWidth-64;
  V.forEach(v=>{
-  if(v.pause>0){v.pause-=dt;if(v.f!==2){v.f=2;paint(v)}}
+  if(v.mode){/* duduk / nonton: diam */}
+  else if(v.goal){
+   const dx=v.goal.x-v.x,stp=70*dt;
+   if(Math.abs(dx)<=stp){v.x=v.goal.x;v.mode=v.goal.mode;v.goal=null;v.dir=1;v.f=v.mode==='sit'?3:2;paint(v)}
+   else{v.dir=dx>0?1:-1;v.x+=v.dir*70*dt;v.t+=dt;const f=Math.floor(v.t*6)%2;if(f!==v.f){v.f=f;paint(v)}}
+  }else if(v.pause>0){v.pause-=dt;if(v.f!==2){v.f=2;paint(v)}}
   else{
    v.x+=v.dir*30*dt;v.t+=dt;const f=Math.floor(v.t*4)%2;if(f!==v.f){v.f=f;paint(v)}
    if(v.x>=W){v.x=W;v.dir=-1;v.pause=1}else if(v.x<=0){v.x=0;v.dir=1;v.pause=1}
    else if(Math.random()<dt*.15)v.pause=1+Math.random()*2;
   }
-  v.el.style.left=v.x+'px';v.cv.style.transform=v.dir<0?'scaleX(-1)':'';
+  v.el.style.left=v.x+'px';v.el.style.bottom=v.mode==='sit'?'54px':'6px';
+  v.cv.style.transform=(!v.mode&&v.dir<0)?'scaleX(-1)':'';
  });
  requestAnimationFrame(tick);
 })(performance.now());
@@ -150,7 +200,7 @@ vb.onclick=()=>{
  const pc=mk(a,2,6);$('#pvw').appendChild(pc);
  const mark=()=>mb.querySelectorAll('.chip').forEach(b=>b.classList.toggle('on',a[b.dataset.k]===+b.dataset.v));
  mb.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{a[b.dataset.k]=+b.dataset.v;mark();draw(pc.getContext('2d'),a,2)});
- mark();draw(pc.getContext('2d'),a,2);
+  mark();draw(pc.getContext('2d'),a,2);
  $('#vs').onclick=()=>{
   const n=($('#vn').value.trim()||'tamu').slice(0,12);store('bday-vn',n);
   const out=clean({...a,n,ts:alive?own.ts:Date.now()});
@@ -159,6 +209,5 @@ vb.onclick=()=>{
 };
 }
 const go=()=>{try{init()}catch(e){console.error(e);const d=document.createElement('div');d.textContent='visitors.js error: '+e.message;d.style.cssText='position:fixed;top:0;left:0;right:0;background:#c00;color:#fff;padding:6px;font:12px monospace;z-index:99';document.body.appendChild(d)}};
-/* extras.js memakai event load; jalankan setelahnya */
 document.readyState==='complete'?setTimeout(go,0):addEventListener('load',()=>setTimeout(go,0));
 })();

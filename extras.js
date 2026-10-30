@@ -4,7 +4,7 @@
 (()=>{
 /* ===== EDIT BAGIAN INI ===== */
 const EX={
- radio:[{n:"lagu 1",src:"music.mp3"},{n:"lagu 2",src:"music2.mp3"},{n:"lagu 3",src:"music3.mp3"}],
+ radio:[{n:"lagu 1",src:"music.mp3"}], /* tambah {n:"nama",src:"file.mp3"} kalau sudah upload lagu lain */
  lock:{code:"2512",openAt:"2026-11-07T22:00:00+07:00",hint:"when r we meet?",msg:"Cie ultah ni yaa, selamat tambah dewasa. stop panggil aku plup meong zzz."},
  letter:{title:"Surat dari aku",body:"Halo Aqsa,\n\nTulis surat panjangmu di sini.\n\nBaris kosong = paragraf baru.\n\n— developer"},
  memories:[
@@ -43,6 +43,22 @@ const css=document.createElement('style');css.textContent=`
 .scrap .tape{position:absolute;top:-10px;left:50%;width:60px;height:18px;margin-left:-30px;background:rgba(242,193,78,.75);transform:rotate(-3deg)}
 .scrap small{font:8px 'Press Start 2P';opacity:.7;display:block;margin:8px 0 4px}
 .scrap b{font:11px/1.5 'Press Start 2P'}.scrap p{font-size:22px;line-height:1.1;margin-top:6px}
+
+#frames{display:none}
+#side{position:absolute;right:10px;bottom:58px;width:88px;height:20px;background:var(--wood);border:4px solid var(--wood2);box-shadow:0 18px 0 -6px var(--wood2)}
+#side:before,#side:after{content:"";position:absolute;top:16px;width:12px;height:70px;background:var(--wood2)}
+#side:before{left:8px}#side:after{right:8px}
+.it{position:absolute;bottom:100%;border:0;background:none;padding:0;cursor:pointer;z-index:2}
+.it canvas{display:block;image-rendering:pixelated}
+.it:hover,.deco:hover{filter:brightness(1.15)}
+#lampBox{position:relative;height:0;z-index:4}
+#lampHang{position:absolute;left:68%;top:0;width:32px;margin-left:-16px;cursor:pointer;display:flex;flex-direction:column;align-items:center}
+.cord{display:block;width:2px;height:30px;background:var(--ink)}
+.glow{position:absolute;left:50%;top:34px;width:120px;height:120px;margin:-20px 0 0 -60px;border-radius:50%;background:radial-gradient(rgba(255,238,150,.5),transparent 70%);pointer-events:none}
+.lampc{position:relative;image-rendering:pixelated}
+#room.night .glow{display:none}
+#room.night .lampc{filter:grayscale(1) brightness(.55)}
+@media(max-width:520px){#table{width:160px}}
 `;document.head.appendChild(css);
 
 /* ---- halaman penuh ---- */
@@ -61,12 +77,15 @@ const IC={
  gift:[".kk..kk.","k..kk..k","kkkrrkkk","kppprppk","kppprppk","krrrrrrk","kppprppk","kkkkkkkk"]
 };
 const MB=[".kkkkkkkk.","kbbbbbbbbk","kbbkkkkbbk","kbbkkkkbbk","kbbbbbbbbk",".kkkkkkkk.","....nn....","....nn....","....nn....","....nn...."];
+const AR=[".kkkkkkkk.","kbbbbbbbbk","kbwyywwwbk","kbwwwwwwbk","kbwwwwwwbk","kbbbbbbbbk","kbbkbbrbbk","kbbbbbbbbk","kbbbbbbbbk","kkkkkkkkkk"];
 const fl=$('#floor');
-const sh=document.createElement('div');sh.id='shelf';
-[['radio',radioUI],['game',game],['lamp',lamp],['gift',gift]].forEach(([k,fn])=>{
- const b=document.createElement('button');b.setAttribute('aria-label',k);b.appendChild(spr(IC[k],3));b.onclick=fn;sh.appendChild(b)});
-fl.appendChild(sh);
-function deco(side,cv,fn,label){const b=document.createElement('button');b.className='deco';b.style[side]='8px';b.setAttribute('aria-label',label);b.appendChild(cv);b.onclick=fn;fl.appendChild(b)}
+const side=document.createElement('div');side.id='side';
+[['radio',radioUI,'left'],['gift',gift,'right']].forEach(([k,fn,sd])=>{const b=document.createElement('button');b.className='it';b.style[sd]='6px';b.setAttribute('aria-label',k);b.appendChild(spr(IC[k],4));b.onclick=fn;side.appendChild(b)});
+fl.appendChild(side);
+const lb=document.createElement('div');lb.id='lampBox';lb.innerHTML='<div id="lampHang" aria-label="lampu"><i class="glow"></i><i class="cord"></i></div>';
+const lc=spr(IC.lamp,4);lc.className='lampc';lb.firstChild.appendChild(lc);lb.firstChild.onclick=lamp;$('#wall').before(lb);
+function deco(side,cv,fn,label,off){const b=document.createElement('button');b.className='deco';b.style[side]=(off||8)+'px';b.setAttribute('aria-label',label);b.appendChild(cv);b.onclick=fn;fl.appendChild(b)}
+deco('left',spr(AR,4),game,'game',58);
 deco('left',spr(MB,4),()=>page(EX.letter.title,`<div class="paper">${esc(EX.letter.body)}</div>`),'surat dari developer');
 const door=document.createElement('canvas');door.width=10;door.height=16;(g=>{R(g,'#1f3a5f',0,0,10,16);R(g,'#8a5a34',1,1,8,15);R(g,'#a8743f',2,2,6,5);R(g,'#a8743f',2,9,6,5);R(g,'#f2c14e',7,8,1,1)})(door.getContext('2d'));
 door.style.cssText='width:40px;height:64px';

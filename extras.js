@@ -4,7 +4,7 @@
 (()=>{
 /* ===== EDIT BAGIAN INI ===== */
 const EX={
- radio:[{n:"lagu 1",src:"music.mp3"}], /* tambah {n:"nama",src:"file.mp3"} kalau sudah upload lagu lain */
+ radio:[{n:"lagu 1",src:"music.mp3"}, {n:"lagu 2",src:"music2.mp3"}, {n:"lagu 3",src:"music3.mp3"}, {n:"lagu 4",src:"music4.mp3"}], /* tambah {n:"nama",src:"file.mp3"} kalau sudah upload lagu lain */
  lock:{code:"2512",hint:"when r we meet?",msg:"Cie ultah ni yaa, selamat tambah dewasa. stop panggil aku plup meong zzz."},
 letter: {
   title: "Surat dari aku",
@@ -80,6 +80,8 @@ const css=document.createElement('style');css.textContent=`
 #win .shoot{position:absolute;left:-10px;top:4px;width:8px;height:3px;background:#fff;opacity:0;box-shadow:-8px -3px 0 -1px rgba(255,255,255,.5)}
 #win .shoot.go{animation:sht .9s linear}
 @keyframes sht{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(70px,40px)}}
+.nt{position:absolute;pointer-events:none;z-index:6;image-rendering:pixelated;animation:ntf 1.8s ease-out forwards}
+@keyframes ntf{0%{opacity:0;transform:translate(0,0)}15%{opacity:1}100%{opacity:0;transform:translate(var(--dx),-56px)}}
 `;document.head.appendChild(css);
 
 /* ---- halaman penuh ---- */
@@ -141,7 +143,15 @@ function play(){if(!au.src)load(ti);au.play().then(()=>{on=true;ui()}).catch(()=
 function pause(){au.pause();on=false;ui()}
 au.onended=()=>{load(ti+1);play()};au.onerror=()=>{if(T.length>1&&on){load(ti+1);play()}};
 const rf=e=>{if(e.target.closest&&e.target.closest('#rdo'))return;removeEventListener('pointerdown',rf);if(!au.src&&T.length&&ls('bday-radio')!=='0')play()};addEventListener('pointerdown',rf);
-function ui(){const rb=$('#rdo');if(rb)rb.textContent=on?'radio on':'radio off';const n=$('#np');if(!n)return;n.textContent=(on?'> ':'')+T[ti].n;$('#pp').textContent=on?'pause':'play';
+const NT=[["...kk","...kk","...k.","...k.","kkk..","kkk..",".k..."],[".kkkkkk",".kkkkkk",".k...k.",".k...k.","kk..kk.","kk..kk."]];
+let ntT=0;
+function note(){
+ const c='bryp'[Math.random()*4|0],m=NT[Math.random()*2|0].map(r=>r.replace(/k/g,c)),e=spr(m,3);
+ e.className='nt';e.style.left=(6+Math.random()*22)+'px';e.style.bottom='calc(100% + 26px)';e.style.setProperty('--dx',(Math.random()*30-15)+'px');
+ side.appendChild(e);setTimeout(()=>e.remove(),1900);
+}
+function ui(){if(on&&!ntT){note();ntT=setInterval(note,650)}else if(!on&&ntT){clearInterval(ntT);ntT=0}
+ const rb=$('#rdo');if(rb)rb.textContent=on?'radio on':'radio off';const n=$('#np');if(!n)return;n.textContent=(on?'> ':'')+T[ti].n;$('#pp').textContent=on?'pause':'play';
  document.querySelectorAll('.tr').forEach((b,i)=>b.style.opacity=i===ti?1:.6)}
 function radioUI(){
  if(!T.length)return openM('<h2>radio</h2><p>belum ada lagu.</p>');
@@ -185,10 +195,13 @@ async function board(){
  const a=await top(),el=$('#lb');if(!el)return;
  el.innerHTML='<h2 class="px" style="font-size:12px;margin:14px 0 8px">papan skor</h2>'+(a.length?a.map((s,i)=>`<p>${i+1}. ${esc(s.name)} — ${s.score}</p>`).join(''):'<p>belum ada skor</p>');
 }
+const gm=new Audio('game.mp3');gm.loop=true;gm.volume=.4;let resume=false;
+function gStop(){gm.pause();gm.currentTime=0}
 let run=false,raf=0;
 function game(){
  const W=300,H=400;run=false;cancelAnimationFrame(raf);
- page('tangkap balon',`<div style="max-width:340px;margin:0 auto"><canvas id="gc" width="${W}" height="${H}" style="width:100%;border:4px solid var(--ink);display:block;touch-action:none;image-rendering:pixelated"></canvas><div class="row" id="gr"><button class="btn" id="gs">start</button></div><p style="font-size:20px;margin-top:8px">skor 40+ = buka stiker baru di photo booth</p><div id="lb"></div></div>`,()=>{run=false;cancelAnimationFrame(raf)});
+ gStop();if(on){resume=true;pause()}
+ page('tangkap balon',`<div style="max-width:340px;margin:0 auto"><canvas id="gc" width="${W}" height="${H}" style="width:100%;border:4px solid var(--ink);display:block;touch-action:none;image-rendering:pixelated"></canvas><div class="row" id="gr"><button class="btn" id="gs">start</button></div><p style="font-size:20px;margin-top:8px">skor 40+ = buka stiker baru di photo booth</p><div id="lb"></div></div>`,()=>{run=false;cancelAnimationFrame(raf);gStop();if(resume){resume=false;play()}});
  const cv=$('#gc'),g=cv.getContext('2d'),SP=['#4f8fe8','#a98bd6','#8fd0f0','#f2c14e','#f4a6c0'].map(balloonCv);
  let bx=W/2,bl=[],sc=0,tl=30,last=0,sp=0;g.imageSmoothingEnabled=false;
  cv.onpointermove=cv.onpointerdown=e=>{const r=cv.getBoundingClientRect();bx=Math.max(30,Math.min(W-30,(e.clientX-r.left)/r.width*W))};
@@ -205,12 +218,12 @@ function game(){
   draw();if(tl<=0){run=false;end()}else raf=requestAnimationFrame(loop);
  }
  function end(){
-  draw('selesai!');const nu=sc>=40&&!ls('bday-unlock');if(sc>=40)ls('bday-unlock','1');
+  gStop();draw('selesai!');const nu=sc>=40&&!ls('bday-unlock');if(sc>=40)ls('bday-unlock','1');
   $('#gr').innerHTML=`<input id="gn" maxlength="14" placeholder="namamu" value="${esc(ls('bday-name')||'')}" style="flex:1"><button class="btn" id="gv">simpan ${sc}</button><button class="btn alt" id="ga">main lagi</button>`;
   $('#ga').onclick=game;if(nu)$('#gr').insertAdjacentHTML('beforeend','<p style="width:100%;font-size:20px">stiker baru terbuka! cek photo booth</p>');
   $('#gv').onclick=async()=>{const n=$('#gn').value.trim()||'anon';ls('bday-name',n);$('#gv').disabled=true;await save(n,sc);board()};
  }
- $('#gs').onclick=()=>{$('#gr').innerHTML='';run=true;last=performance.now();raf=requestAnimationFrame(loop)};
+ $('#gs').onclick=()=>{$('#gr').innerHTML='';run=true;last=performance.now();raf=requestAnimationFrame(loop);gm.currentTime=0;gm.play().catch(()=>{})};
  draw('siap?');board();
 }
 

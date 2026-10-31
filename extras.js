@@ -5,7 +5,7 @@
 /* ===== EDIT BAGIAN INI ===== */
 const EX={
  radio:[{n:"lagu 1",src:"music.mp3"}, {n:"lagu 2",src:"music2.mp3"}, {n:"lagu 3",src:"music3.mp3"}, {n:"lagu 4",src:"music4.mp3"}], /* tambah {n:"nama",src:"file.mp3"} kalau sudah upload lagu lain */
- lock:{code:"2512",hint:"when r we meet?",msg:"Cie ultah ni yaa, selamat tambah dewasa. stop panggil aku plup meong zzz."},
+ lock:{code:"2512",hint:"A Little Clue : The day you decided to be friends with me",msg:"Cie ultah ni yaa, selamat tambah dewasa. stop panggil aku plup meong zzz."},
 bday:{d:7,m:11}, /* GANTI ke tanggal & bulan ultah Aqsa (contoh {d:25,m:12}). 0 = nonaktif. Dipakai kalender dinding: tanggal dilingkari hati + hitung mundur */
  gifts:[ /* kado di bawah meja, maksimal 3. c = warna kotak, r = warna pita, t = isi pesan */
   {c:"#e84a5f",r:"#f2c14e",t:"Kupon traktir boba. Berlaku seumur hidup, tagih langsung ya! (kamu yg traktir bukan aku)"},

@@ -173,7 +173,7 @@ rd.userData.fn=()=>{
 cake.userData.fn=()=>{
  if(!lit){lit=true;flames.forEach(f=>f.visible=true);return}
  lit=false;flames.forEach(f=>f.visible=false);confetti();const p=wpos(cake);
- openCard({pos:new V3(p.x,p.y+1.95,p.z),tgt:new V3(p.x,p.y+.95,p.z),fit:[2.5,3.3],pit:.14,delay:.5,
+ openCard({pos:new V3(p.x,p.y+2.25,p.z+.5),tgt:new V3(p.x,p.y+1.55,p.z+.3),fit:[2.6,3.7],pit:.14,delay:.5,
   card:{w:2.3,h:1.5,title:'make a wish!',tint:'#a98bd6',body:CFG.cakeMessage,from:CFG.cakeFrom},
   keys:[{label:'nyalakan lagi',fn:()=>{lit=true;flames.forEach(f=>f.visible=true);leave()}}]});
 };
@@ -204,6 +204,17 @@ CFG.photos.slice(0,3).forEach((ph0,i)=>{if(!pf[i])return;
 });
 
 /* ---------- TELEPON ---------- */
+/* ---------- SUARA DERING TELEPON (kring) ---------- */
+const RING=(()=>{let a=null,ac=null,os=[];
+ const synth=()=>{try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();ac.resume();const T=ac.currentTime;
+  [0,.5].forEach(b=>{const o=ac.createOscillator(),g=ac.createGain();o.type='square';
+   for(let k=0;k<14;k++)o.frequency.setValueAtTime(k%2?1500:1100,T+b+k*.028);
+   g.gain.setValueAtTime(.0001,T+b);g.gain.exponentialRampToValueAtTime(.05,T+b+.01);g.gain.setValueAtTime(.05,T+b+.38);g.gain.exponentialRampToValueAtTime(.0001,T+b+.42);
+   o.connect(g);g.connect(ac.destination);o.start(T+b);o.stop(T+b+.43);os.push(o)})}catch(e){}};
+ return{start(){this.stop();if(typeof SFX!=='undefined'&&!SFX.on)return;
+   if(typeof CFG!=='undefined'&&CFG.ring){let fb=false;const f=()=>{if(!fb){fb=true;synth()}};a=new Audio(CFG.ring);a.onerror=f;a.play().catch(f)}else synth()},
+  stop(){if(a){a.pause();a=null}os.forEach(o=>{try{o.stop()}catch(e){}});os=[]}}})();
+
 const PLUPP=['..bbbbbb..','.bbbbbbbb.','bbkbbbbkbb','bbbbyybbbb','.bWWWWWWb.','.bWWWWWWb.','..bWWWWb..'],PAL2={b:'#4f8fe8',k:'#1f3a5f',y:'#f2c14e',W:'#ffffff'};
 function drawPhone(c,w,h,P){const t=now(),V=CFG.voice,N=V.length;c.fillStyle='#0f1d3d';c.fillRect(0,0,w,h);
  c.fillStyle='#f2c14e';c.font='9px '+PXF;c.textAlign='left';c.textBaseline='top';c.fillText('PLUP-NET',10,10);c.textAlign='right';c.fillText(new Date().toTimeString().slice(0,5),w-10,10);
@@ -220,13 +231,13 @@ function buildPhone(){
  const hs=new THREE.Group();hs.position.set(0,.22,-.1);g.add(hs);P.hs=hs;bx(.5,.06,.1,DR,0,0,0,hs);cy(.07,.07,.1,DR,-.26,-.03,0,hs);cy(.07,.07,.1,DR,.26,-.03,0,hs);
  const sc=new THREE.Group();sc.position.set(0,.66,-.02);g.add(sc);bx(.74,.58,.03,'#4f7fb8',0,0,-.02,sc);bx(.7,.54,.04,'#10203d',0,0,0,sc);
  P.sc=tex(360,300,c=>drawPhone(c,360,300,P),true);plane(.66,.5,P.sc,0,0,.022,sc);
- const N=()=>CFG.voice.length,sv=()=>ls('bday-vm',String(P.i+1)),go=d=>{P.i=(P.i+d+N())%N();P.st='idle';P.dirty=true;sv()};
+ const N=()=>CFG.voice.length,sv=()=>ls('bday-vm',String(P.i+1)),go=d=>{P.i=(P.i+d+N())%N();P.st='idle';RING.stop();P.dirty=true;sv()};
  P.ctl.push(key(g,.1,.07,'#3b7dd8',-.13,-.055,.21,'prev','#ffffff',()=>go(-1),{d:.02}));
- P.ctl.push(key(g,.1,.07,'#f2b84b',0,-.055,.21,'play','#1f3a5f',()=>{if(P.st==='ring'||P.st==='play')P.st='idle';else{P.st='ring';P.rt=1.1}P.dirty=true},{d:.02}));
+ P.ctl.push(key(g,.1,.07,'#f2b84b',0,-.055,.21,'play','#1f3a5f',()=>{if(P.st==='ring'||P.st==='play'){P.st='idle';RING.stop()}else{P.st='ring';P.rt=1.1;RING.start()}P.dirty=true},{d:.02}));
  P.ctl.push(key(g,.1,.07,'#3b7dd8',.13,-.055,.21,'next','#ffffff',()=>go(1),{d:.02}));
  P.open=()=>{P.i=(+ls('bday-vm')||0)%N();P.st='idle';P.dirty=true;sv()};
  P.upd=(dt,t)=>{
-  if(P.st==='ring'){P.rt-=dt;g.rotation.z=Math.sin(t*50)*.03;if(P.rt<=0){P.st='play';P.n=0;P.acc=0;g.rotation.z=0}}else g.rotation.z*=.8;
+  if(P.st==='ring'){P.rt-=dt;g.rotation.z=Math.sin(t*50)*.03;if(P.rt<=0){P.st='play';P.n=0;P.acc=0;g.rotation.z=0;RING.stop()}}else g.rotation.z*=.8;
   if(P.st==='play'){const L=(CFG.voice[P.i]||'').length||1,step=Math.max(.018,Math.min(.045,2.6/L));P.acc+=dt;while(P.acc>=step&&P.n<L){P.acc-=step;P.n++}if(P.n>=L)P.st='done'}
   const want=(P.st==='play'||P.st==='done')?.2:0;P.lift+=(want-P.lift)*Math.min(1,dt*8);hs.position.y=.22+P.lift;hs.rotation.z=P.lift*.9;
   if(P.dirty||(P.st!=='idle'&&t-P.lt>.05)){P.lt=t;P.dirty=false;P.sc.r()}};
@@ -237,7 +248,7 @@ ph.userData.fn=()=>{
  focusOn({id:'phone',tgt:new V3(base.x,base.y+1.05,base.z+.2),fit:[2.1,3.1],yaw:0,pit:.1,ctl:H.ctl,
   enter(){H.g.position.set(base.x,base.y+.1,base.z+.2);H.g.scale.setScalar(.01);S.add(H.g);ph.visible=false;if(typeof SFX!=='undefined')SFX.pop()},
   update(dt,age,t){H.g.scale.setScalar(S0*(.3+.7*ease(cl(age/.4,0,1))));H.upd(dt,t)},
-  exit(){S.remove(H.g);ph.visible=true;H.st='idle';H.g.rotation.z=0}});
+  exit(){S.remove(H.g);ph.visible=true;H.st='idle';H.g.rotation.z=0;RING.stop()}});
 };
 
 /* ---------- KOTAK KUNCI ---------- */

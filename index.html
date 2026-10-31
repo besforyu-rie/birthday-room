@@ -43,7 +43,7 @@ body{overflow:hidden;background:#9cc4f0;font:22px 'VT323',monospace;color:var(--
 const CFG={
  hint:"*** seret untuk memutar ruangan, tap benda untuk menjelajah ***",title:"happy birthday, Aqsa!",subtitle:"ada kejutan kecil buat kamu di ruangan ini",
  cakeText:"26",cakeMessage:"Selamat ulang tahun, Aqsa!\nSemoga semua yang kamu harapkan tahun ini terwujud.",cakeFrom:"— dari aku",
- avatarSay:"makasih udah dateng!",meow:"meow.mp3",
+ avatarSay:"makasih udah dateng!",meow:"meow.mp3",ring:"ring.mp3",
  photos:[{src:"image1.png",cap:"hari itu, ultahnya mita"},{src:"image2.png",cap:"tiba-tiba dia foto"},{src:"image3.png",cap:"mendaki gunung tapi lupa namanya"}],
  balloons:[{c:"#4f8fe8",t:"Kamu orang baik lainnya yang aku kenal."},{c:"#a98bd6",t:"Makasih udah selalu ada."},{c:"#8fd0f0",t:"Jangan lupa makan dan istirahat ya!"},{c:"#f2c14e",t:"Tahun ini bakal jadi tahun kamu."}],
  gifts:[{c:"#e84a5f",r:"#f2c14e",t:"Kupon traktir boba. Berlaku seumur hidup, tagih langsung ya! (kamu yg traktir bukan aku)"},{c:"#4f8fe8",r:"#ffffff",t:"Kupon satu kali ketik yes kalau mau mabar, wkwkwk call me."},{c:"#a98bd6",r:"#f2c14e",t:"Kupon satu kali 'kamu yg ultah tp aku yg minta kado boleh ga? wkwk bercanda'."}],
@@ -100,6 +100,14 @@ CFG.photos.slice(0,3).forEach((p,i)=>{
  const x=-1.2+i*1.3,f=bx(1.05,1.3,.08,'#4f7fb8',x,3.6,-3.93),im=bx(.85,1.1,.05,'#cfe0f6',x,3.6,-3.88);
  new THREE.TextureLoader().load(p.src,t=>{im.material=new THREE.MeshBasicMaterial({map:t})});
  const fn=()=>openM(`<h2>memory</h2><img class="big" src="${esc(p.src)}" alt="" onerror="this.remove()"><p style="margin-top:10px">${esc(p.cap||'')}</p>`);act(f,fn);act(im,fn);
+ /* bingkai 3D: rangka tebal, bibir dalam, bayangan tembok, paku + tali */
+ const W=1.05,H=1.3,B=.1,Y=3.6,GOLD='#e0a93f',LIP='#8a5a1f',click=b=>act(b,()=>f.userData.fn());
+ f.material.color.set(GOLD);
+ [bx(W,B,.14,GOLD,x,Y+H/2-B/2,-3.87),bx(W,B,.14,GOLD,x,Y-H/2+B/2,-3.87),bx(B,H-2*B,.14,GOLD,x-W/2+B/2,Y,-3.87),bx(B,H-2*B,.14,GOLD,x+W/2-B/2,Y,-3.87),
+  bx(.85,.03,.08,LIP,x,Y+.55-.015,-3.86),bx(.85,.03,.08,LIP,x,Y-.55+.015,-3.86),bx(.03,1.1,.08,LIP,x-.425+.015,Y,-3.86),bx(.03,1.1,.08,LIP,x+.425-.015,Y,-3.86)].forEach(click);
+ const sh=new THREE.Mesh(new THREE.PlaneGeometry(1.2,1.45),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.2,depthWrite:false}));sh.position.set(x+.08,Y-.09,-3.99);S.add(sh);
+ bx(.05,.05,.05,'#cfd6e0',x,4.55,-3.96);
+ [-1,1].forEach(sg=>{const dx=sg*.35,dy=-.3,st=bx(.012,Math.hypot(dx,dy),.012,'#2e527f',x+dx/2,4.55+dy/2,-3.95);st.rotation.z=Math.atan2(-dx,dy)});
 });
 /* papan sticky */
 bx(3,3.4,.06,'#7fa6d6',3.5,2.95,-3.95);
@@ -155,7 +163,7 @@ const COLORS=['#f7e27a','#a9d68b','#a9d2f5','#f4a3a3','#f8c28a','#cdb4f0','#b9c4
 let db=null,fs=null,cloud=[];
 function noteTex(n){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle=n.color;g.fillRect(0,0,128,128);g.fillStyle='rgba(90,74,42,.4)';[22,40,58,76].forEach((y,i)=>g.fillRect(12,y,[100,104,80,50][i],5));
  g.fillStyle='#4a3a1a';g.font='20px VT323,monospace';g.fillText('- '+(n.from||'anon').slice(0,12),12,112);if((n.t||'').length>CFG.NOTE_PAGE){g.fillText('...',96,96)}return new THREE.CanvasTexture(c)}
-let dr=null,pend=0;const NX=p=>4.3+clamp(p,0,100)*.024,NY=p=>4.15-clamp(p,0,100)*.028,pcx=x=>clamp((x-4.3)/.024,0,100),pcy=y=>clamp((4.15-y)/.028,0,100),gridP=i=>{const k=i%16;return{x:(k%4)/3*100,y:Math.floor(k/4)/3*100}};
+let dr=null,pend=0;const NX=p=>4.95+clamp(p,0,100)*.0214,NY=p=>4.2-clamp(p,0,100)*.0255,pcx=x=>clamp((x-4.95)/.0214,0,100),pcy=y=>clamp((4.2-y)/.0255,0,100),gridP=i=>{const k=i%16;return{x:(k%4)/3*100,y:Math.floor(k/4)/3*100}};
 function renderWall(){
  if(dr){pend=1;return}
  noteG.clear();noteHits=[];
@@ -469,7 +477,7 @@ S.children.forEach(o=>{
  if(g==='BoxGeometry'&&P.width===10&&P.height===.9){o.geometry=new THREE.BoxGeometry(16,.9,.1);o.position.x=1}
  else if(g==='BoxGeometry'&&P.depth===8){o.geometry=new THREE.BoxGeometry(.1,.9,14);o.position.z=1}
  else if(g==='BoxGeometry'&&P.width===10&&P.height===.2){o.geometry=new THREE.BoxGeometry(16,.2,.2);o.position.set(1,0,8);return}
- if(o.position.z<=-3.85){o.position.z-=2;if(g==='SphereGeometry'||g==='ConeGeometry')o.position.x*=1.4;else if(g==='BoxGeometry'&&P.width===3&&P.height===3.4)o.position.x+=2;else if(o.position.x<-2.3)o.position.x-=1.5}
+ if(o.position.z<=-3.85){o.position.z-=2;if(g==='SphereGeometry'||g==='ConeGeometry')o.position.x*=1.4;else if(g==='BoxGeometry'&&P.width===3&&P.height===3.4)o.position.x+=2.5;else if(o.position.x<-2.3)o.position.x-=1.5}
  if(o.position.x<=-4.65)o.position.x-=2;
 });
 bw.position.y=lw.position.y=2.75;
@@ -490,7 +498,7 @@ const ray=e=>{mp.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);rc.s
 cv.onpointerdown=e=>{dn={x:e.clientX,y:e.clientY};mv=0;cv.setPointerCapture(e.pointerId);dr=null;
  if(!mode){ray(e);const h=rc.intersectObjects(noteHits)[0];if(h&&h.object.userData.n)dr=h.object}};
 cv.onpointermove=e=>{if(!dn)return;const dx=e.clientX-dn.x,dy=e.clientY-dn.y;mv+=Math.abs(dx)+Math.abs(dy);dn={x:e.clientX,y:e.clientY};
- if(dr){if(mv>6){ray(e);if(rc.ray.intersectPlane(npl,npt)){dr.position.x=clamp(npt.x,4.3,6.7);dr.position.y=clamp(npt.y,1.35,4.15)}}return}
+ if(dr){if(mv>6){ray(e);if(rc.ray.intersectPlane(npl,npt)){dr.position.x=npt.x;dr.position.y=npt.y}}return}
  yaw=clamp(yaw-dx*.006,-1,1);pit=clamp(pit+dy*.004,.1,.8)};
 cv.onpointerup=e=>{if(dr){const m=dr;dr=null;if(mv>=6)saveMove(m);else m.userData.fn();if(pend){pend=0;renderWall()}dn=null;return}
  if(mv<6){ray(e);const h=rc.intersectObjects((mode?lh:hits.concat(noteHits)),true)[0];if(h){let o=h.object;while(o&&!o.userData.fn)o=o.parent;if(o){o===cake?SFX.fan():SFX.click();o.userData.fn()}}}dn=null};
@@ -515,8 +523,14 @@ let last=performance.now();const tgt=new THREE.Vector3(0,2.2,0);
 })(performance.now());
 addEventListener('pointerdown',function f(e){removeEventListener('pointerdown',f);if(!e.target.closest('#rdo')&&!au.src&&T.length&&ls('bday-radio')!=='0')pl()});
 </script>
-  <script src="room3d.js?v=2"></script>
+  <script src="room3d.js?v=4"></script>
   <script src="ui3d.js?v=1"></script>
-  <script src="upgrade3d.js?v=1"></script>
+  <script src="upgrade3d.js?v=2"></script>
+  <script src="secret3d.js?v=2"></script>
+  <script src="floor2.js?v=1"></script>
+  <script src="basement3d.js?v=1"></script>
+  <script src="outdoor3d.js?v=1"></script>
+  <script src="interact3d.js?v=4"></script>
+  <script src="wall3d.js?v=1"></script>
 <style>#sw{position:fixed;top:8px;left:8px;z-index:15;display:inline-block;text-decoration:none;font-size:10px;padding:9px 10px}</style><a class="btn alt" id="sw" href="index2d.html" aria-label="pindah ke versi 2D">2D</a>
 </body></html>

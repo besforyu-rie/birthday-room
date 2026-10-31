@@ -92,7 +92,7 @@ function hearts(n,o){const p=new THREE.Vector3();o.getWorldPosition(p);p.y+=.9;f
 {const p=mk(96,128,g=>{g.fillStyle='#8dbdf7';g.fillRect(0,0,96,128);g.strokeStyle='#1f3a5f';g.lineWidth=4;g.strokeRect(2,2,92,124);stk(g,'star',24,24);stk(g,'star',72,24);stk(g,'cake',48,62);stk(g,'heart',48,98);g.fillStyle='#1f3a5f';g.font='12px "Press Start 2P",monospace';g.textAlign='center';g.fillText('HBD 26',48,121)}),m=new THREE.Mesh(new THREE.PlaneGeometry(.8,1.07),new THREE.MeshBasicMaterial({map:p.t}));m.position.set(-2.3,3.5,-5.87);S.add(m);bx(.9,1.17,.04,'#4f7fb8',-2.3,3.5,-5.9)}
 const bean=new THREE.Mesh(new THREE.SphereGeometry(.55,14,10),M('#a98bd6'));bean.scale.y=.6;bean.position.set(-2.3,.33,-4.6);S.add(bean);
 act(bean,()=>{bean.scale.y=.4;setTimeout(()=>bean.scale.y=.6,250);say3(bean,'plop~')});
-const bunch=new THREE.Group();bunch.position.set(6.3,0,-4.5);S.add(bunch);cy(.2,.25,.15,'#4f7fb8',0,.08,0,bunch);bunch.userData.pop=0;
+const bunch=new THREE.Group();bunch.position.set(8.2,0,-5.3);S.add(bunch);cy(.2,.25,.15,'#4f7fb8',0,.08,0,bunch);bunch.userData.pop=0;
 const bbs=['#e84a5f','#f2c14e','#4f8fe8'].map((c,i)=>{const o=new THREE.Group();o.position.set((i-1)*.35,2.1+i*.15,0);bunch.add(o);const s=new THREE.Mesh(new THREE.SphereGeometry(.34,12,10),M(c));s.scale.y=1.2;o.add(s);bx(.02,1.7,.02,'#1f3a5f',0,-1,0,o);return o});
 act(bunch,()=>{if(bunch.userData.pop>0)return;bunch.userData.pop=3;bbs.forEach(b=>b.visible=false);confetti();say3(bunch,'pop!')});
 
@@ -348,7 +348,7 @@ bowl.userData.fn=()=>{hop=.72;fed++;hearts(fed>=5?6:2,cat);if(fed>=5){fed=0;say3
 /*GEO*/
 /* kotak rintangan per ruangan: [xMin,xMax,zMin,zMax] (sudah termasuk jarak aman). 0 utama, 1 lounge, 2 galeri */
 const OB=[
- [[-1.9,1.9,-.8,2.3],[-1.2,1.2,-6,-3.8],[1.3,2.05,-6,-4.9],[4.4,6.8,-2.1,-.7],[-7.2,-6,-4.4,-1.6],[-6.9,-5.5,-1.7,-.3],[-6.9,-5.4,-.2,1.2],[-6.9,-5.4,2.7,4.1],[7.6,9,.1,1.9],[-3.1,-1.5,-5.4,-3.9],[5.9,6.7,-4.9,-4.1],[-7,-5.8,4.2,5.7],[-3.8,-3,-2.8,-2],[4.5,5.9,4,4.8],[3.1,3.7,4.2,4.8]],
+ [[-1.9,1.9,-.8,2.3],[-1.2,1.2,-6,-3.8],[1.3,2.05,-6,-4.9],[4.4,6.8,-2.1,-.7],[-7.2,-6,-4.4,-1.6],[-6.9,-5.5,-1.7,-.3],[-6.9,-5.4,-.2,1.2],[-6.9,-5.4,2.7,4.1],[7.6,9,.1,1.9],[-3.1,-1.5,-5.4,-3.9],[7.6,8.9,-5.8,-4.8],[-7,-5.8,4.2,5.7],[-3.8,-3,-2.8,-2],[4.5,5.9,4,4.8],[3.1,3.7,4.2,4.8]],
  [[-4.6,-1,-3.4,-1.8],[0,2.4,-3.4,-2.2],[3,4.8,-3.4,-2],[1.2,2,-.1,.7],[2.7,3.7,.6,1]],
  [[-1.7,1.7,-3.4,-2.1],[-4.6,-3.8,-3.4,-2.6],[4,4.6,-3.4,-2.7]]
 ];
@@ -362,7 +362,7 @@ const POIS=[
   {x:-5,z:.5,f:[-1,0],w:[6,12],s:'ayo main tangkap balon!',max:1},{x:-5,z:3.4,f:[-1,0],w:[4,8],s:'foto bareng yuk',max:1},
   {x:-5.5,z:-2.8,f:[-1,0],w:[5,10],s:'mau baca buku apa ya',max:2},{x:-5.1,z:-1,f:[-1,0],w:[4,8],s:'lagunya enak',max:1},
   {x:5.6,z:-.35,f:[0,-1],w:[4,8],s:'ada telepon masuk?',max:2},{x:7.1,z:1,f:[1,0],w:[4,7],s:'trofinya keren',max:1},
-  {x:6.3,z:-3.7,f:[0,-1],w:[3,6],s:'balonnya lucu',max:2},{x:-2.3,z:-3.5,f:[0,-1],w:[3,6],s:'posternya lucu',max:2},
+  {x:8.1,z:-4.2,f:[0,-1],w:[3,6],s:'balonnya lucu',max:2},{x:-2.3,z:-3.5,f:[0,-1],w:[3,6],s:'posternya lucu',max:2},
   {x:-5.3,z:5,f:[-1,0],w:[3,6],s:'ayo mendaki lagi',max:1},{cat:1,w:[4,8],s:'meong~',max:2}],
  [{x:3.9,z:-1.4,f:[0,-1],w:[5,9],max:2},{x:1.2,z:-1,f:[0,-1],w:[6,12],max:3},{x:-2.8,z:-1.1,f:[0,-1],w:[6,10],max:2}],
  [{x:-3.3,z:-1.9,f:[0,-1],w:[5,9],max:2},{x:0,z:-1.7,f:[0,-1],w:[5,9],max:2},{x:3.3,z:-1.9,f:[0,-1],w:[5,9],max:2}]
@@ -380,10 +380,11 @@ function segHit(r,ax,az,cx,cz){
 }
 const clearSeg=(rm,ax,az,cx,cz)=>!OB[rm].some(r=>segHit(r,ax,az,cx,cz));
 /* graf sudut-sudut perabot, dibuat sekali di awal */
-const GN=OB.map((rects,rm)=>{const B=BND[rm],ns=[];
+const mkGN=rm=>{const rects=OB[rm],B=BND[rm],ns=[];
  rects.forEach(r=>[[r[0]-PADN,r[2]-PADN],[r[0]-PADN,r[3]+PADN],[r[1]+PADN,r[2]-PADN],[r[1]+PADN,r[3]+PADN]].forEach(([x,z])=>{if(x>=B.x0&&x<=B.x1&&z>=B.z0&&z<=B.z1&&!inObs(rm,x,z))ns.push({x,z,e:[]})}));
  ns.forEach((a,i)=>ns.forEach((b,j)=>{if(j>i&&clearSeg(rm,a.x,a.z,b.x,b.z)){const d=Math.hypot(a.x-b.x,a.z-b.z);a.e.push([j,d]);b.e.push([i,d])}}));
- return ns});
+ return ns};
+const GN=OB.map((_,rm)=>mkGN(rm));
 function findPath(rm,sx,sz,gx,gz){
  if(clearSeg(rm,sx,sz,gx,gz))return[{x:gx,z:gz}];
  const N=GN[rm],n=N.length,dist=new Array(n+2).fill(Infinity),prev=new Array(n+2).fill(-1),done=new Array(n+2).fill(false);
@@ -558,5 +559,8 @@ function clockStep(){
 }
 const _wf=winFx;winFx=function(dt){_wf(dt);clockStep()};
 
-})();
+/* ---------- dipakai interact3d.js: avatar pemain berjalan ke benda yang di-tap ---------- */
+window.R3={goTo,findPath,eject,inObs,ensure,xfer3,OB,BND,POIS,
+ addRoom(rm,obs,bnd,pois){OB[rm]=obs;BND[rm]=bnd;POIS[rm]=pois||[];GN[rm]=mkGN(rm)}};
 
+})();

@@ -41,14 +41,22 @@ const _wf=winFx;winFx=function(dt){_wf(dt);const t=performance.now()/1000;
  if(Z.on)Z.age+=dt;if(Z.card)Z.card.upd(dt,t);stepF.forEach(f=>f(dt,t))};
 
 /* ================= KARTU KERTAS 3D (tebal, miring mengikuti jari, bisa dibalik) ================= */
-function kbtn(p,l,col,x,y,fn,w){w=w||.5;const g=new THREE.Group();g.position.set(x,y,.05);p.add(g);bx(w,.2,.05,col,0,0,0,g);
- const t=cvs(128,48,(c,W,H)=>{c.fillStyle='#1f3a5f';c.font='18px '+FN;c.textAlign='center';c.textBaseline='middle';c.fillText(l,W/2,H/2+2)},1),m=new THREE.Mesh(new THREE.PlaneGeometry(w*.9,w*.9*.375),new THREE.MeshBasicMaterial({map:t.t,transparent:true}));m.position.z=.03;g.add(m);
+function kbtn(p,l,col,x,y,fn,w,h,fg,pad){w=w||.8;h=h||.34;const g=new THREE.Group();g.position.set(x,y,.05);p.add(g);
+ bx(w+.07,h+.07,.04,'#1f3a5f',0,0,-.006,g);bx(w,h,.06,col,0,0,0,g);
+ const t=cvs(256,96,(c,W,H)=>{c.fillStyle=fg||'#fff';c.strokeStyle='#1f3a5f';c.lineWidth=8;c.lineJoin='round';c.font='64px '+FN;c.textAlign='center';c.textBaseline='middle';c.strokeText(l,W/2,H/2+4);c.fillText(l,W/2,H/2+4)},1),ph=h*.82,m=new THREE.Mesh(new THREE.PlaneGeometry(ph*256/96,ph),new THREE.MeshBasicMaterial({map:t.t,transparent:true}));m.position.z=.04;g.add(m);
+ /* area sentuh tak terlihat, lebih besar dari tombol (jempol HP) */
+ const hit=new THREE.Mesh(new THREE.PlaneGeometry(w+(pad==null?.35:pad),h+(pad==null?.35:pad)),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));hit.position.z=.07;g.add(hit);
  g.userData.zfx=()=>{if(typeof SFX!=='undefined')SFX.click();fn()};return g}
+/* swipe kiri/kanan di kartu berhalaman (o.swipe(+1 / -1)); tidak mengganggu tap karena tap hanya jalan kalau jari nyaris tidak bergeser */
+{let sx=0,sy=0,on=0;
+ cv.addEventListener('pointerdown',e=>{on=!!(Z.on&&Z.card&&Z.card.o&&Z.card.o.swipe);sx=e.clientX;sy=e.clientY});
+ cv.addEventListener('pointerup',e=>{if(!on)return;on=0;const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.5&&Z.card&&Z.card.o.swipe){if(typeof SFX!=='undefined')SFX.click();Z.card.o.swipe(dx<0?1:-1)}});
+ cv.addEventListener('pointercancel',()=>{on=0})}
 function slip(o){const W=512,H=Math.round(512*o.h/o.w),g=new THREE.Group(),pv=new THREE.Group(),C={g,pv,ctl:[],flip:0,fl:0,t:0,o},F=cvs(W,H,o.front),B=o.back&&cvs(W,H,o.back);C.F=F;
  const ed=new THREE.MeshLambertMaterial({color:o.edge||'#e4dcc4'}),mt=[ed,ed,ed,ed,new THREE.MeshBasicMaterial({map:F.t}),B?new THREE.MeshBasicMaterial({map:B.t}):ed];
  const m=new THREE.Mesh(new THREE.BoxGeometry(o.w,o.h,o.thick||.04),mt);pv.add(m);g.add(pv);m.userData.zfx=()=>{if(B){C.flip^=1}};C.ctl.push(m);
  if(o.tape){const tp=new THREE.Mesh(new THREE.PlaneGeometry(.7,.2),new THREE.MeshBasicMaterial({color:'#f6efb8',transparent:true,opacity:.8}));tp.position.set(0,o.h/2-.02,.03);tp.rotation.z=.05;pv.add(tp)}
- (o.keys||[]).forEach((k,i,a)=>{const b=o.ktop?kbtn(g,k.l,k.c||'#f2b84b',o.w/2-.3-(a.length-1-i)*.6,o.h/2+.22,k.fn,.5):kbtn(g,k.l,k.c||'#f2b84b',(i-(a.length-1)/2)*.62,-o.h/2-.2,k.fn);C.ctl.push(b)});
+ (o.keys||[]).forEach((k,i,a)=>{const own=k.x!=null,x=own?k.x:(i-(a.length-1)/2)*1.0,y=own?k.y:(o.ktop?o.h/2+.34:-o.h/2-.3),b=kbtn(o.kin?pv:g,k.l,k.c||'#f2b84b',x,y,k.fn,k.w||.85,k.h||.36,k.fg,k.pad);C.ctl.push(b)});
  C.upd=(dt,t)=>{C.t=Math.min(1,C.t+dt*2.2);const u=ease(C.t);g.scale.setScalar(.3+.7*u);g.position.lerpVectors(o.from||o.pos,o.pos,u);g.position.y+=Math.sin(t*1.5)*.015;
   C.fl+=((C.flip?Math.PI:0)-C.fl)*Math.min(1,dt*8);pv.rotation.y=C.fl+(1-u)*1.1+Z.px*.28;pv.rotation.x=Z.py*.16+(1-u)*.5;pv.rotation.z=(o.rot||0)*u};
  g.position.copy(o.from||o.pos);g.scale.setScalar(.3);S.add(g);Z.card=C;return C}
@@ -86,18 +94,18 @@ stepF.push(()=>{const w=night?SN.t:SD.t;if(sky.material.map!==w){sky.material.ma
 
 /* ================= PAPAN STICKY: zoom + note 3D ================= */
 const board=S.children.find(o=>o.geometry&&o.geometry.type==='BoxGeometry'&&o.geometry.parameters.width===3&&o.geometry.parameters.height===3.4);
-const occl=()=>[...balloons,S.children.find(o=>o.isGroup&&Math.abs(o.position.x-6.3)<.01&&Math.abs(o.position.z+4.5)<.01),S.children.find(o=>o.isGroup&&Math.abs(o.position.x)<.01&&Math.abs(o.position.y-4.5)<.01&&Math.abs(o.position.z-.4)<.01)].filter(Boolean);
-function zoomBoard(){let hid=[];zin({tgt:board.position.clone(),fit:[3.2,3.7],pit:.02,hint:'tap catatan untuk membaca · tap luar untuk kembali',ctl:()=>noteHits,
+const occl=()=>[...balloons,S.children.find(o=>o.isGroup&&Math.abs(o.position.x-8.2)<.01&&Math.abs(o.position.z+5.3)<.01),S.children.find(o=>o.isGroup&&Math.abs(o.position.x)<.01&&Math.abs(o.position.y-4.5)<.01&&Math.abs(o.position.z-.4)<.01)].filter(Boolean);
+function zoomBoard(){let hid=[];zin({tgt:board.position.clone().add(new V3(0,.3,0)),fit:[3.9,4.5],pit:.02,hint:'tap catatan untuk membaca · tap luar untuk kembali',ctl:()=>noteHits,
  enter(){hid=occl().filter(o=>o.visible);hid.forEach(o=>o.visible=false)},exit(){hid.forEach(o=>o.visible=true)}})}
 if(board)act(board,zoomBoard);
 function noteCard(m){const n=m.userData.n,pages=chunk(n.t||'',CFG.NOTE_PAGE||280);let pg=0,C;const bp=board.position;
- const nav=d=>{pg=cl(pg+d,0,pages.length-1);C.F.r()},keys=pages.length>1?[{l:'<',c:'#3b7dd8',fn:()=>nav(-1)},{l:'>',c:'#f2b84b',fn:()=>nav(1)}]:[];
- C=slip({w:2.3,h:2.3,thick:.05,tape:1,ktop:1,rot:((n.t||'').length%5-2)*.025,keys,pos:new V3(bp.x,bp.y,bp.z+1.0),from:m.position.clone(),
+ const nav=d=>{pg=cl(pg+d,0,pages.length-1);C.F.r()},keys=pages.length>1?[{l:'<',c:'#3b7dd8',fg:'#fff',fn:()=>nav(-1),x:-.9,y:-.98,w:.34,h:.24,pad:.14},{l:'>',c:'#f2b84b',fg:'#1f3a5f',fn:()=>nav(1),x:-.308,y:-.98,w:.34,h:.24,pad:.14}]:[];
+ C=slip({w:2.3,h:2.3,thick:.05,tape:1,kin:1,swipe:nav,rot:((n.t||'').length%5-2)*.025,keys,pos:new V3(bp.x,bp.y,bp.z+1.0),from:m.position.clone(),
   front:(g,W,H)=>{g.fillStyle=n.color||'#f7e27a';g.fillRect(0,0,W,H);g.fillStyle='rgba(0,0,0,.07)';g.fillRect(0,0,W,46);g.fillStyle='rgba(255,255,255,.18)';g.fillRect(0,H-70,W,70);
    g.strokeStyle='rgba(90,74,42,.18)';g.lineWidth=2;for(let y=96;y<H-60;y+=44){g.beginPath();g.moveTo(24,y);g.lineTo(W-24,y);g.stroke()}
    g.fillStyle='#4a3a1a';g.textBaseline='alphabetic';let px=46,L;for(;;){g.font=px+'px '+VT;L=wrap(g,pages[pg],W-60);if(L.length*px*.95<H-170||px<=22)break;px-=2}
-   g.textAlign='left';L.forEach((l,i)=>g.fillText(l,30,92+i*px*.95));g.font='34px '+VT;g.textAlign='right';g.fillText('- '+(n.from||'anon'),W-30,H-24);
-   if(pages.length>1){g.font='11px '+FN;g.textAlign='left';g.fillText((pg+1)+'/'+pages.length,30,H-26)}}});
+   g.textAlign='left';L.forEach((l,i)=>g.fillText(l,30,92+i*px*.95));{let fs=34;const nm='- '+(n.from||'anon'),room=pages.length>1?230:W-60;g.font=fs+'px '+VT;while(fs>18&&g.measureText(nm).width>room){fs-=2;g.font=fs+'px '+VT}g.textAlign='right';g.fillText(nm,W-30,H-24)}
+   if(pages.length>1){g.font='11px '+FN;g.textAlign='center';g.fillText((pg+1)+'/'+pages.length,120,H-26)}}});
  if(typeof SFX!=='undefined')SFX.pop();return C}
 const _rw=renderWall;const patchN=()=>noteHits.forEach(m=>{m.userData.fn=()=>zoomBoard();m.userData.zfx=()=>noteCard(m)});
 renderWall=function(){_rw();patchN()};patchN();
@@ -249,8 +257,8 @@ if(GR){
 /* ================= GESER LAYAR: 2 jari (HP) / shift+seret atau klik kanan (PC), cubit untuk zoom ================= */
 {const Pt=new Map();let pan=false,lx=0,ly=0,ld=0,mouseP=false;
  const _d2=cv.onpointerdown,_m2=cv.onpointermove,_u2=cv.onpointerup,mid=()=>{const a=[...Pt.values()],p=a[0],q=a[1]||p;return{x:(p.x+q.x)/2,y:(p.y+q.y)/2,d:Math.hypot(p.x-q.x,p.y-q.y)}};
- const move=(dx,dy)=>{const k=.828*dist/innerHeight,s=Math.sin(yaw),c=Math.cos(yaw),cx=[1,40,80][curRoom]||1,w=curRoom?3:8;
-  goalT.x=cl(goalT.x-dx*k*c+dy*k*-s,cx-w,cx+w);goalT.z=cl(goalT.z+dx*k*s+dy*k*-c,curRoom?-3:-2,curRoom?3:6)};
+ const move=(dx,dy)=>{const k=.828*dist/innerHeight,s=Math.sin(yaw),c=Math.cos(yaw),f2=window.F2&&window.F2.on,cx=f2?window.F2.cx:[1,40,80][curRoom]||1,w=(f2||curRoom)?3:8;
+  goalT.x=cl(goalT.x-dx*k*c+dy*k*-s,cx-w,cx+w);goalT.z=cl(goalT.z+dx*k*s+dy*k*-c,(f2||curRoom)?-3:-2,(f2||curRoom)?3:6)};
  cv.oncontextmenu=e=>e.preventDefault();
  cv.onpointerdown=e=>{if(Z.on)return _d2(e);
   if(e.pointerType==='mouse'&&(e.shiftKey||e.button===2)){mouseP=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId);return}

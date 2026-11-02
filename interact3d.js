@@ -144,7 +144,7 @@ function scan(){
   return {kind:'sit',room:1,seat:i,x:SEAT[i],z:-2.35,stage:{x:SEAT[i],z:-1.4},say:'nyaman~'}},{replace:true,full:'sofa penuh'});
  wrap(g0(()=>tg0),()=>{
   const me=own(),n=[...V.values()].filter(o=>o!==me&&watching(o)).length;
-  return {kind:'stand',room:1,x:1.2+[0,-1.2,1.2][n%3],z:-1.2,f:[0,-1],w:[25,35],say:'seru nih~'}},{replace:true,then:()=>tv()});
+  return {kind:'stand',room:1,x:1.2+[0,-1.2,1.2][n%3],z:-1.2,f:[0,-1],w:[25,35],say:'seru nih~'}},{replace:true,then:()=>{if(window.tvNext)window.tvNext();else tv()}});
  wrap(g0(()=>tank),st(1,3.9,-1.4,[0,-1],'ikannya lucu~',[12,20]));
 
  /* --- ruang utama (ruang 0) --- */

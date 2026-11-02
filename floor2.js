@@ -12,9 +12,9 @@ const STAIR={x:9.4,z:2.55,w:1.4,n:9,run:.44,rise:.33};
 /* kamera saat turun kembali ke lantai 1 */
 const BACK={x:7.4,z:4.2};
 
-console.log('floor2.js v11 loaded');
+console.log('floor2.js v14 loaded');
 /* lencana tes sementara: muncul merah di pojok kiri-bawah saat di lantai 2. Kalau tidak muncul = browser memuat floor2.js yang lama. Hapus 3 baris BADGE kalau sudah beres. */
-const BADGE=document.createElement('div');BADGE.textContent='floor2 v11';BADGE.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99;background:#e84a5f;color:#fff;font:11px monospace;padding:3px 6px;display:none;pointer-events:none';document.body.appendChild(BADGE);
+const BADGE=document.createElement('div');BADGE.textContent='floor2 v14 (pintu balkon mewah)';BADGE.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99;background:#e84a5f;color:#fff;font:11px monospace;padding:3px 6px;display:none;pointer-events:none';document.body.appendChild(BADGE);
 const PX='"Press Start 2P",monospace',VT='VT323,monospace';
 const F2=window.F2={on:false,room:0,cx:120};
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -59,6 +59,18 @@ function door(par,x,z,ry,txt,col,dk,fn){const g=grp(x,0,z,par,ry);
  sp(.07,'#f2c14e',.45,1.25,.16,g);sign(txt,1.3,.33,g,0,3.1,.09,0);
  const m=pl(1.1,.55,M('#e84a5f'),0,.015,.55,g);m.rotation.x=-Math.PI/2;lact(g,fn);return g}
 
+const MARBb='#f4efe4',GOLDb='#d9b24c';
+/* pintu mewah: dua daun kayu gelap, fanlight emas, kusen marmer (dipakai di kamar & balkon). sx = posisi papan nama di samping pintu */
+function luxDoor(par,x,z,ry,txt,fn,sx){const d=grp(x,0,z,par,ry);
+ bx(1.7,2.9,.1,'#2a1a10',0,1.45,-.04,d);
+ [-1,1].forEach(s=>{const X=s*.37;bx(.72,2.8,.1,'#4a2c1a',X,1.4,.02,d);bx(.5,.7,.04,'#5b3822',X,.6,.08,d);pl(.46,1.05,BM('#a9cbe6'),X,1.95,.1,d);[2.5,1.4,.25].forEach(y=>bx(.52,.04,.03,GOLDb,X,y,.1,d));cy(.03,.03,.34,GOLDb,s*.1,1.3,.13,d,8);sp(.05,GOLDb,s*.1,1.5,.13,d)});
+ bx(.03,2.8,.12,GOLDb,0,1.4,.07,d);
+ const fan=new THREE.Mesh(new THREE.CircleGeometry(.75,20,0,Math.PI),BM('#a9cbe6'));fan.position.set(0,2.8,.05);d.add(fan);
+ const ar=new THREE.Mesh(new THREE.TorusGeometry(.78,.05,6,24,Math.PI),M(GOLDb));ar.position.set(0,2.8,.08);d.add(ar);
+ const sg=grp(0,2.8,.07,d);for(let i=0;i<7;i++){const a=-Math.PI/2+i*Math.PI/6,sk=bx(.025,.75,.02,GOLDb,-Math.sin(a)*.375,Math.cos(a)*.375,0,sg);sk.rotation.z=a}
+ [-1,1].forEach(s=>bx(.14,2.85,.18,MARBb,s*.82,1.42,.05,d));bx(1.7,.05,.5,'#e3dccb',0,.025,.28,d);
+ sign(txt,1.0,.26,d,sx,1.9,.09,0);
+ const m=pl(1.1,.55,M('#e84a5f'),0,.015,.65,d);m.rotation.x=-Math.PI/2;lact(d,fn);return d}
 const A={wdT:0,wd:0,frT:0,fr:0,stove:false,water:0,lamp:false,pend:true};
 
 /* ======================================================================
@@ -95,7 +107,7 @@ const dL=grp(-1.0,0,.45,wd),dR=grp(1.0,0,.45,wd);
 bx(.98,3.3,.06,'#c98b52',.5,1.7,0,dL);sp(.05,'#f2c14e',.85,1.6,.06,dL);bx(.98,3.3,.06,'#c98b52',-.5,1.7,0,dR);sp(.05,'#f2c14e',-.85,1.6,.06,dR);
 lact(wd,()=>{A.wdT=A.wdT?0:1;say3(wd,A.wdT?'isinya jaket & kaos favorit':'lemari ditutup')});
 /* meja kerja + laptop + kursi (di dinding kiri) */
-const desk=grp(-4.35,0,.7,BED,Math.PI/2);
+const desk=grp(-4.35,0,.3,BED,Math.PI/2);
 bx(1.9,.1,.9,'#c98b52',0,1.0,0,desk);[[-.85,-.35],[.85,-.35],[-.85,.35],[.85,.35]].forEach(([x,z])=>bx(.1,1.0,.1,'#8a5a34',x,.5,z,desk));bx(.6,.7,.7,'#a8743f',.6,.62,0,desk);
 bx(.7,.05,.5,'#cfd6e0',-.1,1.08,.05,desk);
 const scr=grp(-.1,1.1,-.2,desk);scr.rotation.x=-.25;bx(.72,.5,.04,'#1f3a5f',0,.27,0,scr);
@@ -123,7 +135,7 @@ lact(dn,()=>goDown());
 /* pintu ke ruang makan */
 door(BED,-1.0,-3.43,0,'ruang makan','#f2b84b','#c9922a',()=>swap());
 /* pintu ke balkon (dinding kiri) */
-door(BED,-4.93,2.6,Math.PI/2,'balkon','#8dbdf7','#4f7fb8',()=>goBalcony());
+luxDoor(BED,-4.93,2.5,Math.PI/2,'balkon',()=>goBalcony(),1.5);
 
 /* ======================================================================
    RUANG MAKAN + DAPUR  (x = 160)
@@ -213,17 +225,23 @@ act(stair,()=>goUp());
 const BAL=new THREE.Group();BAL.position.set(200,0,0);S.add(BAL);BAL.visible=false;
 const BCOL=['#e84a5f','#f2c14e','#4f8fe8','#8fd18a','#f4a6c0','#a98bd6'];
 const glow=(w,h,d,c,x,y,z,p)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),BM(c));m.position.set(x,y,z);p.add(m);return m};
-const deckTex=cvTex(128,128,g=>{for(let r=0;r<8;r++){g.fillStyle=['#b99a72','#ae8f68','#bc9e76','#a98a64'][r%4];g.fillRect(0,r*16,128,16);g.fillStyle='#8f7350';g.fillRect(0,r*16+15,128,1);g.fillRect((r*37)%128,r*16,1,15)}},true,[5,3.5]);
+const deckTex=cvTex(256,256,g=>{for(let a=0;a<2;a++)for(let b=0;b<2;b++){g.fillStyle=(a+b)%2?'#d6d0c2':'#f6f1e7';g.fillRect(a*128,b*128,128,128)}
+ for(let i=0;i<14;i++){g.strokeStyle='rgba(120,108,92,.16)';g.lineWidth=1;g.beginPath();const x=(i*71)%256,y=(i*113)%256;g.moveTo(x,y);g.bezierCurveTo(x+30,y+20,x+50,y-20,x+90,y+10);g.stroke()}
+ g.fillStyle='#caa24a';g.fillRect(0,0,256,2);g.fillRect(0,0,2,256);g.fillRect(0,127,256,2);g.fillRect(127,0,2,256)},false,[5,3.5]);
 {const fl=new THREE.Mesh(new THREE.PlaneGeometry(10,7),new THREE.MeshLambertMaterial({map:deckTex}));fl.rotation.x=-Math.PI/2;BAL.add(fl)}
 bx(10,.2,.2,'#2e527f',0,0,3.5,BAL);
 /* dinding luar rumah (warna tidak terpengaruh lampu) + garis papan */
-{const bw=new THREE.Mesh(new THREE.PlaneGeometry(10,5),BM('#c9b48f'));bw.position.set(0,2.5,-3.5);BAL.add(bw)}
-for(let i=0;i<8;i++)pl(10,.04,BM('#b39d78'),0,.95+i*.45,-3.485,BAL);
-bx(10,.7,.1,'#a8946f',0,.35,-3.45,BAL);bx(10,.3,.7,'#8a5a34',0,4.85,-3.2,BAL);
+{const wt=cvTex(512,256,(g,W,H)=>{g.fillStyle='#f0e5d0';g.fillRect(0,0,W,H);for(let i=0;i<300;i++){g.fillStyle=i%2?'rgba(170,140,95,.06)':'rgba(255,255,255,.1)';g.fillRect((i*97)%W,(i*53)%H,4,2)}
+  const bh=19,top=H-57;g.fillStyle='#dccba6';g.fillRect(0,top,W,57);g.fillStyle='#bca67c';for(let r=0;r<3;r++){const y=top+r*bh;g.fillRect(0,y,W,2);for(let c=0;c<W/64+1;c++)g.fillRect(c*64+(r%2?32:0),y,2,bh)}});
+ pl(10,5,BM('#ffffff',{map:wt}),0,2.5,-3.5,BAL)}
+/* chair rail, quoin sudut, kornis marmer + dentil emas (sama seperti teras) */
+bx(10,.1,.1,MARBb,0,1.12,-3.43,BAL);
+[-4.78,4.78].forEach(x=>{for(let i=0;i<7;i++)bx(i%2?.5:.34,.5,.2,'#e3dccb',x,.3+i*.65,-3.4,BAL)});
+bx(10,.22,.5,MARBb,0,4.85,-3.25,BAL);bx(10,.05,.52,GOLDb,0,4.72,-3.25,BAL);for(let i=0;i<33;i++)bx(.12,.1,.1,MARBb,-4.8+i*.3,4.64,-3.04,BAL);
 /* pintu kembali ke kamar tidur */
-door(BAL,-2.2,-3.43,0,'kamar tidur','#8dbdf7','#4f7fb8',()=>goBedroom());
+luxDoor(BAL,-2.2,-3.43,0,'kamar tidur',()=>goBedroom(),-1.5);
 /* jendela kamar dari luar + kotak bunga */
-bx(1.9,1.5,.08,'#ffffff',2.8,2.8,-3.44,BAL);
+bx(1.9,1.5,.08,MARBb,2.8,2.8,-3.44,BAL);bx(2.2,.1,.3,MARBb,2.8,3.62,-3.3,BAL);[-1,1].forEach(s=>bx(.4,1.7,.06,'#2b4a3a',2.8+s*1.15,2.8,-3.36,BAL));
 const balGlass=pl(1.6,1.2,BM('#7fa8d4'),2.8,2.8,-3.39,BAL);
 bx(.05,1.2,.04,'#ffffff',2.8,2.8,-3.36,BAL);bx(1.6,.05,.04,'#ffffff',2.8,2.8,-3.36,BAL);
 bx(2.1,.12,.35,'#8a5a34',2.8,1.98,-3.25,BAL);
@@ -236,11 +254,16 @@ const sconceG=[];[-.9,-4.3].forEach(x=>{bx(.08,.6,.06,'#2a3a52',x,2.6,-3.4,BAL);
 cy(.01,.01,9.4,'#5a3b22',0,4.62,-3.0,BAL).rotation.z=Math.PI/2;
 for(let i=0;i<13;i++){const x=-4.6+i*.7667,d=bx(.3,.3,.03,BCOL[i%6],x,4.42,-3.0,BAL);d.rotation.z=.785}
 for(let i=0;i<14;i++){const u=i/13;fairy.push(sp(.06,['#f2c14e','#f4a6c0','#8fd0f0','#ffffff','#8fd18a'][i%5],-4.8+u*9.6,4.28-.18*Math.sin(u*Math.PI*3),-3.3,BAL,true))}
-/* pagar: kiri, depan, kanan */
+/* pagar: balustrade marmer + tiang bola emas (sama seperti balkon di model rumah) */
+const balGeo=new THREE.LatheGeometry([[.07,0],[.07,.05],[.045,.12],[.045,.2],[.08,.32],[.085,.4],[.07,.48],[.045,.58],[.045,.76],[.07,.84],[.07,.9]].map(a=>new THREE.Vector2(a[0],a[1])),8);
+const balu=(x,y,z)=>{const m=new THREE.Mesh(balGeo,M(MARBb));m.position.set(x,y,z);m.scale.setScalar(.95);BAL.add(m)};
+/* tepi lantai marmer + garis emas */
+bx(10.3,.14,.4,MARBb,0,.05,3.5,BAL);bx(10.3,.04,.42,GOLDb,0,.13,3.5,BAL);[-4.95,4.95].forEach(x=>{bx(.4,.14,7.2,MARBb,x,.05,0,BAL);bx(.42,.04,7.2,GOLDb,x,.13,0,BAL)});
 function railLine(x,z,len,alongZ){
- const n=Math.round(len/.5);
- if(alongZ){bx(.14,.1,len,'#8a5a34',x,1.1,z,BAL);bx(.1,.06,len,'#8a5a34',x,.25,z,BAL);for(let i=0;i<=n;i++)bx(.05,.9,.05,'#e8dcc4',x,.65,z-len/2+i*len/n,BAL);[-1,1].forEach(k=>{bx(.16,1.2,.16,'#6b4423',x,.6,z+k*len/2,BAL);sp(.1,'#8a5a34',x,1.27,z+k*len/2,BAL)})}
- else{bx(len,.1,.14,'#8a5a34',x,1.1,z,BAL);bx(len,.06,.1,'#8a5a34',x,.25,z,BAL);for(let i=0;i<=n;i++)bx(.05,.9,.05,'#e8dcc4',x-len/2+i*len/n,.65,z,BAL);[-1,1].forEach(k=>{bx(.16,1.2,.16,'#6b4423',x+k*len/2,.6,z,BAL);sp(.1,'#8a5a34',x+k*len/2,1.27,z,BAL)})}}
+ const n=Math.round(len/.36);
+ if(alongZ){bx(.24,.1,len,MARBb,x,1.1,z,BAL);bx(.2,.12,len,MARBb,x,.2,z,BAL);for(let i=0;i<=n;i++)balu(x,.2,z-len/2+i*len/n)}
+ else{bx(len,.1,.24,MARBb,x,1.1,z,BAL);bx(len,.12,.2,MARBb,x,.2,z,BAL);for(let i=0;i<=n;i++)balu(x-len/2+i*len/n,.2,z)}
+ [-1,1].forEach(k=>{const px=alongZ?x:x+k*len/2,pz=alongZ?z+k*len/2:z;bx(.34,1.2,.34,MARBb,px,.6,pz,BAL);bx(.44,.07,.44,MARBb,px,1.23,pz,BAL);bx(.28,.05,.28,GOLDb,px,1.29,pz,BAL);sp(.13,GOLDb,px,1.45,pz,BAL)})}
 railLine(-4.9,0,7,true);railLine(0,3.45,10,false);railLine(4.9,0,7,true);
 /* karpet bundar bertingkat di bawah meja */
 [[1.8,'#7aa6d6'],[1.5,'#f6e3b4'],[1.1,'#e07a8f'],[.7,'#f2c14e']].forEach(([r,c],i)=>{const m=cy(r,r,.02,c,1.0,.012+i*.004,.3,BAL);m.scale.z=.8});

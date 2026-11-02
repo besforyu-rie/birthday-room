@@ -1,7 +1,7 @@
 /* visitors.js — taruh sefolder dengan index.html, tambahkan SETELAH extras.js:
    <script src="visitors.js"></script> */
 (()=>{
-const MAX=10,LIFE=10*60*1000;
+const MAX=20; /* permanen, maks 20 avatar; yang ke-21 menggeser yang paling lama */
 const HC=['#2b2630','#6b4429','#e0b050','#e84a5f','#f4a6c0','#4f8fe8','#f2f5fc','#8a3fc0'];
 const SC=['#e84a5f','#f2c14e','#8fd18a','#4f8fe8','#a98bd6','#f4a6c0','#ffffff','#2b2630'];
 const SK=['#fbe0c8','#f0c8a0','#d9a577','#a9744a','#6e4a30'];
@@ -118,7 +118,7 @@ const css=document.createElement('style');css.textContent=`
 
 /* ---- lounge ---- */
 const L=document.createElement('section');L.id='lounge';
-L.innerHTML='<div class="lw"></div><p class="lt px">lounge (10 menit)</p><button class="btn alt" id="vbtn"></button><div class="chair"></div><div class="tb"></div><div class="ltv"></div><div id="lsofa"></div><div class="tb" id="aqt"></div><div id="aq"></div><div id="vz"></div>';
+L.innerHTML='<div class="lw"></div><p class="lt px">lounge</p><button class="btn alt" id="vbtn"></button><div class="chair"></div><div class="tb"></div><div class="ltv"></div><div id="lsofa"></div><div class="tb" id="aqt"></div><div id="aq"></div><div id="vz"></div>';
 const mn=document.createElement('div');mn.id='main';
 [...room.children].forEach(c=>mn.appendChild(c));
 room.appendChild(mn);
@@ -140,9 +140,10 @@ const paint=v=>draw(v.cv.getContext('2d'),v.a,v.f);
 function render(){
  const now=Date.now(),all=new Map();
  remote.forEach(a=>all.set(a.id,a));
- if(own&&own.ts>now-LIFE)all.set(did,{...own,id:did});
- const list=[...all.values()].filter(a=>a.ts>now-LIFE).sort((a,b)=>b.ts-a.ts).slice(0,MAX);
+ if(own)all.set(did,{...own,id:did});
+ const list=[...all.values()].sort((a,b)=>b.ts-a.ts).slice(0,MAX);
  const ids=new Set(list.map(a=>a.id));
+ if(own&&!ids.has(did)){own=null;try{localStorage.removeItem('bday-av')}catch(e){}}
  V.forEach((v,id)=>{if(!ids.has(id)){v.el.remove();V.delete(id)}});
  list.forEach(a=>{
   let v=V.get(a.id);const k=JSON.stringify([a.n,a.g,a.hs,a.hc,a.sc,a.sk,a.ah,a.gl]);
@@ -152,7 +153,7 @@ function render(){
  });
  btn();
 }
-function btn(){const age=own?Date.now()-own.ts:LIFE;vb.textContent=own&&age<LIFE?'avaku · '+Math.ceil((LIFE-age)/60000)+'m':'+ bikin ava'}
+function btn(){vb.textContent=own?'avaku':'+ bikin ava'}
 
 /* ---- sofa & TV ---- */
 const seats=()=>$('#lsofa').clientWidth>=140?[16,86]:[21];
@@ -306,8 +307,8 @@ setInterval(render,10000);render();
 /* sinkron realtime */
 (function w(n){
  if(db&&fs){try{
-  const q=fs.query(fs.collection(db,'visitors'),fs.where('ts','>',Date.now()-LIFE),fs.orderBy('ts','desc'),fs.limit(MAX));
-  fs.onSnapshot(q,s=>{remote=s.docs.map(d=>({...clean(d.data()),id:d.id}));render()},e=>console.warn(e));
+  const q=fs.query(fs.collection(db,'visitors'),fs.orderBy('ts','desc'),fs.limit(MAX));
+  fs.onSnapshot(q,s=>{remote=s.docs.map(d=>({...clean(d.data()),id:d.id}));if(own&&!s.metadata.fromCache&&!s.metadata.hasPendingWrites&&Date.now()-own.ts>15000&&!remote.some(a=>a.id===did)){own=null;try{localStorage.removeItem('bday-av')}catch(e){}}render()},e=>console.warn(e));
  }catch(e){console.warn(e)}}
  else if(n<25)setTimeout(()=>w(n+1),400);
 })(0);
@@ -321,14 +322,14 @@ async function save(a){
 const chips=(k,arr,sw)=>`<div class="sw">${arr.map((v,i)=>`<button class="chip${sw?'':' t'}" data-k="${k}" data-v="${i}"${sw?` style="background:${v}" aria-label="${k} ${i+1}"`:''}>${sw?'':v}</button>`).join('')}</div>`;
 const lab=t=>`<p class="from" style="margin:8px 0 4px">${t}</p>`;
 vb.onclick=()=>{
- const alive=own&&Date.now()-own.ts<LIFE;
+ const alive=!!own;
  const a=alive?{...own}:{n:store('bday-vn')||'',g:2,hs:0,hc:1,sc:3,sk:0,ah:0,gl:0};
  openM(`<h2>bikin avamu</h2><div id="pvw" style="text-align:center;margin-bottom:8px"></div>
  <input id="vn" maxlength="12" placeholder="nama (maks 12)" value="${esc(a.n==='tamu'?'':a.n)}">
  ${lab('gender')}${chips('g',GN)}${lab('model rambut')}${chips('hs',HS)}${lab('warna rambut')}${chips('hc',HC,1)}
  ${lab('warna kulit')}${chips('sk',SK,1)}${lab('warna baju')}${chips('sc',SC,1)}
  ${lab('aksesoris')}${chips('ah',AH)}${chips('gl',['tanpa kacamata','kacamata'])}
- <p class="from" style="font-size:18px">${alive?'avatar aktif, timer 10 menit tidak di-reset.':'1 device = 1 avatar, tampil 10 menit.'}</p>
+ <p class="from" style="font-size:18px">${alive?'avatar aktif, tampil permanen.':'1 device = 1 avatar, maks 20 pengunjung.'}</p>
  <div class="row"><button class="btn" id="vs">${alive?'simpan':'masuk lounge'}</button></div>`);
  const pc=mk(a,2,6);$('#pvw').appendChild(pc);
  const mark=()=>mb.querySelectorAll('.chip').forEach(b=>b.classList.toggle('on',a[b.dataset.k]===+b.dataset.v));

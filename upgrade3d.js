@@ -249,8 +249,8 @@ if(GR){
   C.upd=(dt,t)=>{C.t=Math.min(1,C.t+dt*2);const u=ease(C.t);hg.scale.setScalar(.2+.8*u);hg.position.lerpVectors(from,to,u);hg.position.y+=Math.sin(t*1.4)*.012;hg.rotation.y=Math.PI/2+Z.px*.2+(1-u)*.8;hg.rotation.x=Z.py*.12+(1-u)*.3;
    if(anim){anim.u=Math.min(1,anim.u+dt*2.2);const e=ease(anim.u);lf.rotation.y=-Math.PI*(anim.d>0?e:1-e);if(anim.u>=1){if(anim.d>0){s++;setP()}lf.rotation.y=0;anim=null;save()}}};
   if(typeof SFX!=='undefined')SFX.pop();Z.card=C}
- defs.forEach(d=>{if(d.m)d.m.userData.zfx=()=>openBook(d)});
- let hid=[];const openShelf=()=>{const sp=new V3();sh.getWorldPosition(sp);zin({tgt:new V3(sp.x,1.9,sp.z),fit:[2.7,3.9],yaw:Math.PI/2,pit:.05,hint:'tap buku untuk membaca · buku ungu = jurnal harian',ctl:()=>defs.map(d=>d.m).filter(m=>m&&m.visible),
+ window.BOOKDEFS=defs;defs.forEach(d=>{if(d.m)d.m.userData.zfx=()=>openBook(d)});
+ let hid=[];const openShelf=()=>{const sp=new V3();sh.getWorldPosition(sp);zin({tgt:new V3(sp.x,1.9,sp.z),fit:[2.7,3.9],yaw:Math.PI/2,pit:.05,hint:'tap buku untuk membaca · buku ungu = jurnal harian · buku emas = lencana',ctl:()=>defs.map(d=>d.m).filter(m=>m&&m.visible),
   enter(){hid=[...occl(),lp].filter(o=>o.visible);hid.forEach(o=>o.visible=false)},exit(){hid.forEach(o=>o.visible=true)}})};
  sh.userData.fn=openShelf}
 

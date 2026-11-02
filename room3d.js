@@ -419,10 +419,10 @@ function ensure(v){if(v.R)return v.R;
  v.Ar=(a,b)=>{if(v.arms&&v.arms[0]){v.arms[0].rotation.x=a;v.arms[1].rotation.x=b}};
  return v.R}
 /* tangan Aqsa (pivot di bahu, ikut berayun saat jalan & joget) */
-const avArms=[-1,1].map(q=>{const g=new THREE.Group();g.position.set(q*.34,1.38,0);av.add(g);bx(.15,.28,.15,'#1f78f0',0,-.14,0,g);bx(.13,.26,.13,'#fbe0c8',0,-.41,0,g);return g});
+const avArms=(window.AQV&&AQV.arms)||[-1,1].map(q=>{const g=new THREE.Group();g.position.set(q*.34,1.38,0);av.add(g);bx(.15,.28,.15,'#1f78f0',0,-.14,0,g);bx(.13,.26,.13,'#fbe0c8',0,-.41,0,g);return g});
 const avHead=new THREE.Object3D();avHead.position.y=1.6;av.add(avHead);
 /* papan nama Aqsa di atas kepala, sama seperti pengunjung */
-{const tg=new THREE.Sprite(new THREE.SpriteMaterial({map:tagTex('Aqsa'),transparent:true}));tg.scale.set(1.5,.32,1);tg.position.y=2.35;av.add(tg)}
+{const tg=new THREE.Sprite(new THREE.SpriteMaterial({map:tagTex('Aqsa'),transparent:true}));tg.scale.set(1.5,.32,1);tg.position.y=2.75;av.add(tg)}
 const A={g:av,room:0,isA:true,R:{wp:[],wait:1,sp:1.25,ph:0,fa:av.rotation.y,act:null,dance:false,y:0,poi:-1,hold:0},
  get x(){return av.position.x},set x(q){av.position.x=q},get z(){return av.position.z},set z(q){av.position.z=q},
  L(a){legs[0].rotation.x=a;legs[1].rotation.x=-a},Ar(l,r){avArms[0].rotation.x=l;avArms[1].rotation.x=r}};

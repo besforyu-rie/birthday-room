@@ -21,9 +21,9 @@ const g0=fn=>{try{return fn()}catch(e){return null}};
 /* ===== EDIT: ruangan lantai 2 untuk jalan avatar (rintangan = [xMin,xMax,zMin,zMax], koordinat lokal ruangan) ===== */
 /*ROOMS*/
 const ROOMS={
- 3:{obs:[[1.35,4.05,-3.5,-.05],[.4,1.4,-3.5,-2.7],[-4.6,-2,-3.6,-2.3],[-5,-3.6,-.3,1.7],[4.1,5,-.7,.1],[3.1,4.7,1.2,3.2]],
+ 3:{obs:[[1.35,4.05,-3.5,-.05],[.4,1.4,-3.5,-2.7],[-4.6,-2,-3.6,-2.3],[-5,-3.6,-.7,1.3],[4.1,5,-.7,.1],[3.1,4.7,1.2,3.2]],
     bnd:{x0:-4.6,x1:4.6,z0:-3,z1:3.2},
-    pois:[{x:2.7,z:.5,f:[0,-1],w:[5,9],max:2},{x:.9,z:-2.4,f:[0,-1],w:[4,8],max:1},{x:-3.3,z:-2,f:[0,-1],w:[4,8],max:1},{x:-3.4,z:.7,f:[-1,0],w:[5,9],max:1}]},
+    pois:[{x:2.7,z:.5,f:[0,-1],w:[5,9],max:2},{x:.9,z:-2.4,f:[0,-1],w:[4,8],max:1},{x:-3.3,z:-2,f:[0,-1],w:[4,8],max:1},{x:-3.4,z:.3,f:[-1,0],w:[5,9],max:1}]},
  4:{obs:[[-1,2.6,0,1.8],[-.4,3.4,-3.6,-2.6],[-4.6,-3,-3.6,-2.3]],
     bnd:{x0:-4.5,x1:4.6,z0:-2.9,z1:3.2},
     pois:[{x:.2,z:-2.2,f:[0,-1],w:[4,8],max:1},{x:2.6,z:-2.2,f:[0,-1],w:[4,8],max:1},{x:-2.7,z:-2.2,f:[-1,0],w:[4,8],max:1},{x:.8,z:-1.0,f:[0,1],w:[4,8],max:2}]}
@@ -199,7 +199,7 @@ function scan(){
   wrap(findIn(BEDG,2.7,-1.8),()=>({kind:'sit',room:3,x:2.7,z:-.5,stage:{x:2.7,z:.4},say:'empuk banget kasurnya'}));
   wrap(findIn(BEDG,.9,-3.1),st(3,.9,-2.4,[0,-1],'lampu tidurnya imut',[10,18]));
   wrap(findIn(BEDG,-3.3,-3),st(3,-3.3,-2,[0,-1],'baju apa ya hari ini',[12,20]));
-  wrap(findIn(BEDG,-4.35,.7),st(3,-3.4,.7,[-1,0],'kerja dulu sebentar',[15,25]));
+  wrap(findIn(BEDG,-4.35,.3),st(3,-3.4,.3,[-1,0],'kerja dulu sebentar',[15,25]));
 
   /* --- ruang makan (ruang 4) --- */
   wrap(findIn(DING,.2,-3.1),st(4,.2,-2.4,[0,-1],'cuci piring dulu~',[10,18]));

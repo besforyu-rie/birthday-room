@@ -10,6 +10,7 @@ if(typeof THREE==='undefined'||typeof S==='undefined'||typeof lh==='undefined'||
 /* ============ EDIT BAGIAN INI SAJA ============ */
 const ASQ={
  q:"",   /* petunjuk di kotak kode (opsional). Dikosongkan: kodenya kamu kasih langsung ke orangnya */
+ hashDev:"2ewvzqlx4yn",                          /* kode tester (bukan Aqsa): buka kamar rahasia tanpa dianggap Aqsa di fitur realtime */
  hash:"1kcu4hmvgj6",                              /* hash kode (bukan kodenya). Ganti kode: buka console, ketik aqsaHash('kode baru'), salin hasilnya ke sini */
  hidePublicLetter:true,   /* true = surat di meja dekat kue disembunyikan (isinya hanya ada di kamar rahasia) */
  title:"ruang kecil buat Aqsa & Miko",
@@ -594,7 +595,8 @@ function gate(){
  openM(`<h2>pintu rahasia</h2><p>${esc(ASQ.q||'masukkan kode rahasia.')}</p><input id="sqk" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="kode...">
  <p class="from" id="sqe" style="margin:0;min-height:26px"></p><div class="row"><button class="btn" id="sqo">buka</button></div>`);
  setTimeout(()=>{const i=$('#sqk');if(i)i.focus()},60);
- const go=()=>{const i=$('#sqk');if(!i)return;if(H(i.value)===ASQ.hash){ls('bday-aqsa','1');closeM();enter()}
+ const go=()=>{const i=$('#sqk');if(!i)return;if(H(i.value)===ASQ.hash){ls('bday-aqsa','1');try{localStorage.removeItem('bday-dev')}catch(e){}closeM();enter()}
+  else if(ASQ.hashDev&&H(i.value)===ASQ.hashDev){ls('bday-aqsa','1');ls('bday-dev','1');closeM();enter()}
   else{$('#sqe').textContent='kodenya belum tepat. coba lagi';i.classList.remove('sq-shake');void i.offsetWidth;i.classList.add('sq-shake')}};
  $('#sqo').onclick=go;$('#sqk').onkeydown=e=>{if(e.key==='Enter')go()}}
 

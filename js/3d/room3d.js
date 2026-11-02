@@ -1,5 +1,5 @@
 /* room3d.js — taruh sefolder dengan index.html, muat SETELAH script utama (sebelum </body>):
-   <script src="room3d.js"></script>
+   <script src="js/3d/room3d.js"></script>
    Isi: jendela pixel (siang/malam/hujan), langit berbintang di luar, rak buku berisi buku, pintu -> ruang galeri kenangan (polaroid),
    kunang-kunang, lampu string, poster, beanbag, seikat balon, kucing bisa dielus, pengunjung & Aqsa keliling ruangan (lihat bagian KELILING di bawah). */
 (()=>{
@@ -511,21 +511,38 @@ loungeTick=function(dt,t){
 
 /* ---------- KALENDER & JAM DINDING (model baru, di dinding kiri, menghadap ke dalam ruangan) ---------- */
 /*DRAW*/
-function drawCal(g){
- const d=new Date(),y=d.getFullYear(),m=d.getMonth(),B=EXTRA.bday,fd=new Date(y,m,1).getDay(),nd=new Date(y,m+1,0).getDate();
- g.fillStyle='#fffdf3';g.fillRect(0,0,256,300);
- g.fillStyle='#e84a5f';g.fillRect(0,0,256,64);g.fillStyle='#b0293f';g.fillRect(0,60,256,4);
+/* ---- kalender sobek: tiap hari = 1 lembar. viewOff = berapa lembar yang sudah disobek di layarmu (0 = hari ini) ---- */
+const WD=['MINGGU','SENIN','SELASA','RABU','KAMIS','JUMAT','SABTU'];
+let viewOff=0;
+function pageInfo(off){
+ const t=new Date();t.setHours(0,0,0,0);
+ const d=new Date(t.getFullYear(),t.getMonth(),t.getDate()+off),B=EXTRA.bday;
+ let n=-1;
+ if(B&&B.d){let nx=new Date(d.getFullYear(),B.m-1,B.d);if(nx<d)nx=new Date(d.getFullYear()+1,B.m-1,B.d);n=Math.round((nx-d)/864e5)}
+ return{d,day:d.getDate(),wd:d.getDay(),m:d.getMonth(),y:d.getFullYear(),n,dim:new Date(d.getFullYear(),d.getMonth()+1,0).getDate()}}
+function drawPage(g,off){
+ const p=pageInfo(off),bd=p.n===0,su=p.wd===0,ink=su?'#e84a5f':'#1f3a5f';
+ /* bentuk lembar: tepi atas bergerigi bekas sobekan */
+ g.fillStyle='#e84a5f';g.beginPath();g.moveTo(0,300);g.lineTo(0,9);
+ for(let x=0;x<256;x+=16){g.lineTo(x+8,1);g.lineTo(x+16,9)}
+ g.lineTo(256,300);g.closePath();g.fill();
+ g.fillStyle='#fffdf3';g.fillRect(0,60,256,240);
+ g.fillStyle='#b0293f';g.fillRect(0,56,256,4);
  g.fillStyle='#ffffff';g.textAlign='center';g.textBaseline='alphabetic';
- g.font='15px "Press Start 2P",monospace';g.fillText(MN[m].toUpperCase(),128,32);
- g.font='10px "Press Start 2P",monospace';g.fillText(String(y),128,53);
- g.font='24px VT323,monospace';g.fillStyle='#1f3a5f';
- ['M','S','S','R','K','J','S'].forEach((c,i)=>{g.fillStyle=i===0?'#e84a5f':'#1f3a5f';g.fillText(c,20+i*36,86)});
- g.fillStyle='rgba(31,58,95,.25)';g.fillRect(4,92,248,2);
- for(let k=1;k<=nd;k++){const idx=fd+k-1,c=idx%7,r=(idx/7)|0,cx=20+c*36,top=98+r*33,td=k===d.getDate(),bd=B.m===m+1&&B.d===k;
-  if(bd){g.fillStyle='#f4a6c0';g.fillRect(cx-16,top,32,29)}
-  if(td){g.strokeStyle='#3b7dd8';g.lineWidth=4;g.strokeRect(cx-15,top+2,30,26)}
-  g.fillStyle=bd?'#b0293f':c===0?'#e84a5f':'#1f3a5f';g.font='26px VT323,monospace';g.fillText(String(k),cx,top+23)}
+ g.font='14px "Press Start 2P",monospace';g.fillText(MN[p.m].toUpperCase(),128,34);
+ g.font='10px "Press Start 2P",monospace';g.fillText(String(p.y),128,50);
+ /* tanggal besar */
+ g.font='92px "Press Start 2P",monospace';
+ g.fillStyle='rgba(31,58,95,.16)';g.fillText(String(p.day),132,170);
+ g.fillStyle=ink;g.fillText(String(p.day),128,166);
+ g.font='34px VT323,monospace';g.fillText(WD[p.wd],128,206);
+ /* garis putus-putus */
+ g.fillStyle='rgba(31,58,95,.3)';for(let x=12;x<244;x+=10)g.fillRect(x,220,5,2);
+ /* kaki lembar: hitung mundur ultah / hari H */
+ if(bd){g.fillStyle='#fde0e4';g.fillRect(0,232,256,68);g.fillStyle='#b0293f';g.font='15px "Press Start 2P",monospace';g.fillText('ULTAH AQSA!',128,262);g.font='24px VT323,monospace';g.fillText('selamat ya!',128,286)}
+ else if(p.n>0){g.fillStyle='#1f3a5f';g.font='30px VT323,monospace';g.fillText(p.n+' hari lagi',128,258);g.font='24px VT323,monospace';g.fillStyle='rgba(31,58,95,.75)';g.fillText('ultah Aqsa',128,284)}
 }
+const drawCal=g=>drawPage(g,viewOff);
 function drawClock(g){
  g.fillStyle='#f3f8ff';g.fillRect(0,0,128,128);
  g.strokeStyle='#4f7fb8';g.lineWidth=6;g.beginPath();g.arc(64,64,60,0,Math.PI*2);g.stroke();
@@ -537,11 +554,72 @@ function drawClock(g){
 S.remove(cl);S.remove(ck);[cl,ck].forEach(o=>{const i=hits.indexOf(o);if(i>=0)hits.splice(i,1)});
 S.children.slice().forEach(o=>{const q=o.geometry&&o.geometry.parameters;if(q&&q.width===.14&&q.height===.25&&q.depth===.8)S.remove(o)});
 const calG=new THREE.Group();calG.position.set(-6.9,3.2,2.2);calG.rotation.y=Math.PI/2;S.add(calG);
-bx(.95,1.2,.05,'#5a3b22',0,0,0,calG);bx(.89,1.14,.05,'#f3f8ff',0,0,.02,calG);
+bx(.92,1.32,.04,'#e84a5f',0,0,0,calG);                       /* papan belakang */
+bx(.92,.03,.045,'#b0293f',0,-.645,.003,calG);                /* lis bawah */
+{const hd=mk(256,60,g=>{g.fillStyle='#ffffff';g.font='18px "Press Start 2P",monospace';g.textAlign='center';g.textBaseline='middle';g.fillText(String(new Date().getFullYear()),128,32)});
+ const h=new THREE.Mesh(new THREE.PlaneGeometry(.78,.18),new THREE.MeshBasicMaterial({map:hd.t,transparent:true}));h.position.set(0,.53,.022);calG.add(h)}
+{const nl=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.08,8),M('#c9cfdc'));nl.rotation.x=Math.PI/2;nl.position.set(0,.62,.05);calG.add(nl)}   /* paku gantungan */
+const padM=bx(.78,.98,1,'#fffdf3',0,-.06,.04,calG);          /* tumpukan lembar (tebalnya berkurang tiap disobek) */
+bx(.8,.05,.11,'#b0293f',0,.445,.07,calG);                    /* perekat di atas */
 const calT=mk(256,300,drawCal);
-const calP=new THREE.Mesh(new THREE.PlaneGeometry(.83,.97),new THREE.MeshBasicMaterial({map:calT.t}));calP.position.set(0,0,.047);calG.add(calP);
-[-.25,.25].forEach(x=>bx(.05,.1,.05,'#1f3a5f',x,.6,.03,calG));
-act(calG,calOpen);
+const calP=new THREE.Mesh(new THREE.PlaneGeometry(.78,.98),new THREE.MeshBasicMaterial({map:calT.t,transparent:true}));calP.position.set(0,-.06,.1);calG.add(calP);
+function setPad(){const p=pageInfo(viewOff),dep=.025+(p.dim-p.day)/p.dim*.075;padM.scale.z=dep;padM.position.z=.02+dep/2;calP.position.z=.02+dep+.003}
+function calRedraw(){calT.d();setPad()}
+setPad();
+/* animasi lembar yang disobek: berayun dari pojok kiri atas lalu jatuh */
+let fly=null;
+function killFly(){if(!fly)return;calG.remove(fly.pv);fly.m.geometry.dispose();fly.m.material.dispose();fly.ft.t.dispose();fly=null}
+function tearOff(auto){
+ if(fly)killFly();
+ if(room!==0){if(!auto)viewOff++;calRedraw();return}
+ const old=auto?-1:viewOff,z0=calP.position.z+.004;if(!auto)viewOff++;
+ const ft=mk(256,300,g=>drawPage(g,old));
+ const pv=new THREE.Group();pv.position.set(-.39,.43,z0);calG.add(pv);
+ const m=new THREE.Mesh(new THREE.PlaneGeometry(.78,.98),new THREE.MeshBasicMaterial({map:ft.t,transparent:true}));m.position.set(.39,-.49,0);pv.add(m);
+ fly={pv,m,ft,t:0,z0};
+ calRedraw()}
+function flyStep(dt){
+ if(!fly)return;
+ if(room!==0){killFly();return}
+ const f=fly;f.t+=dt;const t=f.t;
+ f.pv.rotation.z=-Math.min(t*1.1+t*t*.6,2.2);
+ f.pv.position.y=.43-t*t*.9;f.pv.position.x=-.39-t*.12;f.pv.position.z=f.z0+t*.18;
+ f.m.material.opacity=1-Math.max(0,(t-.85)/.5);
+ if(t>1.4)killFly()}
+/* tampilan popup: halaman besar + tombol sobek */
+{const st=document.createElement('style');st.textContent=`
+.tpg{position:relative;background:#fffdf3;border:4px solid var(--ink);box-shadow:5px 5px 0 var(--ink);text-align:center;margin:8px 0 14px;transform-origin:0 0;overflow:hidden}
+.tph{position:relative;background:#e84a5f;color:#fff;font:13px 'Press Start 2P',monospace;padding:16px 0 12px;border-bottom:4px solid #b0293f;line-height:1.5}
+.tph small{display:block;font-size:9px;opacity:.9;margin-top:4px}
+.tpf{position:absolute;left:0;right:0;top:0;height:10px;background:radial-gradient(circle at 8px 5px,#fffdf3 3px,transparent 4px) 0 0/16px 10px repeat-x}
+.tpn{font:84px/1.15 'Press Start 2P',monospace;padding:16px 0 4px;color:var(--ink);text-shadow:4px 4px 0 rgba(31,58,95,.16)}
+.tpw{font:34px VT323,monospace;letter-spacing:4px;color:var(--ink)}
+.tpn.su,.tpw.su{color:#e84a5f}
+.tpt{font:24px VT323,monospace;margin:12px 12px 0;padding:8px 0 12px;border-top:3px dashed rgba(31,58,95,.35)}
+.tpt.bd{background:#fde0e4;color:#b0293f;margin:12px 0 0;border-top:3px solid #f4a6c0}
+.tpg.rip{animation:tprip .65s ease-in forwards}
+@keyframes tprip{0%{transform:none}25%{transform:rotate(-3deg)}100%{transform:translate(-30px,300px) rotate(-28deg);opacity:0}}
+.tpg.pin{animation:tppin .3s ease-out}
+@keyframes tppin{from{transform:translateY(-14px);opacity:.3}}`;document.head.appendChild(st)}
+const tpHTML=off=>{const p=pageInfo(off),bd=p.n===0,su=p.wd===0;
+ return `<div class="tph"><i class="tpf"></i>${MN[p.m].toUpperCase()}<small>${p.y}</small></div><div class="tpn${su?' su':''}">${p.day}</div><div class="tpw${su?' su':''}">${WD[p.wd]}</div><div class="tpt${bd?' bd':''}">${bd?'ULTAH AQSA! selamat ya!':p.n>0?p.n+' hari lagi ultah Aqsa':'&nbsp;'}</div>`};
+function tearOpen(){
+ const q=s=>document.querySelector(s);let busy=false;
+ openM(`<h2>kalender sobek</h2><div class="tpg" id="tpg">${tpHTML(viewOff)}</div><p class="from" id="tpc"></p><div class="row"><button class="btn" id="tpt">sobek</button><button class="btn alt" id="tpr">pasang lagi</button></div><div class="row" style="margin-top:10px"><button class="btn alt" id="tpm">lihat sebulan</button></div>`);
+ const note=()=>{const c=q('#tpc');if(c)c.textContent=viewOff>0?'disobek '+viewOff+' lembar (cuma di layarmu, besok kembali normal)':''};
+ note();if(viewOff===0&&pageInfo(0).n===0)confetti();
+ q('#tpt').onclick=()=>{
+  if(busy)return;busy=true;const g=q('#tpg');if(g)g.classList.add('rip');
+  try{SFX.pop()}catch(e){}
+  setTimeout(()=>{tearOff();const g2=q('#tpg');if(g2){g2.classList.remove('rip');g2.innerHTML=tpHTML(viewOff);g2.classList.add('pin');setTimeout(()=>{const g3=q('#tpg');if(g3)g3.classList.remove('pin')},300);note();if(pageInfo(viewOff).n===0)confetti()}busy=false},650)};
+ q('#tpr').onclick=()=>{if(viewOff===0)return;viewOff=0;calRedraw();const g=q('#tpg');if(g){g.innerHTML=tpHTML(0);g.classList.add('pin');setTimeout(()=>g.classList.remove('pin'),300)}note()};
+ q('#tpm').onclick=()=>{
+  const p=pageInfo(viewOff),B=EXTRA.bday,fd=new Date(p.y,p.m,1).getDay();
+  let h=['Min','Sen','Sel','Rab','Kam','Jum','Sab'].map(x=>`<em>${x}</em>`).join('')+'<i></i>'.repeat(fd);
+  for(let k=1;k<=p.dim;k++)h+=`<b class="${B&&B.m===p.m+1&&B.d===k?'bd':''} ${k===p.day?'td':''}">${k}</b>`;
+  openM(`<h2>${MN[p.m]} ${p.y}</h2><div class="cal">${h}</div><p class="from">${p.n>0?'ulang tahun '+B.d+' '+MN[B.m-1]+': '+p.n+' hari lagi':p.n===0?'hari ini ulang tahunnya!':''}</p><div class="row"><button class="btn" id="tpb">kembali</button></div>`);
+  q('#tpb').onclick=tearOpen}}
+act(calG,tearOpen);
 const clkG=new THREE.Group();clkG.position.set(-6.9,3.2,3.3);clkG.rotation.y=Math.PI/2;S.add(clkG);
 {const rim=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.08,20),M('#5a3b22'));rim.rotation.x=Math.PI/2;clkG.add(rim)}
 const clkT=mk(128,128,drawClock);
@@ -555,9 +633,9 @@ function clockStep(){
  if(room!==0)return;
  const d=new Date(),s=d.getSeconds(),m=d.getMinutes()+s/60,h=(d.getHours()%12)+m/60;
  shG.rotation.z=-s/60*Math.PI*2;mhG.rotation.z=-m/60*Math.PI*2;hhG.rotation.z=-h/12*Math.PI*2;
- const k=d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();if(k!==calKey){calKey=k;calT.d()}
+ const k=d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate();if(k!==calKey){const first=!calKey;calKey=k;if(first||viewOff!==0)calRedraw();else tearOff(true)}
 }
-const _wf=winFx;winFx=function(dt){_wf(dt);clockStep()};
+const _wf=winFx;winFx=function(dt){_wf(dt);clockStep();flyStep(dt)};
 
 /* ---------- dipakai interact3d.js: avatar pemain berjalan ke benda yang di-tap ---------- */
 window.R3={goTo,findPath,eject,inObs,ensure,xfer3,OB,BND,POIS,

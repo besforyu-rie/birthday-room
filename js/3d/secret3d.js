@@ -16,7 +16,7 @@ const ASQ={
  title:"ruang kecil buat Aqsa & Miko",
  hint:"tap Miko, anak-anaknya, surat, foto, kaset di lemari, papan di dinding kiri, mainan di karpet, kotak musik, komputer, kue, dan kado",
  since:[2025,12,25],   /* mulai berteman: [tahun,bulan,tanggal] -> dipakai papan hitungan hari */
- musicbox:{src:""},   /* opsional: file lagu mp3 sefolder dengan index.html (mis. "musicbox.mp3"). Kosong = pakai melodi lullaby bawaan */
+ musicbox:{src:""},   /* opsional: file lagu mp3 sefolder dengan index.html (mis. "assets/audio/musicbox.mp3"). Kosong = pakai melodi lullaby bawaan */
  pc:{name:"AQSA-PC",msg:"halo Aqsa! ini komputer kecil di kamar rahasiamu. tap komputernya untuk ganti layar. semoga harimu menyenangkan."},   /* name = tulisan di taskbar, msg = pesan di layar ke-2 */
  aqsa:{hair:"short",hairColor:"#2b1b2e",skin:"#f6d3b8",shirt:"#7aa7e8",pants:"#3b4a7a",shoes:"#f2f2f2",hijab:"#f4a6c0",glasses:false,catEars:false,
   say:["hai!","yey, ulang tahun!","makasih ya","elus Miko dulu~"]},   /* avatar Aqsa di kamar ini. hair: "short" | "long" | "bun" | "hijab". hijab = warna kerudung (dipakai kalau hair:"hijab"). catEars = bando kuping kucing */
@@ -39,14 +39,14 @@ const ASQ={
  letter:{title:"Surat khusus buat kamu",body:"",from:"- dari aku"},   /* from = tanda tangan di bawah surat (boleh dikosongkan) */
  /* foto: taruh file-nya sefolder dengan index.html (maks 6) */
  photos:[
-  {src:"secret1.png",t:"foto 1",cap:"mabar zombie apocalypse"},
-  {src:"secret2.png",t:"foto 2",cap:"ini di cafe seven eleven pas ultah mita"},
-  {src:"secret3.png",t:"foto 3",cap:"powerpuff aja soalnya 1 nya bukan girl"}
+  {src:"assets/img/secret1.png",t:"foto 1",cap:"mabar zombie apocalypse"},
+  {src:"assets/img/secret2.png",t:"foto 2",cap:"ini di cafe seven eleven pas ultah mita"},
+  {src:"assets/img/secret3.png",t:"foto 3",cap:"powerpuff aja soalnya 1 nya bukan girl"}
  ],
  /* pesan suara: file mp3 sefolder dengan index.html; t = teks cadangan / transkrip (opsional) */
  voices:[
-  {n:"pesan dari aku",src:"secret_voice1.mp3",t:""},
-  {n:"satu lagi",src:"secret_voice2.mp3",t:""}
+  {n:"pesan dari aku",src:"assets/audio/secret_voice1.mp3",t:""},
+  {n:"satu lagi",src:"assets/audio/secret_voice2.mp3",t:""}
  ]
 };
 /* ============================================== */
@@ -176,7 +176,7 @@ function love(n,o,tx){const v=new THREE.Vector3();o.getWorldPosition(v);SR.world
  for(let i=0;i<n;i++)setTimeout(()=>{const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tx||ST,transparent:true,depthTest:false}));s.position.set(v.x+rnd(-.3,.3),v.y+1.2+rnd(0,.3),v.z+rnd(-.2,.2));s.scale.set(.26,.26,1);SR.add(s);hearts.push({s,l:1.4,vx:rnd(-.2,.2)})},i*110)}
 
 /* ---------- suara kucing (pakai meow.mp3 kalau ada) ---------- */
-function meow(rate){try{const a=new Audio(typeof CFG!=='undefined'&&CFG.meow?CFG.meow:'meow.mp3');a.volume=.6;
+function meow(rate){try{const a=new Audio(typeof CFG!=='undefined'&&CFG.meow?CFG.meow:'assets/audio/meow.mp3');a.volume=.6;
   a.preservesPitch=a.mozPreservesPitch=a.webkitPreservesPitch=false;a.playbackRate=rate||1;
   a.onerror=()=>{if(typeof synth==='function')synth()};const p=a.play();if(p&&p.catch)p.catch(()=>{if(typeof synth==='function')synth()})}catch(e){}}
 

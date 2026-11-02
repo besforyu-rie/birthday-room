@@ -133,9 +133,9 @@ const CONFIG = {
   avatarSay: "makasih udah dateng!",   // teks saat avatar Aqsa di-klik
   // foto: upload file fotonya ke repo (satu folder dengan index.html), isi namanya di sini. Kosongkan [] kalau belum ada.
   photos: [
-    {src:"image1.png", cap:"hari itu, ultahnya mita"},
-    {src:"image2.png", cap:"tiba-tiba dia foto"},
-    {src:"image3.png", cap:"mendaki gunung tapi lupa namanya"}
+    {src:"assets/img/image1.png", cap:"hari itu, ultahnya mita"},
+    {src:"assets/img/image2.png", cap:"tiba-tiba dia foto"},
+    {src:"assets/img/image3.png", cap:"mendaki gunung tapi lupa namanya"}
   ],
   // pesan di dalam balon (tiap balon = 1 pesan, boleh tambah/kurangi)
   balloons: [
@@ -147,7 +147,7 @@ const CONFIG = {
   // sticky note awal di dinding (pengunjung bisa tambah sendiri)
   notes: [],
   boothFooter: "happy birthday aqsa • 26",   // tulisan di bawah strip foto
-  meow: "meow.mp3",                          // suara kucing (opsional). Kalau file tidak ada, dipakai suara bawaan
+  meow: "assets/audio/meow.mp3",                          // suara kucing (opsional). Kalau file tidak ada, dipakai suara bawaan
   music: "",                        // taruh file lagu di repo; kosongkan "" kalau tidak mau musik
   // isi dari Firebase (lihat langkah di panduan). Kalau dikosongkan, sticky hanya tersimpan di browser sendiri.
   firebase: {
@@ -415,9 +415,9 @@ if(CONFIG.music){
 }
 </script>
 
-   <script src="extras.js?v=6"></script>
-   <script src="visitors.js?v=6"></script>
-  <script src="shelf.js?v=5"></script>
+   <script src="js/2d/extras.js?v=6"></script>
+   <script src="js/2d/visitors.js?v=6"></script>
+  <script src="js/2d/shelf.js?v=5"></script>
 <style>#sw{position:fixed;bottom:8px;left:8px;z-index:15;display:inline-block;text-decoration:none;font-size:10px;padding:9px 10px}</style><a class="btn alt" id="sw" href="index.html" aria-label="pindah ke versi 3D">3D</a>
 </body>
 </html>

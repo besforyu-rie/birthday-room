@@ -172,7 +172,7 @@ const CPAT=['....wwww......','..wwwwwwww.ww.','.wwwwwwwwwwwww','wwwwwwwwwwwwww',
 function game2(){
  const W=150,H=200,DUR=30,COLS=['#4f8fe8','#a98bd6','#e84a5f','#f4a6c0','#8fd18a'];
  openM(`<h2>tangkap balon</h2><div class="px" style="display:flex;justify-content:space-between;font-size:11px"><span id="gsc">SKOR 0</span><span id="gtm">${DUR}s</span></div><div style="height:10px;border:3px solid var(--ink);background:#e3efff;margin:6px 0 8px"><i id="gbi" style="display:block;height:100%;width:100%;background:var(--hot)"></i></div><div style="position:relative;max-width:340px;margin:0 auto"><canvas id="gc" width="${W}" height="${H}" style="width:100%;display:block;image-rendering:pixelated;border:4px solid var(--ink);touch-action:none"></canvas><div id="gov" style="position:absolute;inset:4px;background:rgba(31,58,95,.72);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:12px;color:#fff"></div></div><div id="lb"></div>`);
- const c=$('#gc'),g=c.getContext('2d'),gm=new Audio('game.mp3');g.imageSmoothingEnabled=false;gm.loop=true;gm.volume=.4;
+ const c=$('#gc'),g=c.getContext('2d'),gm=new Audio('assets/audio/game.mp3');g.imageSmoothingEnabled=false;gm.loop=true;gm.volume=.4;
  const mkB=col=>{const cv=document.createElement('canvas');cv.width=9;cv.height=14;pix(cv.getContext('2d'),BPAT,{b:col,d:shade(col,-55),W:'#ffffff',k:'#1f3a5f'},0,0);return cv},SP=COLS.map(mkB),SG=mkB('#f2c14e');
  let px=W/2,tx=W/2,bl=[],pt=[],ft=[],sc=0,tl=DUR,last=0,sp=0,run=false,raf=0,tt=0;const cl=[{x:20,y:24,v:4},{x:96,y:48,v:6}];
  const kd=e=>{if(e.key==='ArrowLeft')tx=clamp(tx-10,14,W-14);else if(e.key==='ArrowRight')tx=clamp(tx+10,14,W-14)};document.addEventListener('keydown',kd);

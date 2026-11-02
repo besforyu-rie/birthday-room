@@ -4,7 +4,7 @@
 (()=>{
 /* ===== EDIT BAGIAN INI ===== */
 const EX={
- radio:[{n:"lagu 1",src:"music.mp3"}, {n:"lagu 2",src:"music2.mp3"}, {n:"lagu 3",src:"music3.mp3"}, {n:"lagu 4",src:"music4.mp3"}], /* tambah {n:"nama",src:"file.mp3"} kalau sudah upload lagu lain */
+ radio:[{n:"lagu 1",src:"assets/audio/music.mp3"}, {n:"lagu 2",src:"assets/audio/music2.mp3"}, {n:"lagu 3",src:"assets/audio/music3.mp3"}, {n:"lagu 4",src:"assets/audio/music4.mp3"}], /* tambah {n:"nama",src:"file.mp3"} kalau sudah upload lagu lain */
  lock:{code:"2512",hint:"A Little Clue : The day you decided to be friends with me",msg:"Cie ultah ni yaa, selamat tambah dewasa. stop panggil aku plup meong zzz."},
 bday:{d:7,m:11}, /* GANTI ke tanggal & bulan ultah Aqsa (contoh {d:25,m:12}). 0 = nonaktif. Dipakai kalender dinding: tanggal dilingkari hati + hitung mundur */
  gifts:[ /* kado di bawah meja, maksimal 3. c = warna kotak, r = warna pita, t = isi pesan */
@@ -17,12 +17,12 @@ letter: {
   body: "Halo Aqsa,\n\nSelamat ulang tahun yaa. Semoga di umur yang sekarang kamu selalu diberi kesehatan, kebahagiaan, dan kemudahan dalam segala hal. Semoga apa pun yang sedang kamu usahakan sekarang bisa berjalan dengan baik dan mendapatkan hasil yang kamu harapkan.\n\nSebenarnya aku agak bingung mau nulis apa, karena aku bukan orang yang pandai menyampaikan sesuatu lewat kata-kata. Tapi rasanya sayang kalau hari spesial seperti ini dilewatkan begitu saja tanpa ucapan. Jadi, aku mau menyempatkan diri buat menulis sedikit pesan ini untuk kamu.\n\nSemoga ke depannya banyak hal baik yang datang. Semoga kamu bisa ketemu banyak kesempatan baru, punya pengalaman menyenangkan, dan bisa mencapai hal-hal yang selama ini kamu inginkan. Kalau ternyata ada hari-hari yang tidak berjalan sesuai rencana, semoga kamu tetap bisa melewatinya dengan baik. Tidak semua hal harus selesai dalam satu waktu, jadi jangan terlalu membebani diri sendiri.\n\nAku juga berharap kamu selalu dikelilingi orang-orang yang baik dan bisa membuat hari-hari kamu jadi lebih menyenangkan. Tetap jadi diri sendiri, tetap lakukan hal-hal yang kamu suka, dan jangan lupa menikmati waktu yang kamu punya sekarang. Kadang kita terlalu sibuk memikirkan banyak hal sampai lupa kalau hal sederhana juga bisa jadi sesuatu yang menyenangkan.\n\nTerima kasih sudah jadi teman selama ini. Mungkin aku tidak selalu bisa mengungkapkan banyak hal secara langsung, tapi aku tetap menghargai pertemanan yang ada. Semoga ke depannya kita masih bisa berteman baik, berbagi cerita, dan punya lebih banyak kenangan menyenangkan.\n\nTerakhir, semoga semua doa baik yang kamu panjatkan bisa terkabul, satu per satu. Semoga tahun ini membawa lebih banyak hal yang bisa kamu syukuri dan lebih banyak alasan untuk tersenyum.\n\nSekali lagi, happy birthday, Aqsa. Semoga hari ini menyenangkan dan kamu bisa menikmati hari spesialmu dengan baik.\n\nHave a great year ahead! ♡\n\n— plup"
 },
  memories:[
-  {src:"image1.png",date:"April 2026",title:"hari itu, ultahnya mita",story:"Ramenya parah. Temen-temen Mita dateng banyak banget sampai susah ngitung, lampu-lampunya juga cakep. Plup seperti biasa cuma ngamatin dari pojok."},
-  {src:"image5.png",date:"April 2026",title:"foto bareng, ultahnya mita",story:"Semua baris rapi di depan tembok, pose masing-masing. Ada yang kalem, ada yang tangannya naik, ada yang pura-pura kalem. Ramenya masih kerasa walau cuma satu barisan."},
-  {src:"image6.png",date:"April 2026",title:"yang fotoin aqsa",story:"Kali ini Aqsa yang pegang kamera, jadi dia nggak ikut kefoto. Yang difoto malah kompak: ada yang tidur pake sleep mask, ada yang matanya muter-muter saking ngantuknya."},
-  {src:"image2.png",date:"September 2026",title:"tiba-tiba dia foto",story:"Mereka lagi santai, nggak ada yang sadar. Tau-tau Aqsa udah motret diam-diam. Hasilnya malah bagus, jadi ya udah, dimaafin."},
-  {src:"image3.png",date:"Agustus 2026",title:"belum naik, udah foto-foto",story:"Maca, Plup, Mita, sama Aqsa baru nyampe di bawah. Belum juga mulai mendaki, tapi udah sibuk foto duluan. Prioritasnya jelas."},
-  {src:"image4.png",date:"Agustus 2026",title:"akhirnya sampai puncak",story:"Capek, tapi kelar juga. Berempat sampai di puncak, terus ada orang random yang tiba-tiba ikutan masuk foto. Nggak kenal, nggak ada yang ngundang, tapi ya udah, sekalian aja jadi bagian dari kenangan."}
+  {src:"assets/img/image1.png",date:"April 2026",title:"hari itu, ultahnya mita",story:"Ramenya parah. Temen-temen Mita dateng banyak banget sampai susah ngitung, lampu-lampunya juga cakep. Plup seperti biasa cuma ngamatin dari pojok."},
+  {src:"assets/img/image5.png",date:"April 2026",title:"foto bareng, ultahnya mita",story:"Semua baris rapi di depan tembok, pose masing-masing. Ada yang kalem, ada yang tangannya naik, ada yang pura-pura kalem. Ramenya masih kerasa walau cuma satu barisan."},
+  {src:"assets/img/image6.png",date:"April 2026",title:"yang fotoin aqsa",story:"Kali ini Aqsa yang pegang kamera, jadi dia nggak ikut kefoto. Yang difoto malah kompak: ada yang tidur pake sleep mask, ada yang matanya muter-muter saking ngantuknya."},
+  {src:"assets/img/image2.png",date:"September 2026",title:"tiba-tiba dia foto",story:"Mereka lagi santai, nggak ada yang sadar. Tau-tau Aqsa udah motret diam-diam. Hasilnya malah bagus, jadi ya udah, dimaafin."},
+  {src:"assets/img/image3.png",date:"Agustus 2026",title:"belum naik, udah foto-foto",story:"Maca, Plup, Mita, sama Aqsa baru nyampe di bawah. Belum juga mulai mendaki, tapi udah sibuk foto duluan. Prioritasnya jelas."},
+  {src:"assets/img/image4.png",date:"Agustus 2026",title:"akhirnya sampai puncak",story:"Capek, tapi kelar juga. Berempat sampai di puncak, terus ada orang random yang tiba-tiba ikutan masuk foto. Nggak kenal, nggak ada yang ngundang, tapi ya udah, sekalian aja jadi bagian dari kenangan."}
  ]
 };
 /* =========================== */
@@ -204,7 +204,7 @@ async function board(){
  const a=await top(),el=$('#lb');if(!el)return;
  el.innerHTML='<h2 class="px" style="font-size:12px;margin:14px 0 8px">papan skor</h2>'+(a.length?a.map((s,i)=>`<p>${i+1}. ${esc(s.name)} — ${s.score}</p>`).join(''):'<p>belum ada skor</p>');
 }
-const gm=new Audio('game.mp3');gm.loop=true;gm.volume=.4;let resume=false;
+const gm=new Audio('assets/audio/game.mp3');gm.loop=true;gm.volume=.4;let resume=false;
 function gStop(){gm.pause();gm.currentTime=0}
 let run=false,raf=0;
 function game(){

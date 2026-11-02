@@ -6,9 +6,9 @@
 /* ===== EDIT BAGIAN INI ===== */
 const BDAY={d:7,m:11}; /* samakan dengan EX.bday di extras.js */
 const BOOKS=[
- {id:'holmes',title:'The Blue Carbuncle',by:'A. Conan Doyle',src:'holmes.txt',c:'#e84a5f'},
- {id:'prince',title:'The Happy Prince',by:'Oscar Wilde',src:'prince.txt',c:'#4f8fe8'},
- {id:'kita',title:'4 Manusia Ini Ketemu dari Mana Sih?',by:'plup',src:'kita.txt',c:'#a98bd6'}
+ {id:'holmes',title:'The Blue Carbuncle',by:'A. Conan Doyle',src:'assets/text/holmes.txt',c:'#e84a5f'},
+ {id:'prince',title:'The Happy Prince',by:'Oscar Wilde',src:'assets/text/prince.txt',c:'#4f8fe8'},
+ {id:'kita',title:'4 Manusia Ini Ketemu dari Mana Sih?',by:'plup',src:'assets/text/kita.txt',c:'#a98bd6'}
 ];
 /* jurnal: urut dari paling awal sampai hari H. Entri terakhir = tanggal BDAY, sebelumnya mundur 1 hari per entri */
 const JOURNAL=[

@@ -101,11 +101,29 @@ function warp(v,room){
  if(v.L)v.L(0);if(v.Ar)v.Ar(0,0)}
 
 let P=null,sitT=0;
+/* ===== CEK TEMPAT DUDUK: dianggap terisi kalau ada avatar lain yang duduk di situ, sedang menuju ke situ
+   (goal duduk / jalan otomatis / tujuan pemain), atau sudah dipesan. ex = avatar yang diabaikan, exA = entri AUTO yang diabaikan. ===== */
+function occupied(room,x,z,ex,exA){
+ const nr=(a,b)=>Math.hypot(a-x,b-z)<.55;
+ for(const o of V.values()){
+  if(o===ex||o.room!==room)continue;
+  if(o.mode==='sit'&&nr(o.x,o.z))return true;
+  if(o.goal&&o.goal.mode==='sit'&&nr(o.goal.x,o.goal.z))return true}
+ for(const a of AUTO.values()){
+  if(a===exA||a.room!==room)continue;
+  if(nr(a.sp.x,a.sp.z))return true}
+ if(P&&P.v!==ex&&P.sp.kind==='sit'&&P.sp.room===room&&nr(P.sp.x,P.sp.z))return true;
+ return false}
 /* sp = {kind:'stand'|'sit', room, x, z, f:[hadapX,hadapZ], w:[detikMin,detikMax], say, stage:{x,z} (untuk sit)} */
 function visit(sp){
  const v=own();if(!v||sp.room==null)return false;
  R3.ensure(v);
  if(sp.kind==='sit'&&v.mode==='sit'&&v.room===sp.room&&Math.hypot(v.x-sp.x,v.z-sp.z)<.7){standUp(v);say3(v.tg,'oke, berdiri dulu');P=null;return true}
+ if(sp.kind==='sit'&&occupied(sp.room,sp.x,sp.z,v)){
+  /* tempat sudah dipakai (termasuk avatar yang duduk acak) -> coba tempat kosong lain di benda/ruangan yang sama, kalau tidak ada ya batal */
+  const alt=(SPOTS()[sp.room]||[]).find(p=>Math.hypot(p.x-sp.x,p.z-sp.z)<3.5&&!occupied(sp.room,p.x,p.z,v));
+  if(alt)sp=Object.assign({},sp,{x:alt.x,z:alt.z,stage:alt.st,f:alt.f||sp.f,seat:alt.seat});
+  else{say3(v.tg,'sudah ada yang duduk');P=null;return true}}
  clearV(v);warp(v,sp.room);
  const st=sp.kind==='sit'?sp.stage:sp,an=sp.kind==='sit'?{f:sp.f||[0,1],w:[.5,.5]}:{f:sp.f,w:sp.w||[22,34]};
  const ok=R3.goTo(v,st.x,st.z,an);
@@ -129,8 +147,8 @@ function tick(dt){
    EDIT: AUTO_ON = false untuk mematikan; AUTO_P = peluang per cek (tiap 1,5 detik) avatar santai mau duduk; AUTO_SIT = [detikMin,detikMax] lama duduk. */
 const AUTO_ON=true,AUTO_P=.12,AUTO_SIT=[8,22],AUTO_CD=25;
 const SPOTS=()=>{const W=window.SWING,sp={};
- if(typeof SEAT!=='undefined'&&SEAT&&SEAT.length)sp[1]=Array.from(SEAT).map(x=>({x,z:-2.35,st:{x,z:-1.4}}));
- sp[2]=[-.9,-.2,.5,1.2].map(x=>({x,z:-2.6,st:{x,z:-1.6}}));
+ if(typeof SEAT!=='undefined'&&SEAT&&SEAT.length)sp[1]=Array.from(SEAT).map((x,i)=>({x,z:-2.35,st:{x,z:-1.4},seat:i}));
+ sp[2]=[-.9,-.2,.5,1.2].map(x=>({x,z:-2.6,st:{x,z:-1.6}})).concat([{x:4.3,z:.9,st:{x:3.3,z:.9},f:[-1,0]}]);
  sp[3]=[{x:2.7,z:-.5,st:{x:2.7,z:.4}}];
  sp[4]=[.1,1.5].map(x=>({x,z:-.2,st:{x,z:-1}}));
  sp[5]=[{x:1.0,z:-.55,st:{x:1.0,z:-1.5}},{x:-3.2,z:.1,st:{x:-3.2,z:1.6}}];
@@ -142,19 +160,22 @@ const rnd=(a,b)=>a+Math.random()*(b-a);
 function autoStep(dt){
  if(!AUTO_ON)return;autoAcc+=dt;if(autoAcc<1.5)return;const dd=autoAcc;autoAcc=0;
  const me=own(),now=Date.now(),SP=SPOTS();
- const taken=(room,p)=>[...V.values()].some(o=>o.room===room&&o.mode==='sit'&&Math.hypot(o.x-p.x,o.z-p.z)<.5)||[...AUTO.values()].some(a=>a.sp===p);
+ const taken=(room,p,ex)=>occupied(room,p.x,p.z,ex);
  AUTO.forEach((a,v)=>{
   if(!V.has(v.a&&v.a.id!=null?v.a.id:null)&&![...V.values()].includes(v)){AUTO.delete(v);return}
   if(v===me||v.room!==a.room){AUTO.delete(v);return}
   const R=v.R;if(!R){AUTO.delete(v);return}
   if(a.s==='go'){a.t+=dd;
    if(v.mode&&v.mode!=='sit'){AUTO.delete(v);return}
-   if(!R.wp.length||a.t>25){R.wp=[];R.act=null;v.goal={x:a.sp.x,z:a.sp.z,mode:'sit'};if(a.sp.f)R.fa=Math.atan2(a.sp.f[0],a.sp.f[1]);a.s='sit';a.t=rnd(AUTO_SIT[0],AUTO_SIT[1])}}
+   if(!R.wp.length||a.t>25){R.wp=[];R.act=null;
+    /* cek ulang: kalau selama jalan ada yang duduk duluan di situ, batal duduk */
+    if(occupied(a.room,a.sp.x,a.sp.z,v,a)){v._autoCd=now+8000;AUTO.delete(v);return}
+    v.goal={x:a.sp.x,z:a.sp.z,mode:'sit'};if(a.sp.seat!=null)v.seat=a.sp.seat;if(a.sp.f)R.fa=Math.atan2(a.sp.f[0],a.sp.f[1]);a.s='sit';a.t=rnd(AUTO_SIT[0],AUTO_SIT[1])}}
   else{a.t-=dd;if(a.t<=0){standUp(v);v._autoCd=now+AUTO_CD*1000;AUTO.delete(v)}}});
  V.forEach(v=>{
   if(v===me||AUTO.has(v)||!v.R||v.mode||v.goal||v.xfer||v.path||v.R.wp.length||(v._autoCd||0)>now)return;
   const list=SP[v.room];if(!list||Math.random()>AUTO_P)return;
-  const free=list.filter(p=>!taken(v.room,p));if(!free.length)return;
+  const free=list.filter(p=>!taken(v.room,p,v));if(!free.length)return;
   const p=free[Math.floor(Math.random()*free.length)];
   R3.ensure(v);if(!R3.goTo(v,p.st.x,p.st.z,{f:p.f||[0,1],w:[.5,.5]})){v._autoCd=now+8000;return}
   AUTO.set(v,{s:'go',sp:p,room:v.room,t:0})})}
@@ -186,6 +207,26 @@ function scan(){
   return {kind:'stand',room:1,x:1.2+[0,-1.2,1.2][n%3],z:-1.2,f:[0,-1],w:[25,35],say:'seru nih~'}},{replace:true,then:()=>{if(window.tvNext)window.tvNext();else tv()}});
  wrap(g0(()=>tank),st(1,3.9,-1.4,[0,-1],'ikannya lucu~',[12,20]));
 
+ /* --- furnitur & tanaman baru lounge: zona tap + avatar berdiri di dekatnya --- */
+ if(typeof LG!=='undefined'&&!LG._zones&&typeof lact==='function'){
+  LG._zones=1;
+  const zn=(x,z,w,d,h,lines)=>{const g=new THREE.Group();g.position.set(x,0,z);
+   const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));m.position.y=h/2;g.add(m);LG.add(g);
+   lact(g,()=>say3(g,pick(lines)));return g};
+  zn(4.95,-2.75,.9,.9,2.4,['tanamannya segar~','daunnya lebar banget','udah disiram belum ya']);
+  zn(7.65,-2.7,.7,.7,1.7,['lidah mertua, awet dan kuat','tanamannya rapi~']);
+  zn(-4.74,2.7,.5,1.3,2.0,['bukunya banyak banget','ada album lama di rak ini']);
+  zn(-2.6,-.5,1.4,.8,.7,['ada teh hangat di meja','majalahnya seru dibaca']);
+  zn(-.55,-2.85,.6,.6,1.3,['lampu mejanya hangat','cocok buat baca malam-malam']);
+  zn(-4.3,-.1,.7,.7,.7,['selimutnya lembut banget','enak buat ngadem sambil nonton'])}
+ if(typeof LG!=='undefined'&&LG._zones){
+  wrap(findIn(LG,4.95,-2.75),st(1,4.5,-1.6,[.3,-1],'tanamannya segar~',[10,18]));
+  wrap(findIn(LG,7.65,-2.7),st(1,4.5,-1.6,[1,-.5],'lidah mertua, awet banget',[10,18]));
+  wrap(findIn(LG,-4.74,2.7),st(1,-3.7,2.7,[-1,0],'bukunya banyak banget',[12,20]));
+  wrap(findIn(LG,-2.6,-.5),st(1,-2.6,.6,[0,-1],'ada teh hangat di meja',[10,18]));
+  wrap(findIn(LG,-.55,-2.85),st(1,-.55,-1.9,[0,-1],'lampu mejanya hangat',[10,18]));
+  wrap(findIn(LG,-4.3,-.1),st(1,-3.5,-.1,[-1,0],'selimutnya lembut banget',[10,18]))}
+
  /* --- ruang utama (ruang 0) --- */
  wrap(g0(()=>cake),st(0,0,2.9,[0,-1],'kuenya wangi~',[14,24]));
  wrap(g0(()=>tvG),st(0,0,-3.45,[0,-1],'nonton tv~',[20,30]));
@@ -216,6 +257,12 @@ function scan(){
   zone(0,-2.7,2.9,.75,0,.9,['bangkunya empuk','duduk santai sambil liatin foto','banyak kenangan di sini']);
   zone(4.35,.9,.95,.95,0,1.2,['kursinya nyaman banget','tempat favorit buat ngelamun']);
   zone(-4.2,-3.0,.7,.7,0,2.0,['tanamannya segar~','udah disiram belum ya']);
+  zone(4.3,2.0,.8,.8,0,1.1,['ada kopi sama buku di sini','mejanya mungil tapi manis']);
+  zone(4.4,-1.2,.7,1.7,0,1.4,['putar piringan hitam~']);
+  zone(0,1.0,1.2,1.2,0,.9,['mejanya cantik, ada bunganya','teh hangat enaknya di sini']);
+  zone(-1.35,1.35,.8,.8,0,.45,['poufnya empuk banget']);zone(1.35,1.45,.8,.8,0,.45,['poufnya empuk banget']);
+  zone(-4.3,2.85,.7,.7,0,1.8,['gitarnya siap dimainin','jreng~ lagu apa ya']);
+  zone(-4.85,1.3,.3,.9,3.1,.8,['jam']);
   zone(-4.75,-1.3,.4,1.7,2.0,1.4,['bukunya banyak banget','ada album lama di rak ini']);
   zone(-4.8,2.8,.3,1.0,2.5,1.0,['lukisannya bagus','siang-siang cerah ya']);
   zone(-4.8,-3.0,.3,1.0,2.5,1.0,['lukisan malamnya syahdu','bintangnya banyak']);
@@ -226,8 +273,17 @@ function scan(){
          c=[-.9,-.2,.5,1.2].find(x=>!others.some(o=>Math.abs(o.x-x)<.5));
    if(c==null)return {kind:'stand',room:2,x:0,z:-1.7,f:[0,-1],w:[10,18],say:'bangkunya penuh, aku berdiri aja'};
    return {kind:'sit',room:2,x:c,z:-2.6,stage:{x:c,z:-1.6},say:'enak duduk di sini sambil liatin foto'}});
-  wrap(findIn(GRPG,4.35,.9),st(2,3.4,.9,[1,0],'kursinya nyaman, tapi lihat-lihat dulu',[12,20]));
+  wrap(findIn(GRPG,4.35,.9),()=>{const me=own(),at=o=>o.room===2&&o.mode==='sit'&&Math.hypot(o.x-4.3,o.z-.9)<.5;
+   if(me&&at(me)||![...V.values()].some(o=>o!==me&&at(o)))return {kind:'sit',room:2,x:4.3,z:.9,stage:{x:3.3,z:.9},f:[-1,0],say:'nyaman banget~'};
+   return null},{replace:true,full:'kursinya sudah ada yang duduk'});
   wrap(findIn(GRPG,-4.2,-3.0),st(2,-3.5,-2.5,[-1,0],'tanamannya segar',[10,18]));
+  wrap(findIn(GRPG,4.3,2.0),st(2,3.4,2.1,[1,0],'ada kopi sama buku di sini',[10,18]));
+  wrap(findIn(GRPG,4.4,-1.2),()=>{GRPG.userData.vinyl=!GRPG.userData.vinyl;return st(2,3.4,-1.2,[1,0],GRPG.userData.vinyl?'piringan hitamnya diputar~':'piringannya istirahat dulu',[10,18])()});
+  wrap(findIn(GRPG,0,1.0),st(2,0,2.1,[0,-1],'mejanya cantik, ada bunganya',[10,18]));
+  wrap(findIn(GRPG,-1.35,1.35),st(2,-1.35,2.3,[0,-1],'poufnya empuk banget',[10,18]));
+  wrap(findIn(GRPG,1.35,1.45),st(2,1.35,2.4,[0,-1],'poufnya empuk banget',[10,18]));
+  wrap(findIn(GRPG,-4.3,2.85),st(2,-3.3,2.6,[-1,0],'jreng~ gitarnya bagus',[10,18]));
+  wrap(findIn(GRPG,-4.85,1.3),st(2,-3.6,1.3,[-1,0],()=>{const d=new Date();return 'sekarang jam '+d.getHours()+'.'+String(d.getMinutes()).padStart(2,'0')},[8,14]));
   wrap(findIn(GRPG,-4.75,-1.3),st(2,-4.1,-1.3,[-1,0],'bukunya banyak banget',[12,20]));
   wrap(findIn(GRPG,-4.8,2.8),st(2,-4.1,2.8,[-1,0],'lukisannya bagus',[10,18]));
   wrap(findIn(GRPG,-4.8,-3.0),st(2,-4.1,-2.0,[-1,0],'lukisan malamnya syahdu',[10,18]));
@@ -312,6 +368,15 @@ function scan(){
     return {kind:'sit',room:8,x:W.x,z:W.zs[i],stage:{x:W.x-1.4,z:W.zs[i]},say:'wuuss~ seru!'}},{replace:true,full:'ayunannya penuh'})}
  }
 }
+
+/* ===== KUNCI ARAH HADAP saat duduk di kursi meja teh (teras) =====
+   Engine avatar menimpa arah hadap saat duduk, jadi diatur ulang TEPAT SEBELUM render (sama seperti postAv ayunan).
+   Kursi kiri (x=.4) menghadap kanan (+x) ke meja, kursi kanan (x=2.4) menghadap kiri (-x). */
+if(typeof REN!=='undefined'&&REN&&typeof REN.render==='function'&&!REN._chairFace){REN._chairFace=true;const _rc=REN.render;
+ const CH=[{r:7,x:.4,z:.2,a:Math.PI/2},{r:7,x:2.4,z:.2,a:-Math.PI/2},{r:2,x:4.3,z:.9,a:-Math.PI/2}];
+ REN.render=function(a,b){try{V.forEach(v=>{if(v.mode!=='sit'||!v.g)return;
+   const c=CH.find(c=>c.r===v.room&&Math.hypot(v.x-c.x,v.z-c.z)<.5);if(c){v.g.rotation.y=c.a;if(v.R)v.R.fa=c.a}})}catch(e){}
+  return _rc.call(this,a,b)}}
 try{scan()}catch(e){console.warn('interact3d',e)}
 setInterval(()=>{try{scan()}catch(e){}},4000);
 })();

@@ -138,8 +138,12 @@ const ph=new THREE.Group();ph.position.set(-.55,1.1,0);st.add(ph);bx(.45,.25,.4,
 const rd=new THREE.Group();rd.position.set(.1,1.15,0);st.add(rd);bx(.55,.35,.3,'#8fd0f0',0,0,0,rd);bx(.2,.2,.05,'#1f3a5f',-.12,0,.16,rd);act(rd,radioUI);
 const lk=new THREE.Group();lk.position.set(.65,1.12,0);st.add(lk);bx(.35,.3,.3,'#a98bd6',0,0,0,lk);bx(.08,.08,.04,'#f2c14e',0,.03,.17,lk);act(lk,lock);
 /* lampu berdiri (siang/malam) */
-const lp=new THREE.Group();lp.position.set(4.3,0,-2.8);S.add(lp);cy(.05,.05,3,'#1f3a5f',0,1.5,0,lp);cy(.35,.2,.5,'#f2c14e',0,3.2,0,lp);cy(.3,.3,.08,'#1f3a5f',0,.04,0,lp);
-let night=false;act(lp,()=>{night=!night;S.background.set(night?'#141f4a':'#9cc4f0');amb.intensity=night?.28:.75;sun.intensity=night?.15:.6;lampL.intensity=night?1.6:0;sky.material.color.set(night?'#141f4a':'#8fd0f0');bw.material.color.set(night?'#2a3a78':'#86b3e6');lw.material.color.set(night?'#34468a':'#9cc4f0');fl.material.color.set(night?'#4a5a8c':'#c9dbf1')});
+const lp=new THREE.Group();lp.position.set(4.3,0,-2.8);S.add(lp);
+/* model lampu = gaya lampu lounge: alas bundar biru, tiang perak tipis, kap krem yang menyala (lebih terang saat malam) */
+cy(.28,.3,.06,'#2e527f',0,.03,0,lp);cy(.1,.14,.08,'#f2c14e',0,.1,0,lp);cy(.035,.035,2.85,'#cfd6e0',0,1.5,0,lp);cy(.06,.06,.07,'#f2c14e',0,2.95,0,lp);
+const lpSh=cy(.3,.45,.55,'#fff1cf',0,3.2,0,lp);lpSh.material=new THREE.MeshLambertMaterial({color:'#fff1cf',emissive:'#ffd98a',emissiveIntensity:.4,side:THREE.DoubleSide});
+cy(.31,.31,.04,'#f2c14e',0,3.49,0,lp);cy(.46,.46,.04,'#f2c14e',0,2.94,0,lp);
+let night=false;act(lp,()=>{night=!night;S.background.set(night?'#141f4a':'#9cc4f0');amb.intensity=night?.28:.75;sun.intensity=night?.15:.6;lampL.intensity=night?1.6:0;lpSh.material.emissiveIntensity=night?1:.4;sky.material.color.set(night?'#141f4a':'#8fd0f0');bw.material.color.set(night?'#2a3a78':'#86b3e6');lw.material.color.set(night?'#34468a':'#9cc4f0');fl.material.color.set(night?'#4a5a8c':'#c9dbf1')});
 /* kucing */
 const cat=new THREE.Group();cat.position.set(-3,0,3.9);S.add(cat);
 const cb=bx(.6,.3,.28,'#f0dcc0',0,.35,0,cat),ch=bx(.3,.28,.28,'#f0dcc0',.38,.55,0,cat);bx(.08,.12,.06,'#4a3328',.46,.75,.08,cat);bx(.08,.12,.06,'#4a3328',.46,.75,-.08,cat);bx(.08,.08,.04,'#4fb4ff',.54,.58,.08,cat);bx(.08,.08,.04,'#4fb4ff',.54,.58,-.08,cat);bx(.35,.08,.08,'#4a3328',-.45,.5,0,cat);
@@ -734,7 +738,7 @@ addEventListener('pointerdown',function f(e){removeEventListener('pointerdown',f
   <script src="js/3d/floor2.js?v=5"></script>
   <script src="js/3d/basement3d.js?v=1"></script>
   <script src="js/3d/outdoor3d.js?v=7"></script>
-  <script src="js/3d/interact3d.js?v=10"></script>
+  <script src="js/3d/interact3d.js?v=12"></script>
   <script src="js/3d/wall3d.js?v=3"></script>
   <script src="js/3d/housemodel3d.js?v=1"></script>
   <script src="js/3d/badge3d.js?v=1"></script>

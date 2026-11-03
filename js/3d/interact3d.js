@@ -107,7 +107,7 @@ function visit(sp){
  R3.ensure(v);
  if(sp.kind==='sit'&&v.mode==='sit'&&v.room===sp.room&&Math.hypot(v.x-sp.x,v.z-sp.z)<.7){standUp(v);say3(v.tg,'oke, berdiri dulu');P=null;return true}
  clearV(v);warp(v,sp.room);
- const st=sp.kind==='sit'?sp.stage:sp,an=sp.kind==='sit'?{f:[0,1],w:[.5,.5]}:{f:sp.f,w:sp.w||[22,34]};
+ const st=sp.kind==='sit'?sp.stage:sp,an=sp.kind==='sit'?{f:sp.f||[0,1],w:[.5,.5]}:{f:sp.f,w:sp.w||[22,34]};
  const ok=R3.goTo(v,st.x,st.z,an);
  if(!ok&&sp.kind!=='sit'){v.x=sp.x;v.z=sp.z;R3.eject(v.room,v);v.R.fa=Math.atan2((sp.f||[0,1])[0],(sp.f||[0,1])[1])}
  P={v,sp,t:0};return true}
@@ -120,7 +120,7 @@ function tick(dt){
  P.t+=dt;const R=v.R;if(!R)return;
  if(R.wp.length&&P.t<20)return;
  const s=P.sp;P=null;
- if(s.kind==='sit'){R.wp=[];R.act=null;v.goal={x:s.x,z:s.z,mode:'sit'};v.seat=s.seat==null?null:s.seat}
+ if(s.kind==='sit'){R.wp=[];R.act=null;v.goal={x:s.x,z:s.z,mode:'sit'};v.seat=s.seat==null?null:s.seat;if(s.f)v.R.fa=Math.atan2(s.f[0],s.f[1])}
  if(s.say)say3(v.tg,s.say)}
 {const _wf=winFx;winFx=function(dt){_wf(dt);try{tick(dt)}catch(e){console.warn(e)}}}
 
@@ -134,7 +134,7 @@ const SPOTS=()=>{const W=window.SWING,sp={};
  sp[3]=[{x:2.7,z:-.5,st:{x:2.7,z:.4}}];
  sp[4]=[.1,1.5].map(x=>({x,z:-.2,st:{x,z:-1}}));
  sp[5]=[{x:1.0,z:-.55,st:{x:1.0,z:-1.5}},{x:-3.2,z:.1,st:{x:-3.2,z:1.6}}];
- sp[7]=[{x:-2.6,z:-2.85,st:{x:-2.6,z:-1.9}},{x:-1.8,z:-2.85,st:{x:-1.8,z:-1.9}},{x:.4,z:.2,st:{x:-.3,z:.2}},{x:2.4,z:.2,st:{x:3.1,z:.2}}];
+ sp[7]=[{x:-2.6,z:-2.85,st:{x:-2.6,z:-1.9}},{x:-1.8,z:-2.85,st:{x:-1.8,z:-1.9}},{x:.4,z:.2,st:{x:-.3,z:.2},f:[1,0]},{x:2.4,z:.2,st:{x:3.1,z:.2},f:[-1,0]}];
  if(W)sp[8]=W.zs.map(z=>({x:W.x,z,st:{x:W.x-1.4,z}}));
  return sp};
 const AUTO=new Map();let autoAcc=0;
@@ -149,14 +149,14 @@ function autoStep(dt){
   const R=v.R;if(!R){AUTO.delete(v);return}
   if(a.s==='go'){a.t+=dd;
    if(v.mode&&v.mode!=='sit'){AUTO.delete(v);return}
-   if(!R.wp.length||a.t>25){R.wp=[];R.act=null;v.goal={x:a.sp.x,z:a.sp.z,mode:'sit'};a.s='sit';a.t=rnd(AUTO_SIT[0],AUTO_SIT[1])}}
+   if(!R.wp.length||a.t>25){R.wp=[];R.act=null;v.goal={x:a.sp.x,z:a.sp.z,mode:'sit'};if(a.sp.f)R.fa=Math.atan2(a.sp.f[0],a.sp.f[1]);a.s='sit';a.t=rnd(AUTO_SIT[0],AUTO_SIT[1])}}
   else{a.t-=dd;if(a.t<=0){standUp(v);v._autoCd=now+AUTO_CD*1000;AUTO.delete(v)}}});
  V.forEach(v=>{
   if(v===me||AUTO.has(v)||!v.R||v.mode||v.goal||v.xfer||v.path||v.R.wp.length||(v._autoCd||0)>now)return;
   const list=SP[v.room];if(!list||Math.random()>AUTO_P)return;
   const free=list.filter(p=>!taken(v.room,p));if(!free.length)return;
   const p=free[Math.floor(Math.random()*free.length)];
-  R3.ensure(v);if(!R3.goTo(v,p.st.x,p.st.z,{f:[0,1],w:[.5,.5]})){v._autoCd=now+8000;return}
+  R3.ensure(v);if(!R3.goTo(v,p.st.x,p.st.z,{f:p.f||[0,1],w:[.5,.5]})){v._autoCd=now+8000;return}
   AUTO.set(v,{s:'go',sp:p,room:v.room,t:0})})}
 {const _wf2=winFx;winFx=function(dt){_wf2(dt);try{autoStep(dt)}catch(e){console.warn('auto-sit',e)}}}
 
@@ -286,8 +286,8 @@ function scan(){
   const sitAt=(room,spots,say)=>()=>{const me=own(),at=(o,p)=>o.room===room&&o.mode==='sit'&&Math.hypot(o.x-p.x,o.z-p.z)<.5;
    let i=spots.findIndex(p=>me&&at(me,p));
    if(i<0){const oth=[...V.values()].filter(o=>o!==me);i=spots.findIndex(p=>!oth.some(o=>at(o,p)));if(i<0)return null}
-   const p=spots[i];return {kind:'sit',room,x:p.x,z:p.z,stage:p.st,say}};
-  const BEN=[{x:-2.6,z:-2.85,st:{x:-2.6,z:-1.9}},{x:-1.8,z:-2.85,st:{x:-1.8,z:-1.9}}],CHL={x:.4,z:.2,st:{x:-.3,z:.2}},CHR={x:2.4,z:.2,st:{x:3.1,z:.2}};
+   const p=spots[i];return {kind:'sit',room,x:p.x,z:p.z,stage:p.st,f:p.f,say}};
+  const BEN=[{x:-2.6,z:-2.85,st:{x:-2.6,z:-1.9}},{x:-1.8,z:-2.85,st:{x:-1.8,z:-1.9}}],CHL={x:.4,z:.2,st:{x:-.3,z:.2},f:[1,0]},CHR={x:2.4,z:.2,st:{x:3.1,z:.2},f:[-1,0]};
   wrap(findIn(TERG,-2.2,-3.0),sitAt(7,BEN,'enak buat ngopi sore'),{replace:true,full:'bangkunya penuh'});
   const TBL=findIn(TERG,1.4,.2);
   if(TBL){wrap(findIn(TBL,-1,0),sitAt(7,[CHL],'kursinya empuk~'),{replace:true,full:'kursinya sudah ada yang duduk'});

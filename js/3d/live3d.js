@@ -113,6 +113,7 @@ function pub(force){
 const fresh=p=>serverNow()-p.ms<ONLINE_MS;
 function onlineMap(){const m=new Map();P.forEach((p,id)=>{if(fresh(p))m.set(id,p)});return m}
 
+const escH=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function renderHud(){
  if(!db){hud.style.display='none';return}
  const on=onlineMap(),ids=new Set(on.keys());
@@ -124,6 +125,9 @@ function renderHud(){
  if(!isAqsaName(myName())){let aq=null;on.forEach((p,id)=>{if(id!==did&&isAqsaName(p.n))aq=p});
   if(aq)h+=' · <i>Aqsa '+(aq.r>=0&&aq.r<=8?'di '+ROOMN[aq.r]:'online')+'</i>'}
  if(partyTxt)h+=' · '+partyTxt;
+ /* daftar siapa di ruang mana (hanya yang online) */
+ const ls2=[];on.forEach((p,id)=>{if(id!==did)ls2.push(escH(p.n||'tamu')+' ('+(p.r>=0&&p.r<=8?ROOMN[p.r]:'tab tidak aktif')+')')});
+ if(ls2.length)h+='<br><span style="font-size:17px">'+ls2.slice(0,6).join(', ')+(ls2.length>6?' +'+(ls2.length-6):'')+'</span>';
  hud.innerHTML=h;hud.style.display='block'}
 
 /* ---------- event realtime ---------- */
@@ -225,7 +229,7 @@ function subPos(r){
 
 /* ---------- sinkron ava ---------- */
 const hashS=t=>{let h=0;for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))>>>0;return h};
-function homeRooms(){const a=[0,1];if(window.GRP)a.push(2);for(let r=3;r<=8;r++)if(window.R3&&R3.BND&&R3.BND[r])a.push(r);return a}
+function homeRooms(){const a=[0,1];if(window.GRP)a.push(2);return a} /* ruang lantai 1 saja: ava offline tidak "sembunyi" di basement/taman/lantai 2 saat web dibuka */
 const ambient=()=>[...V.entries()].filter(([id,v])=>id!==did&&!v._pin);
 function sync(){
  const mr=myRoom(),tr=eff(mr),me=V.get(did),now=Date.now();
@@ -286,8 +290,52 @@ function startNet(){
   if(!TEST)fs.onSnapshot(fs.doc(db,'party','main'),s=>{
    if(!s.exists())return;const t=s.data().startAt,ms=t&&t.toMillis?t.toMillis():null;
    if(ms&&ms>Date.now()-86400000&&ms!==PSTART){PSTART=ms;litSet=false;boom=false;lastNum=-1}},e=>console.warn('party',e));
-  netOn=true;pub(true);
+  netOn=true;pub(true);setTimeout(heal,4000);setInterval(heal,90000);
  }catch(e){console.warn('live3d net',e)}}
+
+/* ---------- pemulihan ava yang gagal terkirim + panel diagnosa (buka index.html?debug=1) ---------- */
+let healN=0;
+function heal(){
+ try{
+  if(healN>8||!db||!fs||lsg('bday-av-pend')!=='1')return; /* hanya kalau HP ini tahu avanya belum pernah terkirim */
+  const o=g0(()=>own);if(!o||typeof pushV!=='function')return;
+  healN++;
+  fs.getDoc(fs.doc(db,'visitors',did)).then(sn=>{
+   if(!sn.exists())pushV(true);else{try{localStorage.removeItem('bday-av-pend')}catch(e){}}
+  }).catch(e=>console.warn('heal',e))
+ }catch(e){}}
+const LIM={g:2,hs:10,pn:4,hd:6,hc:11,sc:11,sk:4,ah:13,gl:3,fc:3,ey:4,bj:4,cp:1,ac:7,ex:6},REQ=['n','g','hs','hc','sc','sk','ah','gl','ts'];
+function violations(o){
+ const v=[];
+ Object.keys(o).forEach(k=>{if(!(k in LIM)&&k!=='n'&&k!=='ts')v.push('field tidak dikenal: '+k)});
+ REQ.forEach(k=>{if(!(k in o))v.push('field wajib hilang: '+k)});
+ Object.keys(LIM).forEach(k=>{if(k in o){const x=o[k];if(!Number.isInteger(x)||x<0||x>LIM[k])v.push(k+'='+x+' di luar batas 0..'+LIM[k])}});
+ if(typeof o.n!=='string'||o.n.length<1||o.n.length>12)v.push('nama harus 1-12 karakter');
+ if(typeof o.ts!=='number')v.push('ts bukan angka');
+ return v}
+if(qs.get('debug')==='1'){
+ let cap='',res='',remote='?';
+ const _cw=console.warn;console.warn=function(){try{if(arguments[0]==='visitors'&&arguments[1])cap=(arguments[1].code||'')+' '+(arguments[1].message||'')}catch(e){}return _cw.apply(console,arguments)};
+ const box=mk('div','lvd');box.style.cssText='position:fixed;right:6px;bottom:6px;z-index:60;max-width:92vw;background:#fff;border:3px solid #1f3a5f;padding:6px 8px;font:17px/1.2 VT323,monospace;white-space:pre-wrap;color:#1f3a5f';
+ const pre=document.createElement('div');box.appendChild(pre);
+ const b1=document.createElement('button');b1.className='btn';b1.textContent='kirim ulang ava';
+ const b2=document.createElement('button');b2.className='btn alt';b2.textContent='tutup';b2.onclick=()=>box.remove();
+ box.appendChild(b1);box.appendChild(b2);
+ const draw=()=>{const o=g0(()=>own);
+  const L=['DIAGNOSA live3d','database siap: '+(db&&fs?'ya':'belum'),'id device: '+String(did).slice(0,8),
+   'ava di HP ini: '+(o?o.n:'TIDAK ADA'),'tanda belum terkirim: '+(lsg('bday-av-pend')==='1'?'ya':'tidak'),
+   'pernah berhasil kirim: '+(lsg('bday-av-ok')==='1'?'ya':'belum'),'dokumen di visitors: '+remote,
+   'selisih jam HP-server: '+(off?Math.round(off/1000)+' dtk':'belum diukur')];
+  if(o){const vi=violations(o);L.push(vi.length?'MASALAH DATA: '+vi.join('; '):'data ava sesuai aturan')}
+  if(cap)L.push('error terakhir: '+cap);if(res)L.push(res);
+  pre.textContent=L.join('\n')};
+ const chk=()=>{if(!(db&&fs))return;fs.getDoc(fs.doc(db,'visitors',did)).then(sn=>{remote=sn.exists()?'ADA':'TIDAK ADA';draw()}).catch(e=>{remote='gagal baca ('+(e.code||e.message)+')';draw()})};
+ b1.onclick=async()=>{
+  if(typeof pushV!=='function'){res='pushV tidak ada: index.html di HP ini versi lama';draw();return}
+  cap='';res='mengirim...';draw();
+  let ok=null;try{ok=await pushV(false)}catch(e){cap=String(e&&e.message||e)}
+  res=ok===true?'HASIL: berhasil terkirim':'HASIL: gagal';chk();draw()};
+ setInterval(draw,2000);setTimeout(chk,2500);draw()}
 
 /* ---------- jalan ---------- */
 hookAll();

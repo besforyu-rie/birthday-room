@@ -1,15 +1,106 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
+  match /databases/{db}/documents {
     match /notes/{id} {
       allow read: if true;
-      allow create: if request.resource.data.t is string
-                    && request.resource.data.t.size() > 0
-                    && request.resource.data.t.size() <= 160
-                    && request.resource.data.from.size() <= 24;
+      allow create: if request.resource.data.keys().hasOnly(['from','t','color','x','y','createdAt'])
+        && request.resource.data.t is string
+        && request.resource.data.t.size() > 0 && request.resource.data.t.size() <= 1000
+        && request.resource.data.from is string && request.resource.data.from.size() <= 24;
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['x','y'])
-                    && request.resource.data.x is number && request.resource.data.x >= 0 && request.resource.data.x <= 100
-                    && request.resource.data.y is number && request.resource.data.y >= 0 && request.resource.data.y <= 100;
+        && request.resource.data.x is number && request.resource.data.y is number
+        && request.resource.data.x >= 0 && request.resource.data.x <= 100
+        && request.resource.data.y >= 0 && request.resource.data.y <= 100;
+      allow delete: if false;
+    }
+    match /scores/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['name','score','createdAt'])
+        && request.resource.data.name is string && request.resource.data.name.size() <= 14
+        && request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score <= 150;
+      allow update, delete: if false;
+    }
+    match /visitors/{id} {
+      function okV() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['n','g','hs','hc','sc','sk','ah','gl','ts'])
+          && d.keys().hasAll(['n','g','hs','hc','sc','sk','ah','gl','ts'])
+          && id.size() <= 64
+          && d.n is string && d.n.size() >= 1 && d.n.size() <= 12
+          && d.g is int && d.g >= 0 && d.g <= 2
+          && d.hs is int && d.hs >= 0 && d.hs <= 5
+          && d.hc is int && d.hc >= 0 && d.hc <= 7
+          && d.sc is int && d.sc >= 0 && d.sc <= 7
+          && d.sk is int && d.sk >= 0 && d.sk <= 4
+          && d.ah is int && d.ah >= 0 && d.ah <= 4
+          && d.gl is int && d.gl >= 0 && d.gl <= 1
+          && d.ts is number;
+      }
+      function fresh() {
+        let t = request.time.toMillis();
+        return request.resource.data.ts >= t - 600000 && request.resource.data.ts <= t + 600000;
+      }
+      allow read: if true;
+      allow create: if okV() && fresh();
+      allow update: if okV() && (fresh() || request.resource.data.ts == resource.data.ts);
+      allow delete: if false;
+    }
+
+        match /presence/{id} {
+      function okP() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['n','r','ts'])
+          && d.keys().hasAll(['n','r','ts'])
+          && id.size() <= 64
+          && d.n is string && d.n.size() >= 1 && d.n.size() <= 12
+          && d.r is int && d.r >= -1 && d.r <= 8
+          && d.ts == request.time;
+      }
+      allow read: if true;
+      allow create: if okP();
+      allow update: if okP() && request.time > resource.data.ts + duration.value(3, 's');
+      allow delete: if false;
+    }
+
+    match /live/{id} {
+      function okL() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['n','k','r','ts'])
+          && d.keys().hasAll(['n','k','r','ts'])
+          && id.size() <= 64
+          && d.n is string && d.n.size() >= 1 && d.n.size() <= 12
+          && d.k in ['pet','feed','wish','sit','tv','balloon','candle','wave']
+          && d.r is int && d.r >= 0 && d.r <= 8
+          && d.ts == request.time;
+      }
+      allow read: if true;
+      allow create: if okL();
+      allow update: if okL() && request.time > resource.data.ts + duration.value(2, 's');
+      allow delete: if false;
+    }
+
+    match /party/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+        match /pos/{id} {
+      function okPos() {
+        let d = request.resource.data;
+        return d.keys().hasOnly(['r','x','z','tx','tz','m','ts'])
+          && d.keys().hasAll(['r','x','z','tx','tz','m','ts'])
+          && id.size() <= 64
+          && d.r is int && d.r >= 0 && d.r <= 8
+          && d.x is number && d.x >= -20 && d.x <= 20
+          && d.z is number && d.z >= -20 && d.z <= 20
+          && d.tx is number && d.tx >= -20 && d.tx <= 20
+          && d.tz is number && d.tz >= -20 && d.tz <= 20
+          && d.m in ['', 'sit', 'watch']
+          && d.ts == request.time;
+      }
+      allow read: if true;
+      allow create: if okPos();
+      allow update: if okPos() && request.time > resource.data.ts + duration.value(2, 's');
       allow delete: if false;
     }
   }

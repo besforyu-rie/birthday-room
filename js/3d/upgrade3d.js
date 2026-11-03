@@ -326,8 +326,51 @@ const TVA=(()=>{let ac=null,out=null,nz=null,cur=-1,nodes=[],tok=0,armed=false;
    if(anim){anim.u=Math.min(1,anim.u+dt*2.2);const e=ease(anim.u);lf.rotation.y=-Math.PI*(anim.d>0?e:1-e);if(anim.u>=1){if(anim.d>0){s++;setP()}lf.rotation.y=0;anim=null;save()}}};
   if(typeof SFX!=='undefined')SFX.pop();Z.card=C}
  window.BOOKDEFS=defs;defs.forEach(d=>{if(d.m)d.m.userData.zfx=()=>openBook(d)});
- let hid=[];const openShelf=()=>{const sp=new V3();sh.getWorldPosition(sp);zin({tgt:new V3(sp.x,1.9,sp.z),fit:[2.7,3.9],yaw:Math.PI/2,pit:.05,hint:'tap buku untuk membaca · buku ungu = jurnal harian · buku emas = lencana',ctl:()=>defs.map(d=>d.m).filter(m=>m&&m.visible),
-  enter(){hid=[...occl(),lp].filter(o=>o.visible);hid.forEach(o=>o.visible=false)},exit(){hid.forEach(o=>o.visible=true)}})};
+ /* ---------- ZOOM RAK: bersihkan penghalang + nomori buku + daftar judul ---------- */
+ const SHL={on:false,hid:new Map(),leg:null,css:null};
+ /* plakat nomor kecil di punggung buku (menghadap kamera zoom rak) */
+ const numLabel=(n,sz)=>{const t=cvs(64,64,(g,W,H)=>{g.fillStyle='#1f3a5f';g.fillRect(0,0,W,H);g.fillStyle='#fff8dc';g.fillRect(4,4,W-8,H-8);g.fillStyle='#1f3a5f';g.textAlign='center';g.textBaseline='middle';g.font=(String(n).length>1?26:34)+'px '+FN;g.fillText(String(n),W/2,H/2+2)},1);
+  const m=new THREE.Mesh(new THREE.PlaneGeometry(sz,sz),new THREE.MeshBasicMaterial({map:t.t}));m.rotation.y=Math.PI/2;return m};
+ /* urutan: buku biasa dari KIRI ke KANAN layar (kamera di sisi +x melihat ke -x, jadi kiri layar = z besar), lalu jurnal, lalu buku emas */
+ function shelfOrder(){const all=window.BOOKDEFS||defs,reg=all.filter(d=>d.m&&!d.j&&d.id!=='lencana').sort((a,b)=>b.m.position.z-a.m.position.z);
+  const o=reg.concat(all.filter(d=>d.m&&d.j),all.filter(d=>d.m&&d.id==='lencana'));o.forEach((d,i)=>d.no=i+1);return o}
+ function shelfLabels(order){order.forEach(d=>{if(d.lab&&d.labN===d.no)return;if(d.lab)d.m.remove(d.lab);
+   let sz,x,y;const gp=d.m.geometry&&d.m.geometry.parameters;
+   if(gp){sz=Math.min(.15,gp.depth*.9);x=gp.width/2+.012;y=-gp.height/2+Math.max(.16,sz/2+.03)}else{sz=.15;x=.312;y=.25} /* grup buku emas */
+   const m=numLabel(d.no,sz);m.position.set(x,y,0);d.m.add(m);d.lab=m;d.labN=d.no})}
+ function shelfLegend(order){
+  if(!SHL.leg){const e=document.createElement('div');e.style.cssText='position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:8px;right:8px;z-index:12;display:none;flex-wrap:wrap;gap:5px;justify-content:center;max-height:34vh;overflow:auto;pointer-events:none';document.body.appendChild(e);SHL.leg=e}
+  const e=SHL.leg;e.innerHTML='';
+  order.forEach(d=>{const b=document.createElement('button');b.type='button';b.style.cssText='pointer-events:auto;display:flex;align-items:center;gap:6px;background:rgba(31,58,95,.92);color:#fff;border:3px solid #f2c14e;box-shadow:2px 2px 0 #0d1d33;padding:3px 8px 3px 4px;font:20px/1 VT323,monospace;cursor:pointer';
+   const n=document.createElement('span');n.textContent=d.no;n.style.cssText='font:9px/1 "Press Start 2P",monospace;background:#f2c14e;color:#1f3a5f;padding:5px 5px;min-width:18px;text-align:center';
+   b.append(n,document.createTextNode(d.title||('buku '+d.no)));
+   b.onclick=ev=>{ev.stopPropagation();if(Z.card||!d.m||!d.m.visible)return;if(typeof SFX!=='undefined'&&SFX.click)SFX.click();d.m.userData.zfx()};e.append(b)})}
+ /* semua yang bisa menghalangi: avatar (punyamu, Aqsa, pengunjung) + label namanya, kucing, dan perabot yang berdiri di depan rak */
+ function shelfBlockers(sp,limit){const L=[],add=o=>{if(o&&o.visible!==undefined&&!L.includes(o))L.push(o)};
+  if(typeof V!=='undefined')V.forEach(v=>{add(v.g);add(v.tg)});
+  if(typeof av!=='undefined')add(av);if(typeof avHead!=='undefined')add(avHead);if(typeof cat!=='undefined')add(cat);
+  add(lp);occl().forEach(add);
+  const B=new THREE.Box3();
+  S.children.forEach(c=>{if(c===sh||c.isLight||c.isCamera||!c.visible||L.includes(c))return;let inside=false;c.traverse(o=>{if(o===sh)inside=true});if(inside)return;
+   B.setFromObject(c);if(B.isEmpty())return;const w=B.max.x-B.min.x,d=B.max.z-B.min.z;
+   if(w<4&&d<4&&B.min.x>sp.x+.3&&B.min.x<limit&&B.max.z>sp.z-1.4&&B.min.z<sp.z+1.4&&B.max.y>.35&&B.min.y<3.9)L.push(c)});
+  return L}
+ const shelfHide=o=>{if(!SHL.hid.has(o))SHL.hid.set(o,o.visible);o.visible=false};
+ stepF.push(()=>{if(!SHL.on)return;
+  SHL.hid.forEach((v,o)=>{o.visible=false}); /* kalau ada yang dimunculkan lagi oleh skrip lain, sembunyikan lagi */
+  if(typeof V!=='undefined')V.forEach(v=>{if(v.g&&!SHL.hid.has(v.g))shelfHide(v.g);if(v.tg&&!SHL.hid.has(v.tg))shelfHide(v.tg)}); /* pengunjung baru yang muncul saat zoom */
+  if(typeof av!=='undefined'&&!SHL.hid.has(av))shelfHide(av);
+  if(typeof sayEl!=='undefined'&&sayEl)sayEl.style.display='none';
+  if(SHL.leg)SHL.leg.style.display=Z.card?'none':'flex'});
+ const openShelf=()=>{const sp=new V3();sh.getWorldPosition(sp);zin({tgt:new V3(sp.x,1.9,sp.z),fit:[2.7,3.9],yaw:Math.PI/2,pit:.05,hint:'tap buku (atau nomor di atas) untuk membaca · ungu = jurnal harian · emas = lencana',ctl:()=>defs.map(d=>d.m).concat((window.BOOKDEFS||[]).map(d=>d.m)).filter((m,i,a)=>m&&m.visible&&a.indexOf(m)===i),
+  enter(){const order=shelfOrder();shelfLabels(order);order.forEach(d=>{if(d.lab)d.lab.visible=true});shelfLegend(order);
+   if(!SHL.css){const st=document.createElement('style'),se=typeof sayEl!=='undefined'&&sayEl?(sayEl.id?'#'+sayEl.id:(sayEl.classList&&sayEl.classList[0]?'.'+sayEl.classList[0]:'')):'';st.textContent=se?'body.shelfzoom '+se+'{display:none!important}':'';document.head.appendChild(st);SHL.css=st}
+   document.body.classList.add('shelfzoom');
+   shelfBlockers(sp,sp.x+Z.td*.95+.5).forEach(o=>{if(o.visible)shelfHide(o)});
+   SHL.on=true;SHL.leg.style.display='flex'},
+  exit(){SHL.on=false;document.body.classList.remove('shelfzoom');if(SHL.leg)SHL.leg.style.display='none';
+   (window.BOOKDEFS||defs).forEach(d=>{if(d.lab)d.lab.visible=false});
+   SHL.hid.forEach((v,o)=>{o.visible=v});SHL.hid.clear()}})};
  sh.userData.fn=openShelf}
 
 /* ================= GESER LAYAR: 2 jari (HP) / shift+seret atau klik kanan (PC), cubit untuk zoom ================= */

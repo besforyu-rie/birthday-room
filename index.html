@@ -390,8 +390,29 @@ function loungeTick(dt,t){
  food.forEach(m=>{if(m.position.y>1.05)m.position.y-=.5*dt});
 }
 setInterval(renderV,1e4);renderV();
-(function w(n){if(db&&fs){try{fs.onSnapshot(fs.query(fs.collection(db,'visitors'),fs.orderBy('ts','desc'),fs.limit(MAX)),s=>{remote=s.docs.map(d=>({...clean(d.data()),id:d.id}));if(own&&!s.metadata.fromCache&&!s.metadata.hasPendingWrites&&Date.now()-own.ts>15000&&!remote.some(a=>a.id===did)){own=null;try{localStorage.removeItem('bday-av')}catch(e){}}renderV()},e=>console.warn(e))}catch(e){console.warn(e)}}else if(n<25)setTimeout(()=>w(n+1),400)})(0);
-async function saveV(a){own=a;ls('bday-av',JSON.stringify(a));renderV();if(db&&fs){try{await fs.setDoc(fs.doc(db,'visitors',did),a)}catch(e){console.warn(e)}}}
+(function w(n){if(db&&fs){try{fs.onSnapshot(fs.query(fs.collection(db,'visitors'),fs.orderBy('ts','desc'),fs.limit(MAX)),s=>{remote=s.docs.map(d=>({...clean(d.data()),id:d.id}));if(own&&!s.metadata.fromCache&&!s.metadata.hasPendingWrites&&!remote.some(a=>a.id===did)){if(ls('bday-av-pend')==='1'){if(!vRetry&&Date.now()-vLast>60000){vRetry=1;pushV(true).then(()=>{vRetry=0})}}else if(Date.now()-own.ts>15000){own=null;try{localStorage.removeItem('bday-av')}catch(e){}}}if(own&&remote.some(a=>a.id===did)){ls('bday-av-ok','1');try{localStorage.removeItem('bday-av-pend')}catch(e){}}renderV()},e=>console.warn(e))}catch(e){console.warn(e)}}else if(n<25)setTimeout(()=>w(n+1),400)})(0);
+/* ava dikirim ke Firestore (koleksi visitors). Dulu kalau gagal (mis. aturan Firestore menolak) errornya diam-diam dibuang,
+   sehingga ava cuma ada di device pembuatnya. Sekarang: tunggu db siap, tandai "pending" kalau gagal, tampilkan pesan, dan coba lagi otomatis. */
+const vMsg=t=>{let e=document.getElementById('vmsg');if(!e){e=document.createElement('div');e.id='vmsg';e.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#fff;color:#b0293f;border:3px solid #1f3a5f;padding:6px 10px;font:20px/1.2 VT323,monospace;text-align:center';document.body.appendChild(e)}e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>{e.style.display='none'},9000)};
+let vRetry=0,vLast=0;
+async function pushV(quiet){
+ if(!own)return true;
+ for(let i=0;i<40&&!(db&&fs);i++)await new Promise(r=>setTimeout(r,250));
+ if(!(db&&fs)){ls('bday-av-pend','1');return false}
+ vLast=Date.now();
+ /* aturan Firestore menolak ts yang lebih dari 10 menit dari waktu server -> ava lama dikirim dengan ts baru */
+ try{
+  const ref=fs.doc(db,'visitors',did),sn=await fs.getDoc(ref);let o;
+  if(sn.exists()){o={...own,ts:sn.data().ts}} /* ava yang sudah ada: ts tidak diubah, jadi edit tidak memindahkan urutannya */
+  else{
+   o=Math.abs(Date.now()-own.ts)<300000?own:{...own,ts:Date.now()}} /* aturan Firestore menolak ts yang lebih dari 10 menit dari waktu server */
+  await fs.setDoc(ref,o);if(own&&own.ts!==o.ts){own={...own,ts:o.ts};ls('bday-av',JSON.stringify(own))}ls('bday-av-ok','1');try{localStorage.removeItem('bday-av-pend')}catch(e){}return true}
+ catch(e){console.warn('visitors',e);ls('bday-av-pend','1');
+  if(!quiet)vMsg('avamu baru tersimpan di device ini, belum masuk database ('+(e.code||'error')+'). '+(e.code==='permission-denied'?'aturan Firestore koleksi visitors perlu diupdate.':'nanti dicoba lagi otomatis.'));
+  return false}}
+async function saveV(a){own=a;ls('bday-av',JSON.stringify(a));renderV();return pushV()}
+/* ava lama yang belum pernah terkonfirmasi ada di database -> kirim otomatis (tanpa harus bikin ulang) */
+if(own&&ls('bday-av-ok')!=='1')ls('bday-av-pend','1');
 /* editor avatar */
 const chips=(k,arr,sw)=>`<div class="sw">${arr.map((v,i)=>`<button class="chip${sw?'':' t'}" data-k="${k}" data-v="${i}"${sw?` style="background:${v}" aria-label="${k} ${i+1}"`:''}>${sw?'':v}</button>`).join('')}</div>`;
 const lab=t=>`<p class="from" style="margin:8px 0 4px">${t}</p>`;
@@ -717,7 +738,7 @@ addEventListener('pointerdown',function f(e){removeEventListener('pointerdown',f
   <script src="js/3d/wall3d.js?v=3"></script>
   <script src="js/3d/housemodel3d.js?v=1"></script>
   <script src="js/3d/badge3d.js?v=1"></script>
-  <script src="js/3d/live3d.js?v=1"></script>
+  <script src="js/3d/live3d.js?v=3"></script>
   <script src="js/3d/greet3d.js?v=1"></script>
 <style>#sw{position:fixed;top:8px;left:8px;z-index:15;display:inline-block;text-decoration:none;font-size:10px;padding:9px 10px}</style><a class="btn alt" id="sw" href="index2d.html" aria-label="pindah ke versi 2D">2D</a>
 </body></html>

@@ -1,6 +1,6 @@
 /* interact3d.js — avatar PEMAIN ikut berinteraksi dengan benda yang di-tap.
    Taruh sefolder dengan index.html, muat PALING AKHIR (setelah floor2.js):
-   <script src="interact3d.js?v=4"></script>
+   <script src="interact3d.js?v=10"></script>
    Syarat: room3d.js versi terbaru (mengekspor window.R3) dan pemain sudah punya avatar ("+ bikin ava").
 
    Cara kerja: tap benda -> avatarmu jalan ke sana (lewat jalur yang menghindari perabot) lalu berdiri / duduk.
@@ -44,9 +44,12 @@ ENTRY[6]={x:1.9,z:-1};
 ROOMS[7]={obs:[[-3.5,-.9,-3.5,-2.5],[.4,2.4,-.8,1.2],[3.8,4.8,-3.4,-2.3],[-4.7,-3.4,-3.4,-2.8],[-4.6,-3.9,2.6,3.3]],
     bnd:{x0:-4.6,x1:4.6,z0:-3,z1:3.2},
     pois:[{x:-2.2,z:-1.9,f:[0,-1],w:[5,9],max:2},{x:1.4,z:1.7,f:[0,-1],w:[5,9],max:2},{x:4.3,z:-1.8,f:[0,-1],w:[4,8],max:1}]};
-ROOMS[8]={obs:[[-1.1,1.7,-.9,1.9],[1.9,4.3,-3.2,-.8],[-4.1,-2.7,-3.3,-1.8],[-3.5,-1.1,2.3,3.1],[3.5,4.5,1.8,2.8]],
-    bnd:{x0:-4.6,x1:4.6,z0:-3,z1:3.2},
-    pois:[{x:.3,z:2.3,f:[0,-1],w:[6,12],max:2},{x:3.1,z:-.2,f:[0,-1],w:[6,12],max:2},{x:-3.4,z:-1.2,f:[0,-1],w:[4,8],max:1},{x:-2.3,z:1.9,f:[0,1],w:[4,8],max:1}]};
+ROOMS[8]={obs:[[-1.1,1.7,-.9,1.9],[1.9,4.3,-3.2,-.8],[-4.1,-2.7,-3.3,-1.8],[-3.5,-1.1,2.3,3.1],[3.5,4.5,1.8,2.8],
+      [.9,2.9,2.55,3.25],[5.0,10.6,2.3,3.2],[5.4,6.8,-2.7,-1.3],[10.0,10.6,-1.4,-.8],
+      [7.3,7.6,-2.0,-1.7],[9.2,9.5,-2.0,-1.7],[7.3,7.6,.7,1.0],[9.2,9.5,.7,1.0],[-1.5,-.3,-3.0,-2.1]],   /* terakhir = patung Miko */   /* 4 terakhir = tiang ayunan (SWX 8.4, SWZ -.5) */
+    bnd:{x0:-4.6,x1:10.6,z0:-3,z1:3.2},
+    pois:[{x:.3,z:2.3,f:[0,-1],w:[6,12],max:2},{x:3.1,z:-.2,f:[0,-1],w:[6,12],max:2},{x:-3.4,z:-1.2,f:[0,-1],w:[4,8],max:1},{x:-2.3,z:1.9,f:[0,1],w:[4,8],max:1},
+      {x:6.6,z:.1,f:[1,0],w:[5,9],max:1},{x:9.8,z:1.0,f:[-1,0],w:[4,8],max:1}]};
 ENTRY[7]={x:0,z:-2.2};ENTRY[8]={x:-3.9,z:.5};
 /*ENDROOMS*/
 
@@ -120,6 +123,42 @@ function tick(dt){
  if(s.kind==='sit'){R.wp=[];R.act=null;v.goal={x:s.x,z:s.z,mode:'sit'};v.seat=s.seat==null?null:s.seat}
  if(s.say)say3(v.tg,s.say)}
 {const _wf=winFx;winFx=function(dt){_wf(dt);try{tick(dt)}catch(e){console.warn(e)}}}
+
+/* ===== AVATAR LAIN duduk sendiri secara acak (kursi/sofa/bangku/ayunan di beberapa ruangan) =====
+   Avatar yang lagi santai (tidak sedang dikendalikan kamu) kadang jalan ke tempat duduk yang kosong, duduk 8-22 detik, lalu berdiri dan lanjut jalan-jalan.
+   EDIT: AUTO_ON = false untuk mematikan; AUTO_P = peluang per cek (tiap 1,5 detik) avatar santai mau duduk; AUTO_SIT = [detikMin,detikMax] lama duduk. */
+const AUTO_ON=true,AUTO_P=.12,AUTO_SIT=[8,22],AUTO_CD=25;
+const SPOTS=()=>{const W=window.SWING,sp={};
+ if(typeof SEAT!=='undefined'&&SEAT&&SEAT.length)sp[1]=Array.from(SEAT).map(x=>({x,z:-2.35,st:{x,z:-1.4}}));
+ sp[2]=[-.9,-.2,.5,1.2].map(x=>({x,z:-2.6,st:{x,z:-1.6}}));
+ sp[3]=[{x:2.7,z:-.5,st:{x:2.7,z:.4}}];
+ sp[4]=[.1,1.5].map(x=>({x,z:-.2,st:{x,z:-1}}));
+ sp[5]=[{x:1.0,z:-.55,st:{x:1.0,z:-1.5}},{x:-3.2,z:.1,st:{x:-3.2,z:1.6}}];
+ sp[7]=[{x:-2.6,z:-2.85,st:{x:-2.6,z:-1.9}},{x:-1.8,z:-2.85,st:{x:-1.8,z:-1.9}},{x:.4,z:.2,st:{x:-.3,z:.2}},{x:2.4,z:.2,st:{x:3.1,z:.2}}];
+ if(W)sp[8]=W.zs.map(z=>({x:W.x,z,st:{x:W.x-1.4,z}}));
+ return sp};
+const AUTO=new Map();let autoAcc=0;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function autoStep(dt){
+ if(!AUTO_ON)return;autoAcc+=dt;if(autoAcc<1.5)return;const dd=autoAcc;autoAcc=0;
+ const me=own(),now=Date.now(),SP=SPOTS();
+ const taken=(room,p)=>[...V.values()].some(o=>o.room===room&&o.mode==='sit'&&Math.hypot(o.x-p.x,o.z-p.z)<.5)||[...AUTO.values()].some(a=>a.sp===p);
+ AUTO.forEach((a,v)=>{
+  if(!V.has(v.a&&v.a.id!=null?v.a.id:null)&&![...V.values()].includes(v)){AUTO.delete(v);return}
+  if(v===me||v.room!==a.room){AUTO.delete(v);return}
+  const R=v.R;if(!R){AUTO.delete(v);return}
+  if(a.s==='go'){a.t+=dd;
+   if(v.mode&&v.mode!=='sit'){AUTO.delete(v);return}
+   if(!R.wp.length||a.t>25){R.wp=[];R.act=null;v.goal={x:a.sp.x,z:a.sp.z,mode:'sit'};a.s='sit';a.t=rnd(AUTO_SIT[0],AUTO_SIT[1])}}
+  else{a.t-=dd;if(a.t<=0){standUp(v);v._autoCd=now+AUTO_CD*1000;AUTO.delete(v)}}});
+ V.forEach(v=>{
+  if(v===me||AUTO.has(v)||!v.R||v.mode||v.goal||v.xfer||v.path||v.R.wp.length||(v._autoCd||0)>now)return;
+  const list=SP[v.room];if(!list||Math.random()>AUTO_P)return;
+  const free=list.filter(p=>!taken(v.room,p));if(!free.length)return;
+  const p=free[Math.floor(Math.random()*free.length)];
+  R3.ensure(v);if(!R3.goTo(v,p.st.x,p.st.z,{f:[0,1],w:[.5,.5]})){v._autoCd=now+8000;return}
+  AUTO.set(v,{s:'go',sp:p,room:v.room,t:0})})}
+{const _wf2=winFx;winFx=function(dt){_wf2(dt);try{autoStep(dt)}catch(e){console.warn('auto-sit',e)}}}
 
 /* ===== pasang ke benda: tap benda -> avatar pergi ke sana ===== */
 function wrap(o,specFn,opt){
@@ -243,14 +282,34 @@ function scan(){
 
  /* --- teras (ruang 7) & taman (ruang 8) --- */
  if(TERG&&TAMG){
-  wrap(findIn(TERG,-2.2,-3.0),st(7,-2.2,-1.9,[0,-1],'enak buat ngopi sore',[12,20]));
-  wrap(findIn(TERG,1.4,.2),st(7,1.4,1.7,[0,-1],'teh hangat + kue, mantap',[12,20]));
+  /* duduk di teras: bangku beludru (2 tempat) & 2 kursi emas di meja teh. Tap kursi tertentu = kursi itu; tap meja / bangku = tempat yang kosong */
+  const sitAt=(room,spots,say)=>()=>{const me=own(),at=(o,p)=>o.room===room&&o.mode==='sit'&&Math.hypot(o.x-p.x,o.z-p.z)<.5;
+   let i=spots.findIndex(p=>me&&at(me,p));
+   if(i<0){const oth=[...V.values()].filter(o=>o!==me);i=spots.findIndex(p=>!oth.some(o=>at(o,p)));if(i<0)return null}
+   const p=spots[i];return {kind:'sit',room,x:p.x,z:p.z,stage:p.st,say}};
+  const BEN=[{x:-2.6,z:-2.85,st:{x:-2.6,z:-1.9}},{x:-1.8,z:-2.85,st:{x:-1.8,z:-1.9}}],CHL={x:.4,z:.2,st:{x:-.3,z:.2}},CHR={x:2.4,z:.2,st:{x:3.1,z:.2}};
+  wrap(findIn(TERG,-2.2,-3.0),sitAt(7,BEN,'enak buat ngopi sore'),{replace:true,full:'bangkunya penuh'});
+  const TBL=findIn(TERG,1.4,.2);
+  if(TBL){wrap(findIn(TBL,-1,0),sitAt(7,[CHL],'kursinya empuk~'),{replace:true,full:'kursinya sudah ada yang duduk'});
+   wrap(findIn(TBL,1,0),sitAt(7,[CHR],'teh hangat + kue, mantap'),{replace:true,full:'kursinya sudah ada yang duduk'});
+   wrap(TBL,sitAt(7,[CHL,CHR],'teh hangat + kue, mantap'),{replace:true,full:'kursinya penuh'})}
   wrap(findIn(TERG,4.3,-2.8),st(7,4.3,-1.8,[0,-1],'tanamannya subur',[10,18]));
   wrap(findIn(TAMG,.3,.5),st(8,.3,2.3,[0,-1],'make a wish~',[14,24]));
   wrap(findIn(TAMG,3.1,-2.0),st(8,3.1,-.2,[0,-1],'gazebonya adem banget',[14,24]));
   wrap(findIn(TAMG,-3.4,-2.5),st(8,-3.4,-1.2,[0,-1],'pohonnya rindang',[10,18]));
   wrap(findIn(TAMG,-2.3,2.7),st(8,-2.3,1.9,[0,1],'bunganya warna-warni~',[10,18]));
   wrap(findIn(TAMG,4.0,2.3),st(8,3.1,2.3,[1,0],'pohonnya cantik',[10,18]));
+  wrap(findIn(TAMG,-.9,-2.55),st(8,-.9,-1.4,[0,-1],'Miko gagah banget!',[10,18]));
+  wrap(findIn(TAMG,6.4,2.75),st(8,6.4,1.9,[0,1],'mawarnya harum banget',[10,18]));
+  wrap(findIn(TAMG,9.2,2.75),st(8,9.2,1.9,[0,1],'tulipnya rapi~',[10,18]));
+  wrap(findIn(TAMG,6.1,-2.0),st(8,6.1,-.9,[0,-1],'lilinya anggun~',[10,18]));
+  wrap(findIn(TAMG,10.3,-1.1),st(8,9.8,-1.1,[1,0],'teduh banget di sini',[10,18]));
+  /* ayunan: tap = avatarmu jalan ke kursi yang kosong lalu duduk & berayun; tap lagi = berdiri (posisi dari window.SWING di outdoor3d.js) */
+  {const W=window.SWING;if(W)wrap(findIn(TAMG,W.x,(W.zs[0]+W.zs[1])/2),()=>{
+    const me=own(),at=(o,z)=>o.room===8&&o.mode==='sit'&&Math.abs(o.x-W.x)<.55&&Math.abs(o.z-z)<.45;
+    let i=W.zs.findIndex(z=>me&&at(me,z));
+    if(i<0){const used=[...V.values()].filter(o=>o!==me).map(o=>W.zs.findIndex(z=>at(o,z)));i=[0,1].find(j=>!used.includes(j));if(i==null)return null}
+    return {kind:'sit',room:8,x:W.x,z:W.zs[i],stage:{x:W.x-1.4,z:W.zs[i]},say:'wuuss~ seru!'}},{replace:true,full:'ayunannya penuh'})}
  }
 }
 try{scan()}catch(e){console.warn('interact3d',e)}

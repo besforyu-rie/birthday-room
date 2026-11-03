@@ -14,7 +14,7 @@ const BACK={x:7.4,z:4.2};
 
 console.log('floor2.js v14 loaded');
 /* lencana tes sementara: muncul merah di pojok kiri-bawah saat di lantai 2. Kalau tidak muncul = browser memuat floor2.js yang lama. Hapus 3 baris BADGE kalau sudah beres. */
-const BADGE=document.createElement('div');BADGE.textContent='floor2 v14 (pintu balkon mewah)';BADGE.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99;background:#e84a5f;color:#fff;font:11px monospace;padding:3px 6px;display:none;pointer-events:none';document.body.appendChild(BADGE);
+const BADGE=document.createElement('div');BADGE.textContent='floor2 v15 (isi lemari & kulkas)';BADGE.style.cssText='position:fixed;left:8px;bottom:8px;z-index:99;background:#e84a5f;color:#fff;font:11px monospace;padding:3px 6px;display:none;pointer-events:none';document.body.appendChild(BADGE);
 const PX='"Press Start 2P",monospace',VT='VT323,monospace';
 const F2=window.F2={on:false,room:0,cx:120};
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -101,8 +101,28 @@ lact(nsG,toggleLamp);
 const wd=grp(-3.3,0,-3.0,BED);
 bx(2.0,3.4,.06,'#d9b98a',0,1.7,-.42,wd);bx(.06,3.4,.9,'#d9b98a',-.97,1.7,0,wd);bx(.06,3.4,.9,'#d9b98a',.97,1.7,0,wd);bx(2.0,.08,.9,'#d9b98a',0,3.4,0,wd);bx(2.0,.08,.9,'#c9a876',0,.04,0,wd);
 bx(1.9,.05,.05,'#8a5a34',0,2.9,0,wd);
-[['#e84a5f',-.6],['#4f8fe8',-.25],['#f2c14e',.1],['#8fd18a',.45],['#a98bd6',.75]].forEach(([c,x])=>bx(.28,1.0,.08,c,x,2.35,0,wd));
-bx(.5,.5,.4,'#f4a6c0',-.5,.3,-.1,wd);bx(.5,.4,.4,'#8fd0f0',.4,.25,-.1,wd);
+/* isi lemari: pakaian bergantung di hanger (kaos, gaun, jaket, celana, hoodie), tumpukan baju terlipat, sepatu; di atas lemari: koper, kotak topi, selimut */
+{const hang=(x,z,kind,c1,c2)=>{
+  bx(.012,.1,.012,'#9aa3b2',x,2.95,z,wd);[-1,1].forEach(sg=>{const a=bx(.2,.018,.018,'#b8864f',x+sg*.09,2.83,z,wd);a.rotation.z=-sg*.3});
+  if(kind==='shirt'){bx(.28,.46,.05,c1,x,2.55,z,wd);[-1,1].forEach(sg=>{const a=bx(.1,.24,.05,c1,x+sg*.18,2.68,z,wd);a.rotation.z=sg*.55});bx(.1,.04,.056,'#ffffff',x,2.78,z,wd);bx(.04,.3,.056,c2,x,2.55,z,wd)}
+  else if(kind==='dress'){bx(.2,.26,.05,c1,x,2.68,z,wd);[-1,1].forEach(sg=>bx(.03,.12,.03,c1,x+sg*.07,2.82,z,wd));const k=cy(.11,.27,.52,c1,x,2.3,z,wd);k.scale.z=.2;bx(.22,.04,.056,c2,x,2.55,z,wd)}
+  else if(kind==='jacket'){bx(.32,.62,.07,c1,x,2.48,z,wd);[-1,1].forEach(sg=>{const a=bx(.1,.5,.06,c1,x+sg*.2,2.5,z,wd);a.rotation.z=sg*.18});bx(.03,.5,.076,c2,x,2.45,z,wd);[2.62,2.5,2.38].forEach(y=>sp(.018,'#f2c14e',x+.06,y,z+.04,wd));bx(.12,.05,.075,c2,x,2.78,z,wd)}
+  else if(kind==='pants'){bx(.26,.06,.05,c2,x,2.78,z,wd);[-1,1].forEach(sg=>bx(.115,.6,.05,c1,x+sg*.065,2.46,z,wd));bx(.09,.07,.056,c2,x-.08,2.7,z,wd)}
+  else{bx(.3,.46,.07,c1,x,2.55,z,wd);[-1,1].forEach(sg=>{const a=bx(.11,.28,.07,c1,x+sg*.2,2.65,z,wd);a.rotation.z=sg*.45});const hd=sp(.11,c1,x,2.77,z-.02,wd);hd.scale.set(1.2,.8,.6);bx(.012,.14,.012,'#ffffff',x-.03,2.62,z+.04,wd);bx(.012,.14,.012,'#ffffff',x+.03,2.62,z+.04,wd);bx(.16,.08,.02,c2,x,2.42,z+.04,wd)}};
+ hang(-.8,-.045,'shirt','#e84a5f','#ffffff');hang(-.5,.045,'dress','#a98bd6','#f2c14e');hang(-.2,-.045,'jacket','#4f8fe8','#2b4a7a');
+ hang(.12,.045,'pants','#3f6fb5','#2b4a7a');hang(.43,-.045,'hoodie','#f2c14e','#d9a62e');hang(.75,.045,'shirt','#8fd18a','#ffffff');
+ /* rak + tumpukan baju terlipat */
+ bx(1.9,.04,.7,'#c9a876',0,1.15,-.06,wd);
+ const stk=(x,y0,z,cols,w,d)=>cols.forEach((c,i)=>bx(w,.07,d,c,x+(i%2?.012:-.012),y0+.035+i*.072,z,wd));
+ stk(-.6,.08,-.12,['#f4a6c0','#f7c3d6','#f4a6c0','#ee8fb0'],.46,.36);stk(-.08,.08,-.12,['#8fd0f0','#6fb8e0','#8fd0f0'],.42,.34);stk(.42,.08,-.12,['#3f6fb5','#35609e','#3f6fb5','#35609e'],.4,.34);
+ stk(-.55,1.17,-.1,['#ffffff','#fff1cf','#ffffff','#f9d6e4','#ffffff'],.4,.3);stk(-.05,1.17,-.1,['#8fd18a','#a8dca3','#8fd18a'],.4,.3);stk(.5,1.17,-.1,['#e84a5f','#f2c14e','#e84a5f','#f2c14e'],.4,.3);
+ const shoe=(x,c)=>{bx(.12,.04,.3,'#ffffff',x,.1,.05,wd);bx(.12,.09,.2,c,x,.165,-.0,wd);const t=sp(.06,c,x,.14,.17,wd);t.scale.set(1,.7,1)};shoe(.8,'#e84a5f');shoe(.93,'#e84a5f');
+ /* di atas lemari */
+ const yT=3.44;
+ bx(.9,.38,.52,'#8a5a34',-.55,yT+.19,0,wd);[-.82,-.28].forEach(x=>bx(.06,.4,.54,'#6b4423',x,yT+.19,0,wd));bx(.3,.04,.04,'#d9b24c',-.55,yT+.4,0,wd);sp(.03,'#d9b24c',-.55,yT+.2,.27,wd);
+ cy(.26,.26,.22,'#f4a6c0',.35,yT+.11,0,wd);cy(.28,.28,.06,'#f7c3d6',.35,yT+.25,0,wd);cy(.265,.265,.03,'#e84a5f',.35,yT+.12,0,wd);
+ cy(.32,.32,.02,'#e6c27a',.35,yT+.29,0,wd);cy(.17,.19,.12,'#e6c27a',.35,yT+.36,0,wd);cy(.19,.19,.03,'#e84a5f',.35,yT+.31,0,wd);
+ stk(.8,yT-.04,0,['#fff1cf','#a98bd6','#fff1cf','#8fd0f0'],.3,.4)}
 const dL=grp(-1.0,0,.45,wd),dR=grp(1.0,0,.45,wd);
 bx(.98,3.3,.06,'#c98b52',.5,1.7,0,dL);sp(.05,'#f2c14e',.85,1.6,.06,dL);bx(.98,3.3,.06,'#c98b52',-.5,1.7,0,dR);sp(.05,'#f2c14e',-.85,1.6,.06,dR);
 lact(wd,()=>{A.wdT=A.wdT?0:1;say3(wd,A.wdT?'isinya jaket & kaos favorit':'lemari ditutup')});
@@ -170,9 +190,27 @@ lact(stG,()=>{A.stove=!A.stove;burners.forEach(b=>b.material.color.set(A.stove?'
 const fr=grp(-3.9,0,-2.95,DIN);
 bx(1.3,3.0,.08,'#c9d3e2',0,1.5,-.41,fr);bx(.08,3.0,.9,'#c9d3e2',-.61,1.5,0,fr);bx(.08,3.0,.9,'#c9d3e2',.61,1.5,0,fr);bx(1.3,.08,.9,'#c9d3e2',0,3.0,0,fr);bx(1.3,.08,.9,'#c9d3e2',0,.04,0,fr);
 [.7,1.4,2.1].forEach(y=>bx(1.14,.04,.8,'#cfe0f6',0,y,0,fr));
-bx(.2,.4,.2,'#ffffff',-.35,.93,.1,fr);bx(.2,.08,.2,'#4f8fe8',-.35,1.17,.1,fr);bx(.4,.25,.3,'#fff6c8',.2,.85,.1,fr);bx(.4,.06,.3,'#e84a5f',.2,1.0,.1,fr);
-bx(.3,.3,.3,'#8fd18a',-.3,1.58,.1,fr);bx(.3,.22,.3,'#f2c14e',.25,1.53,.1,fr);bx(.4,.3,.3,'#f4a6c0',0,2.28,.1,fr);
+/* isi kulkas: sayur & buah, susu, jus, yogurt, kue ultah sisa, telur, keju, semangka */
+const pie=(r,a0,a1,h,c,x,y,z,p)=>{const sh=new THREE.Shape();sh.moveTo(0,0);sh.absarc(0,0,r,a0,a1,false);sh.lineTo(0,0);const g=new THREE.ExtrudeGeometry(sh,{depth:h,bevelEnabled:false,curveSegments:18});g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,M(c));m.position.set(x,y,z);p.add(m);return m};
+{const lt=sp(.2,'#7fc96b',-.33,.28,.05,fr);lt.scale.y=.85;sp(.14,'#a6dc8e',-.3,.33,.12,fr);
+ [[0,.16,0],[.14,.16,.12],[.1,.16,-.14]].forEach(([x,y,z])=>{sp(.075,'#e0412e',x,y,z,fr);bx(.04,.02,.04,'#3f9a4f',x,y+.07,z,fr)});
+ [[.3,.11,0],[.4,.11,.05],[.35,.18,.02]].forEach(([x,y,z])=>{const c=cy(.035,.01,.38,'#f2802a',x,y,z,fr);c.rotation.x=Math.PI/2;bx(.05,.03,.05,'#3f9a4f',x,y,z+.2,fr)});
+ /* rak 1: susu, jus, yogurt, mentega, selai */
+ bx(.16,.3,.16,'#ffffff',-.38,.87,0,fr);bx(.165,.1,.165,'#4f8fe8',-.38,.82,0,fr);bx(.16,.06,.09,'#ffffff',-.38,1.05,0,fr);cy(.03,.03,.03,'#e84a5f',-.38,1.09,0,fr);
+ cy(.065,.065,.28,'#f58b2a',-.18,.86,.04,fr);cy(.03,.03,.08,'#f58b2a',-.18,1.04,.04,fr);cy(.034,.034,.03,'#ffffff',-.18,1.1,.04,fr);
+ ['#f4a6c0','#8fd0f0','#f2c14e'].forEach((c,i)=>{cy(.06,.045,.1,'#ffffff',.05+i*.14,.77,.1,fr);cy(.063,.063,.015,c,.05+i*.14,.83,.1,fr);cy(.062,.047,.03,c,.05+i*.14,.77,.1,fr)});
+ bx(.14,.05,.08,'#fff1a6',.38,.745,-.14,fr);bx(.145,.03,.085,'#c9d3e2',.38,.735,-.14,fr);cy(.05,.05,.1,'#c9304f',.38,.77,.1,fr);cy(.052,.052,.02,'#d9b24c',.38,.83,.1,fr);
+ /* rak 2: sisa kue ultah (sepotong sudah diambil), telur, keju */
+ cy(.25,.25,.02,'#ffffff',-.22,1.43,.02,fr);
+ pie(.19,0,Math.PI*1.5,.07,'#f4d9a0',-.22,1.44,.02,fr);pie(.19,0,Math.PI*1.5,.03,'#fff6e8',-.22,1.51,.02,fr);pie(.19,0,Math.PI*1.5,.07,'#f4d9a0',-.22,1.54,.02,fr);pie(.195,0,Math.PI*1.5,.03,'#f4a6c0',-.22,1.61,.02,fr);
+ sp(.035,'#d72f52',-.31,1.66,-.05,fr);sp(.035,'#d72f52',-.2,1.66,-.12,fr);
+ bx(.34,.04,.2,'#d9c8a8',.28,1.44,-.08,fr);[[.19,-.12],[.28,-.12],[.37,-.12],[.19,-.04],[.28,-.04],[.37,-.04]].forEach(([x,z])=>{const e=sp(.04,'#f4e6cf',x,1.5,z,fr);e.scale.y=1.25});
+ pie(.12,0,1.0,.07,'#f6d34a',.28,1.42,.22,fr);
+ /* rak 3: mangkuk buah + semangka */
+ cy(.2,.14,.1,'#e6f6ff',-.25,2.17,0,fr);sp(.07,'#e0412e',-.3,2.28,.02,fr);sp(.07,'#8fd18a',-.2,2.28,-.05,fr);sp(.07,'#f58b2a',-.25,2.3,.08,fr);
+ pie(.212,0,Math.PI,.03,'#4fa05a',.3,2.125,.12,fr);pie(.2,0,Math.PI,.04,'#e84a5f',.3,2.14,.12,fr);[[.24,.04],[.32,.06],[.36,-.02]].forEach(([x,z])=>bx(.018,.012,.03,'#1a1a1a',x,2.185,z,fr))}
 const frD=grp(-.65,0,.45,fr);bx(1.3,3.0,.08,'#d9e2ef',.65,1.5,.04,frD);bx(.05,.6,.08,'#8a97ab',1.15,1.7,.1,frD);bx(1.3,.9,.09,'#e6f6ff',.65,2.55,.05,frD);
+bx(1.0,.03,.12,'#cfe0f6',.65,1.2,-.06,frD);cy(.04,.04,.2,'#d72f52',.4,1.32,-.06,frD);cy(.012,.012,.05,'#d72f52',.4,1.45,-.06,frD);cy(.04,.04,.2,'#f2c14e',.55,1.32,-.06,frD);cy(.045,.045,.26,'#7a3b1f',.75,1.35,-.06,frD);cy(.045,.045,.26,'#cfe9ff',.9,1.35,-.06,frD);cy(.03,.03,.03,'#4f8fe8',.9,1.5,-.06,frD);
 lact(fr,()=>{A.frT=A.frT?0:1;say3(fr,A.frT?'isinya sisa kue ultah!':'kulkas ditutup')});
 /* meja makan + kursi + isi meja */
 const tb=grp(.8,0,.9,DIN);bx(3.0,.12,1.5,'#c98b52',0,1.0,0,tb);bx(2.6,.02,.5,'#f4a6c0',0,1.07,0,tb);

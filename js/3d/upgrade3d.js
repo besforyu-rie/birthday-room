@@ -376,7 +376,7 @@ const TVA=(()=>{let ac=null,out=null,nz=null,cur=-1,nodes=[],tok=0,armed=false;
 /* ================= GESER LAYAR: 2 jari (HP) / shift+seret atau klik kanan (PC), cubit untuk zoom ================= */
 {const Pt=new Map();let pan=false,lx=0,ly=0,ld=0,mouseP=false;
  const _d2=cv.onpointerdown,_m2=cv.onpointermove,_u2=cv.onpointerup,mid=()=>{const a=[...Pt.values()],p=a[0],q=a[1]||p;return{x:(p.x+q.x)/2,y:(p.y+q.y)/2,d:Math.hypot(p.x-q.x,p.y-q.y)}};
- const move=(dx,dy)=>{const k=.828*dist/innerHeight,s=Math.sin(yaw),c=Math.cos(yaw),f2=window.F2&&window.F2.on,cx=f2?window.F2.cx:[1,40,80][curRoom]||1,w=(f2||curRoom)?3:8;
+ const move=(dx,dy)=>{const k=.828*dist/innerHeight,s=Math.sin(yaw),c=Math.cos(yaw),f2=window.F2&&window.F2.on,cx=f2?window.F2.cx+(window.F2.pc||0):[1,40,80][curRoom]||1,w=(f2||curRoom)?((f2&&window.F2.pw)||3):8;
   goalT.x=cl(goalT.x-dx*k*c+dy*k*-s,cx-w,cx+w);goalT.z=cl(goalT.z+dx*k*s+dy*k*-c,(f2||curRoom)?-3:-2,(f2||curRoom)?3:6)};
  cv.oncontextmenu=e=>e.preventDefault();
  cv.onpointerdown=e=>{if(Z.on)return _d2(e);

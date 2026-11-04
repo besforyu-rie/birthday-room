@@ -714,36 +714,43 @@ cv.onwheel=e=>{dist=clamp(dist+e.deltaY*.01,9,40)};
 
 /* ---- loop ---- */
 let last=performance.now();const tgt=new THREE.Vector3(0,2.2,0);
+const _tkErr={};const tkWarn=(k,e)=>{if(!_tkErr[k]){_tkErr[k]=1;console.error('[tick:'+k+']',e);if(/[?&]debug=1/.test(location.search)){let b=document.getElementById('tkerr');if(!b){b=document.createElement('div');b.id='tkerr';b.style.cssText='position:fixed;left:6px;top:60px;z-index:99;max-width:90vw;background:#fff;color:#b0293f;border:3px solid #b0293f;padding:4px 8px;font:16px/1.2 monospace;white-space:pre-wrap;pointer-events:none';document.body.appendChild(b)}b.textContent+='['+k+'] '+(e&&e.stack?e.stack.split('\n').slice(0,3).join(' | '):e)+'\n'}}};
 (function tick(now){
+ requestAnimationFrame(tick);
  const dt=Math.min(.1,(now-last)/1000||0),t=now/1000;last=now;
- tgt.lerp(goalT,.12);loungeTick(dt,t);cam.position.set(tgt.x+dist*Math.sin(yaw)*Math.cos(pit),tgt.y+dist*Math.sin(pit),tgt.z+dist*Math.cos(yaw)*Math.cos(pit));cam.lookAt(tgt);
+ try{tgt.lerp(goalT,.12)}catch(e){tkWarn('tgt',e)}
+ try{loungeTick(dt,t)}catch(e){tkWarn('loungeTick',e)}
+ cam.position.set(tgt.x+dist*Math.sin(yaw)*Math.cos(pit),tgt.y+dist*Math.sin(pit),tgt.z+dist*Math.cos(yaw)*Math.cos(pit));cam.lookAt(tgt);
  balloons.forEach(b=>b.position.y=4.3+Math.sin(t*1.6+b.userData.p)*.12);
  flames.forEach((f,i)=>f.scale.y=.85+Math.sin(t*14+i)*.2);
  /* kucing */
- catStep(dt);winFx(dt);bulbs.forEach(b=>b.visible=night);
+ try{catStep(dt)}catch(e){tkWarn('catStep',e)}try{winFx(dt)}catch(e){tkWarn('winFx',e)}try{bulbs.forEach(b=>b.visible=night)}catch(e){tkWarn('bulbs',e)}
  hop=Math.max(0,hop-dt);cat.position.y=hop>0?Math.sin((1-hop/.72)*Math.PI)*1.1:0;
  /* avatar */
- if(window.avStep)avStep(dt);else if(apause>0){apause-=dt;legs.forEach(l=>l.rotation.x=0);av.rotation.y=0}
+ if(window.avStep){try{avStep(dt)}catch(e){tkWarn('avStep',e)}}else if(apause>0){apause-=dt;legs.forEach(l=>l.rotation.x=0);av.rotation.y=0}
  else{av.position.x+=adir*1.1*dt;aT+=dt;legs[0].rotation.x=Math.sin(aT*8)*.6;legs[1].rotation.x=-Math.sin(aT*8)*.6;av.rotation.y=adir>0?Math.PI/2:-Math.PI/2;
   if(av.position.x>7.8){adir=-1;apause=1.2}else if(av.position.x<-5.8){adir=1;apause=1.2}else if(Math.random()<dt*.12)apause=1.4}
  if(sayT>0&&sayO){sayT-=dt;sayO.getWorldPosition(pv);pv.y+=1.2;pv.project(cam);sayEl.style.left=(pv.x*.5+.5)*innerWidth+'px';sayEl.style.top=(-pv.y*.5+.5)*innerHeight+'px';if(sayT<=0)sayEl.style.display='none'}
- REN.render(S,cam);requestAnimationFrame(tick);
+ try{REN.render(S,cam)}catch(e){tkWarn('render',e)}
 })(performance.now());
 addEventListener('pointerdown',function f(e){removeEventListener('pointerdown',f);if(!e.target.closest('#rdo')&&!au.src&&T.length&&ls('bday-radio')!=='0')pl()});
 </script>
-  <script src="js/3d/room3d.js?v=6"></script>
+  <script src="js/3d/room3d.js?v=7"></script>
   <script src="js/3d/ui3d.js?v=1"></script>
   <script src="js/3d/upgrade3d.js?v=7"></script>
   <script src="js/3d/secret3d.js?v=3"></script>
-  <script src="js/3d/floor2.js?v=5"></script>
+  <script src="js/3d/floor2.js?v=6"></script>
   <script src="js/3d/basement3d.js?v=1"></script>
   <script src="js/3d/outdoor3d.js?v=7"></script>
-  <script src="js/3d/interact3d.js?v=12"></script>
+  <script src="js/3d/interact3d.js?v=14"></script>
   <script src="js/3d/wall3d.js?v=3"></script>
-  <script src="js/3d/housemodel3d.js?v=1"></script>
+  <script src="js/3d/housemodel3d.js?v=2"></script>
   <script src="js/3d/badge3d.js?v=1"></script>
-  <script src="js/3d/live3d.js?v=3"></script>
+  <script src="js/3d/live3d.js?v=5"></script>
   <script src="js/3d/greet3d.js?v=1"></script>
   <script src="js/3d/guestbook3d.js?v=1"></script>
+  <script src="js/3d/komplek3d.js?v=2"></script>
+  <script src="js/3d/mart3d.js?v=4"></script>
+  <script src="js/3d/perpus3d.js?v=1"></script>
 <style>#sw{position:fixed;top:8px;left:8px;z-index:15;display:inline-block;text-decoration:none;font-size:10px;padding:9px 10px}</style><a class="btn alt" id="sw" href="index2d.html" aria-label="pindah ke versi 2D">2D</a>
 </body></html>

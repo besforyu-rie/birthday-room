@@ -1,21 +1,25 @@
 /* housemodel3d.js — MINIATUR RUMAH di LOUNGE + halaman preview 3D seluruh rumah.
    Taruh sefolder dengan index.html, muat SETELAH outdoor3d.js (disarankan setelah wall3d.js, sebelum live3d.js):
-     <script src="housemodel3d.js?v=1"></script>
+     <script src="housemodel3d.js?v=2"></script>
    Cara kerja:
    - Di lounge (pojok kanan-depan, dekat pintu teras) ada miniatur rumah di bawah kubah kaca. Tap = buka preview.
    - Preview = layar penuh dengan model 3D rumah mewah (serasi dengan teras): portico + pilar + pediment, balustrade marmer,
      taman formal (air mancur, gazebo kubah), lantai 1, lantai 2 + balkon, atap, dan garasi di basement.
    - Seret = putar, scroll / cubit = zoom. Tombol bawah: tampak luar, lantai 1, lantai 2, garasi (potongan denah dengan nama ruangan).
    - Siang/malam ikut tombol lampu di ruang utama. Esc / tombol "tutup" untuk keluar.
-   Mau geser miniaturnya? Ubah MINI di bawah (koordinat lokal lounge). */
+   Mau geser miniaturnya? Ubah MINI di bawah (koordinat lokal lounge).
+   v2: lantai 2 diperluas ke kanan sebesar EXTU (ruang santai di samping kamar tidur, kamar mandi di samping dapur) — badan rumah, tiang penyangga, atap, dan denah potongan lantai 2 ikut berubah. */
 (()=>{
 if(typeof THREE==='undefined'||typeof S==='undefined'||typeof LG==='undefined'||typeof lact==='undefined'||typeof say3==='undefined'||typeof winFx==='undefined')return;
 
 /* ===== EDIT: posisi miniatur di lounge (koordinat lokal lounge) ===== */
 const MINI={x:6.3,z:1.9};
-const MINI_SCALE=.036;
+const MINI_SCALE=.031;
+/* ===== perluasan lantai 2 ke kanan (satuan model). L2W = lebar ruang santai, BATHW = lebar kamar mandi, EXTU = jumlah keduanya ===== */
+const L2W=3.6,BATHW=3.4,EXTU=L2W+BATHW;
+const SOILC=(-13+(6+EXTU+1.2))/2;      /* titik tengah tanah diorama (sebelumnya -3) */
 
-console.log('housemodel3d.js v1 loaded');
+console.log('housemodel3d.js v2 loaded');
 const PX='"Press Start 2P",monospace';
 const GOLDC='#d9b24c',MARBC='#f4efe4',MARB2C='#e3dccb',WALLC='#f0e5d0',IRONC='#1d222c';
 
@@ -54,9 +58,10 @@ function buildHouse(){
 
  /* ---------- tanah: diorama (tanah coklat + rumput) ---------- */
  const soilM=[L('#7a5a3a'),L('#7a5a3a'),L('#5fae5a'),L('#4a3220'),L('#7a5a3a'),L('#7a5a3a')];
- const soil=put(new THREE.BoxGeometry(20,3.2,16),soilM,-3,-1.6,1);
+ const soil=put(new THREE.BoxGeometry(20+EXTU+.2,3.2,16),soilM,SOILC,-1.6,1);
  const lot=grp(0,0,0);                              /* semua yang di atas tanah (disembunyikan saat mode garasi) */
- [[-6,-4.2,2.6],[-9.5,2.6,2.2],[-12,-5.5,2.0]].forEach(([x,z,r],i)=>flat(r*1.4,r,i%2?'#6cbb64':'#68b660',x,.012,z,lot).rotation.z=i);
+ [[-6,-4.2,2.6],[-9.5,2.6,2.2],[-12,-5.5,2.0],[9.6,-5.2,2.2],[12.8,5.0,2.0]].forEach(([x,z,r],i)=>flat(r*1.4,r,i%2?'#6cbb64':'#68b660',x,.012,z,lot).rotation.z=i);
+ flat(EXTU+.4,D+.6,'#e3dccb',6+EXTU/2+.1,.016,0,lot);   /* paving di bawah perluasan lantai 2 */
  /* ---------- plinth + teras ---------- */
  const plin=grp(0,0,0,lot);
  box(12.6,PL,7.6,MARB2C,0,PL/2,0,plin);box(12.8,.06,7.8,GOLDC,0,PL-.02,0,plin);
@@ -89,8 +94,8 @@ function buildHouse(){
  /* jalan depan + pagar besi + gerbang */
  flat(2.6,1.5,'#e9e1cd',0,.014,8.35,lot);
  {const z=8.95,fe=(x0,x1)=>{box(x1-x0,.05,.05,IRONC,(x0+x1)/2,1.15,z,lot);box(x1-x0,.05,.05,IRONC,(x0+x1)/2,.3,z,lot);const n=Math.round((x1-x0)/.22);for(let i=0;i<=n;i++){const x=x0+(x1-x0)*i/n;cyl(.014,.014,1.2,IRONC,x,.62,z,lot,5);if(i%2===0)put(new THREE.ConeGeometry(.04,.1,6),L(GOLDC),x,1.3,z,lot)}};
-  fe(-12.6,-1.7);fe(1.7,6.6);[-1.55,1.55].forEach(x=>{box(.46,.3,.46,MARBC,x,.15,z,lot);box(.36,1.9,.36,'#e9e1cf',x,1.25,z,lot);box(.46,.08,.46,MARBC,x,2.24,z,lot);sph(.16,GOLDC,x,2.45,z,lot)});
-  [-9,-5,-2.7,2.7,6.6].forEach(x=>{box(.22,1.5,.22,'#e9e1cf',x,.75,z,lot);sph(.08,GOLDC,x,1.6,z,lot)})}
+  fe(-12.6,-1.7);fe(1.7,13.8);[-1.55,1.55].forEach(x=>{box(.46,.3,.46,MARBC,x,.15,z,lot);box(.36,1.9,.36,'#e9e1cf',x,1.25,z,lot);box(.46,.08,.46,MARBC,x,2.24,z,lot);sph(.16,GOLDC,x,2.45,z,lot)});
+  [-9,-5,-2.7,2.7,6.6,10.2,13.8].forEach(x=>{box(.22,1.5,.22,'#e9e1cf',x,.75,z,lot);sph(.08,GOLDC,x,1.6,z,lot)})}
 
  /* ---------- LANTAI 1 (cangkang) ---------- */
  const s1=grp(0,Y1,0);
@@ -120,13 +125,17 @@ function buildHouse(){
  [-1.9,1.9].forEach(x=>{const lt=put(new THREE.BoxGeometry(.2,.38,.2),lampMat,x,2.7,5.0,por);lampGlows.push(lt);box(.28,.06,.28,GOLDC,x,2.95,5.0,por);halo(x,2.7,5.1,por,1.5)});
  /* ---------- PELAT + LANTAI 2 ---------- */
  const up=grp(0,0,0);
- box(W+.4,SLAB,D+.4,MARBC,0,Y1+H1+SLAB/2,0,up);box(W+.5,.05,D+.5,GOLDC,0,Y1+H1+.02,0,up);
+ const W2=W+EXTU,CX2=EXTU/2;                       /* lantai 2 lebih lebar ke kanan */
+ box(W2+.4,SLAB,D+.4,MARBC,CX2,Y1+H1+SLAB/2,0,up);box(W2+.5,.05,D+.5,GOLDC,CX2,Y1+H1+.02,0,up);
+ /* tiang penyangga di bawah perluasan */
+ {const col=(x,z)=>{const c=grp(x,PL,z,up);box(.55,.14,.55,MARBC,0,.07,0,c);box(.42,.1,.42,MARB2C,0,.19,0,c);cyl(.17,.2,H1-.4,MARBC,0,(H1-.4)/2+.2,0,c,14);box(.5,.1,.5,GOLDC,0,H1-.15,0,c);box(.6,.12,.6,MARBC,0,H1-.06,0,c)};
+  [[9.4,3.0],[12.7,3.0],[9.4,-3.0],[12.7,-3.0],[12.7,0]].forEach(([x,z])=>col(x,z))}
  const s2=grp(0,Y2,0,up);
- box(W,H2,.25,WALLC,0,H2/2,D/2-.125,s2);box(W,H2,.25,WALLC,0,H2/2,-D/2+.125,s2);box(.25,H2,D,WALLC,-W/2+.125,H2/2,0,s2);box(.25,H2,D,WALLC,W/2-.125,H2/2,0,s2);
- [-W/2,W/2].forEach(x=>[-D/2,D/2].forEach(z=>{for(let i=0;i<5;i++){const wide=i%2?.5:.34;box(wide,.5,.5,MARB2C,x+(x<0?1:-1)*.05,.3+i*.68,z+(z<0?1:-1)*.05,s2)}}));
- [-4.6,-2.6,2.6,4.6].forEach(x=>win(s2,x,1.8,D/2,0,1.1,1.7));win(s2,0,2.0,D/2,0,1.4,2.1);
- [-1.8,1.8].forEach(z=>win(s2,W/2,1.8,z,Math.PI/2,1.2,1.7));
- [-4,-1.3,1.3,4].forEach(x=>win(s2,x,1.8,-D/2,Math.PI,1.2,1.7));
+ box(W2,H2,.25,WALLC,CX2,H2/2,D/2-.125,s2);box(W2,H2,.25,WALLC,CX2,H2/2,-D/2+.125,s2);box(.25,H2,D,WALLC,-W/2+.125,H2/2,0,s2);box(.25,H2,D,WALLC,W/2+EXTU-.125,H2/2,0,s2);
+ [-W/2,W/2+EXTU].forEach(x=>[-D/2,D/2].forEach(z=>{for(let i=0;i<5;i++){const wide=i%2?.5:.34;box(wide,.5,.5,MARB2C,x+(x<0?1:-1)*.05,.3+i*.68,z+(z<0?1:-1)*.05,s2)}}));
+ [-4.6,-2.6,2.6,4.6,7.6,9.9,12.0].forEach(x=>win(s2,x,1.8,D/2,0,1.1,1.7));win(s2,0,2.0,D/2,0,1.4,2.1);
+ [-1.8,1.8].forEach(z=>win(s2,W/2+EXTU,1.8,z,Math.PI/2,1.2,1.7));
+ [-4,-1.3,1.3,4,7.4,10.2,12.4].forEach(x=>win(s2,x,1.8,-D/2,Math.PI,1.2,1.7));
  win(s2,-W/2,1.6,-2.9,-Math.PI/2,1.0,1.7);win(s2,-W/2,1.6,2.9,-Math.PI/2,1.0,1.7);
  /* pintu kaca ke balkon (dinding kiri) */
  {const d=grp(-W/2,0,0,s2);d.rotation.y=-Math.PI/2;box(2.1,2.8,.14,MARBC,0,1.4,0,d);[-1,1].forEach(s=>{box(.9,2.55,.06,'#5b3822',s*.46,1.35,.06,d);put(new THREE.PlaneGeometry(.7,2.2),glassMat,s*.46,1.4,.1,d)});box(.04,2.6,.08,GOLDC,0,1.35,.1,d)}
@@ -142,17 +151,17 @@ function buildHouse(){
   for(let i=0;i<9;i++){const u=i/8;sph(.05,['#f0cf6a','#fff1cf','#f4a6c0','#ffffff'][i%4],-1.1,2.0-.22*Math.sin(u*Math.PI),-2.0+u*4.0,bal)}}
  /* ---------- ATAP (hip) + cornice ---------- */
  const roof=grp(0,0,0);
- box(W+.6,.25,D+.6,MARBC,0,YR+.12,0,roof);box(W+.7,.05,D+.7,GOLDC,0,YR-.02,0,roof);
- for(let i=0;i<37;i++)box(.12,.1,.1,MARBC,-W/2-.2+i*.34,YR-.1,D/2+.3,roof);
- {const w=W+1.6,d=D+1.6,h=2.7,r=(w-d)/2,y0=YR+.25;
+ box(W2+.6,.25,D+.6,MARBC,CX2,YR+.12,0,roof);box(W2+.7,.05,D+.7,GOLDC,CX2,YR-.02,0,roof);
+ for(let i=0,n=Math.round((W2+.4)/.34);i<n;i++)box(.12,.1,.1,MARBC,-W/2-.2+i*.34,YR-.1,D/2+.3,roof);
+ {const w=W2+1.6,d=D+1.6,h=2.7,r=(w-d)/2,y0=YR+.25;
   const v=(x,y,z)=>[x,y,z],A=v(-w/2,0,d/2),Bv=v(w/2,0,d/2),C=v(w/2,0,-d/2),Dv=v(-w/2,0,-d/2),R1=v(-r,h,0),R2=v(r,h,0);
   const pos=[].concat(A,Bv,R2,A,R2,R1,Bv,C,R2,C,Dv,R1,C,R1,R2,Dv,A,R1);
   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.computeVertexNormals();
-  const m=put(g,new THREE.MeshLambertMaterial({color:'#33507d',side:THREE.DoubleSide}),0,y0,0,roof);
-  const m2=put(g,new THREE.MeshLambertMaterial({color:'#243a5e',wireframe:true}),0,y0+.012,0,roof);
-  box(r*2,.14,.2,GOLDC,0,y0+h,0,roof);sph(.16,GOLDC,-r,y0+h,0,roof);sph(.16,GOLDC,r,y0+h,0,roof);
+  const m=put(g,new THREE.MeshLambertMaterial({color:'#33507d',side:THREE.DoubleSide}),CX2,y0,0,roof);
+  const m2=put(g,new THREE.MeshLambertMaterial({color:'#243a5e',wireframe:true}),CX2,y0+.012,0,roof);
+  box(r*2,.14,.2,GOLDC,CX2,y0+h,0,roof);sph(.16,GOLDC,CX2-r,y0+h,0,roof);sph(.16,GOLDC,CX2+r,y0+h,0,roof);
   /* dormer depan */
-  [-3.4,3.4].forEach(x=>{const dg=grp(x,y0+.95,2.3,roof);box(1.3,1.2,1.1,WALLC,0,.5,0,dg);put(new THREE.PlaneGeometry(.8,.8),glassMat,0,.55,.56,dg);box(1.0,.06,.1,MARBC,0,.1,.58,dg);tri(1.6,.75,1.3,'#33507d',0,1.1,0,dg);sph(.07,GOLDC,0,1.9,.0,dg)});
+  [-3.4,3.4,10.4].forEach(x=>{const dg=grp(x,y0+.95,2.3,roof);box(1.3,1.2,1.1,WALLC,0,.5,0,dg);put(new THREE.PlaneGeometry(.8,.8),glassMat,0,.55,.56,dg);box(1.0,.06,.1,MARBC,0,.1,.58,dg);tri(1.6,.75,1.3,'#33507d',0,1.1,0,dg);sph(.07,GOLDC,0,1.9,.0,dg)});
   /* cerobong */
   box(.9,2.0,.9,'#8b4a3c',4.1,y0+h*.55+.6,-1.2,roof);box(1.1,.15,1.1,MARBC,4.1,y0+h*.55+1.65,-1.2,roof)}
 
@@ -175,7 +184,7 @@ function buildHouse(){
  const tree=(x,z,sc)=>{const t=grp(x,0,z,gar);cyl(.14*sc,.2*sc,1.6*sc,'#5a3b22',0,.8*sc,0,t,8);const cs=['#3f9150','#4fa05a','#5fb86a','#479a57'];
   [[0,2.1,0,.9],[.5,2.5,.1,.6],[-.45,2.4,-.1,.55],[.1,2.9,.05,.5],[-.2,1.8,.4,.5],[.3,1.9,-.4,.5]].forEach(([a,b,c,r],i)=>sph(r*sc,cs[i%4],a*sc,b*sc,c*sc,t));
   [[.4,1.9,.6],[-.5,2.2,.5],[.1,2.8,.45],[.6,2.4,.3]].forEach(([a,b,c],i)=>sph(.09*sc,i%2?'#f4a6c0':'#fff1f4',a*sc,b*sc,c*sc,t))};
- tree(-11.6,-4.6,1.1);tree(-11.5,6.0,1.0);tree(-7.2,-5.4,.9);
+ tree(-11.6,-4.6,1.1);tree(-11.5,6.0,1.0);tree(-7.2,-5.4,.9);tree(13.2,-5.4,1.0);tree(9.4,6.3,.9);
  box(.6,1.2,10.2,'#2f7a45',-12.55,.6,1.5,gar);for(let i=0;i<7;i++)sph(.34,'#2f7a45',-12.55,1.35,-3.1+i*1.45,gar);
  box(5.6,1.1,.6,'#2f7a45',-9.5,.55,-5.5,gar);
  [[-8.2,6.9,2.4],[-11.2,6.9,2.0]].forEach(([x,z,wd])=>{const b=grp(x,0,z,gar);box(wd,.4,.7,MARBC,0,.2,0,b);box(wd+.06,.05,.76,GOLDC,0,.4,0,b);box(wd-.2,.1,.5,'#5a3b22',0,.42,0,b);
@@ -203,14 +212,37 @@ function buildHouse(){
  {const tk=put(new THREE.BoxGeometry(1.5,1.0,.8),new THREE.MeshLambertMaterial({color:'#8dbdf7',transparent:true,opacity:.55}),5.2,1.45,-2.3,in1)}box(1.0,.9,.9,'#a8743f',5.2,.45,-2.3,in1);
  cyl(1.3,1.3,.03,'#f4a6c0',3.2,.07,-1.2,in1,22);
  [0,1,2].forEach(i=>box(.08,1.2,.9,['#4f7fb8','#e0a93f','#4f7fb8'][i],5.7,1.5,.7+i*.9,in1));box(1.4,.5,.5,'#4f8fe8',3.2,.25,1.7,in1);
- /* lantai 2 */
+ /* lantai 2 (diperluas ke kanan: ruang santai di samping kamar tidur, kamar mandi di samping dapur) */
+ const XL=-.2,XD=XL+L2W,XB=5.9+EXTU-BATHW;     /* ruang santai XL..XD · ruang makan XD..XB · kamar mandi XB..(5.9+EXTU) */
  room(in2,-5.9,-.2,-3.4,3.4,'#d9c8f3','kamar tidur',2.2);
- room(in2,-.2,5.9,-3.4,3.4,'#cfe0cf','ruang makan & dapur',2.2,10);
+ room(in2,XL,XD,-3.4,3.4,'#f3d3e3','ruang santai',2.2,12);
+ room(in2,XD,XB,-3.4,3.4,'#cfe0cf','ruang makan & dapur',2.2,10);
+ room(in2,XB,5.9+EXTU,-3.4,3.4,'#bfe4ec','kamar mandi',2.2,12);
  room(in2,-8.4,-6.0,-2.1,2.1,'#b99a72','balkon',2.0,13);
+ /* kamar tidur */
  box(2.4,.5,3.3,'#8a5a34',-3.0,.3,-1.7,in2);box(2.2,.3,3.1,'#fffdf3',-3.0,.7,-1.7,in2);box(2.2,.16,2.0,'#8fd0f0',-3.0,.92,-1.2,in2);box(.9,.2,.5,'#f4a6c0',-3.4,.95,-3.0,in2);
  box(.9,.7,.6,'#c98b52',-1.4,.35,-3.1,in2);box(.7,2.9,2.0,'#d9b98a',-5.5,1.45,-1.3,in2);box(.7,1.0,1.8,'#c98b52',-5.5,.5,2.0,in2);
- box(5.2,.9,.8,'#4f7fb8',2.9,.45,-3.0,in2);box(1.2,2.6,.9,'#c9d3e2',5.2,1.3,-1.6,in2);box(2.8,.12,1.5,'#c98b52',1.6,1.0,.9,in2);
- [[.5,-.2],[2.7,-.2],[.5,2.0],[2.7,2.0]].forEach(([x,z])=>box(.5,.6,.5,'#4f8fe8',x,.4,z,in2));cyl(.45,.45,.1,'#fff1cf',-.0+1.6,1.1,.9,in2,10);
+ /* ruang santai: rak buku, TV, sofa, meja kopi, beanbag, lampu lantai, pojok tanaman, meja catur */
+ {const lx=XL;
+  box(.8,2.8,.5,'#c98b52',lx+.55,1.4,-3.05,in2);[0,1,2,3].forEach(i=>box(.6,.14,.1,['#e84a5f','#4f8fe8','#f2c14e','#8fd18a'][i],lx+.55,.6+i*.6,-2.78,in2));
+  box(1.4,.5,.5,'#e8d8b8',lx+1.8,.25,-3.05,in2);box(1.2,.8,.08,'#10151f',lx+1.8,1.1,-3.2,in2);box(1.0,.6,.02,'#3f6fb5',lx+1.8,1.1,-3.15,in2);
+  cyl(.04,.05,1.9,'#2a3a52',lx+3.1,1.05,-3.0,in2,6);cyl(.2,.3,.4,'#ffe9a0',lx+3.1,2.1,-3.0,in2,10);
+  cyl(1.25,1.25,.03,'#7fc4c4',lx+1.8,.07,-.2,in2,22);box(1.3,.4,.7,'#c98b52',lx+1.8,.25,-.2,in2);box(1.1,.04,.5,'#e8f4fb',lx+1.8,.47,-.2,in2);
+  box(2.3,.5,.9,'#4a9a9a',lx+1.8,.3,1.4,in2);box(2.3,.7,.22,'#3f8a8a',lx+1.8,.8,1.82,in2);[-1,1].forEach(k=>box(.22,.6,.9,'#3f8a8a',lx+1.8+k*1.12,.55,1.4,in2));
+  sph(.4,'#f2c14e',lx+.35,.4,-.5,in2);sph(.4,'#f4a6c0',lx+3.0,.4,-.9,in2);
+  cyl(.2,.17,.4,'#c98b52',lx+3.1,.25,2.8,in2,10);sph(.38,'#3f9150',lx+3.1,.85,2.8,in2);sph(.12,'#f4a6c0',lx+3.2,1.2,2.8,in2);
+  cyl(.4,.4,.05,'#c98b52',lx+.4,.7,2.6,in2,12);cyl(.04,.04,.7,'#5a3b22',lx+.4,.35,2.6,in2,6);box(.4,.45,.4,'#4fb3a8',lx+.4,.25,1.9,in2);box(.4,.45,.4,'#e07a8f',lx+.4,.25,3.3,in2)}
+ /* ruang makan & dapur (digeser sebesar lebar ruang santai) */
+ {const sx=L2W;
+  box(5.2,.9,.8,'#4f7fb8',2.9+sx,.45,-3.0,in2);box(1.2,2.6,.9,'#c9d3e2',5.2+sx,1.3,-1.6,in2);box(2.8,.12,1.5,'#c98b52',1.6+sx,1.0,.9,in2);
+  [[.5,-.2],[2.7,-.2],[.5,2.0],[2.7,2.0]].forEach(([x,z])=>box(.5,.6,.5,'#4f8fe8',x+sx,.4,z,in2));cyl(.45,.45,.1,'#fff1cf',1.6+sx,1.1,.9,in2,10)}
+ /* kamar mandi: bak mandi, toilet, wastafel, keranjang, keset, pakis */
+ {const bx0=XB;
+  box(2.2,.7,1.1,'#f4f8fb',bx0+1.3,.38,-2.75,in2);box(1.9,.05,.8,'#8fd0f0',bx0+1.3,.7,-2.75,in2);cyl(.03,.03,2.2,'#cfd6e0',bx0+2.2,1.2,-3.25,in2,6);cyl(.14,.14,.05,'#cfd6e0',bx0+2.2,2.3,-3.0,in2,8);
+  box(.5,.7,.3,'#f7fbfd',bx0+2.95,.45,-3.15,in2);box(.5,.4,.7,'#ffffff',bx0+2.95,.25,-2.75,in2);
+  box(1.1,.9,.55,'#d9b98a',bx0+.7,.45,2.9,in2);box(.9,.05,.4,'#e8f0f6',bx0+.7,.92,2.9,in2);box(.9,.9,.05,'#bfe4f6',bx0+.7,1.6,3.2,in2);
+  cyl(.28,.25,.7,'#d9b98a',bx0+2.9,.35,2.6,in2,10);box(1.4,.04,.7,'#7fc4c4',bx0+1.3,.06,-1.6,in2);
+  sph(.35,'#3f9150',bx0+2.9,.9,.6,in2);cyl(.2,.17,.4,'#e9e2d2',bx0+2.9,.25,.6,in2,10)}
  box(.12,.9,.12,'#5a3b22',-7.2,.5,0,in2);cyl(.35,.35,.05,'#c98b52',-7.6,.7,0,in2,12);
  /* garasi (basement) */
  box(11.4,.2,6.4,'#4a5160',0,.1,0,inB);
@@ -267,7 +299,7 @@ const ped=new THREE.Group();ped.position.set(MINI.x,0,MINI.z);LG.add(ped);
  [[-.54,-.54],[.54,-.54],[-.54,.54],[.54,.54]].forEach(([x,z])=>bx2(.04,.8,.04,GOLDC,x,1.31,z));bx2(1.12,.04,1.12,GOLDC,0,1.72,0);
  const topK=new THREE.Mesh(new THREE.SphereGeometry(.05,8,6),LM(GOLDC));topK.position.set(0,1.78,0);ped.add(topK)}
 const spin=new THREE.Group(),sc=new THREE.Group(),cen=new THREE.Group();
-spin.position.y=.9+3.2*MINI_SCALE+.02;sc.scale.setScalar(MINI_SCALE);cen.position.set(3,0,-1);spin.add(sc);sc.add(cen);ped.add(spin);
+spin.position.y=.9+3.2*MINI_SCALE+.02;sc.scale.setScalar(MINI_SCALE);cen.position.set(-SOILC,0,-1);spin.add(sc);sc.add(cen);ped.add(spin);
 const mini=buildHouse();cen.add(mini.root);
 const sgn=new THREE.Sprite(new THREE.SpriteMaterial({map:labelTex('rumah Aqsa',13),transparent:true}));sgn.scale.set(1.5,.375,1);sgn.position.set(0,2.2,0);ped.add(sgn);
 lact(ped,()=>openHouse());
@@ -285,11 +317,11 @@ const hm=document.createElement('div');hm.id='hm';
 hm.innerHTML='<canvas></canvas><div class="ttl"><b>rumah Aqsa</b><span id="hmc"></span></div><button class="btn alt cl" id="hmx">tutup</button><div class="hn">seret = putar &nbsp; scroll / cubit = zoom</div>'
  +'<div class="bb"><button class="btn" data-m="out">tampak luar</button><button class="btn" data-m="l1">lantai 1</button><button class="btn" data-m="l2">lantai 2</button><button class="btn" data-m="b">garasi</button></div>';
 document.body.appendChild(hm);
-const CAP={out:'teras marmer, taman formal, lantai 2 + balkon',l1:'ruang utama · lounge · galeri kenangan',l2:'kamar tidur · ruang makan & dapur · balkon',b:'basement: garasi + mobil'};
+const CAP={out:'teras marmer, taman formal, lantai 2 + balkon',l1:'ruang utama · lounge · galeri kenangan',l2:'kamar tidur · ruang santai · ruang makan & dapur · kamar mandi · balkon',b:'basement: garasi + mobil'};
 const hcv=hm.querySelector('canvas'),capEl=hm.querySelector('#hmc'),btns=[...hm.querySelectorAll('[data-m]')];
 
 let ren=null,sc2=null,cam2=null,big=null,amb2=null,sun2=null,raf=0,open=false,lt=0;
-let yaw=.55,pit=.42,dist=36,gp=null,auto=true;const tgt2=new THREE.Vector3(-3,3.2,1.6),tg2=new THREE.Vector3(-3,3.2,1.6);
+let yaw=.55,pit=.42,dist=36,gp=null,auto=true;const tgt2=new THREE.Vector3(SOILC,3.2,1.6),tg2=new THREE.Vector3(SOILC,3.2,1.6);
 const MT={out:{y:3.4,p:.42},l1:{y:1.2,p:.95},l2:{y:4.4,p:.95},b:{y:-2.0,p:.95}};
 function init(){
  ren=new THREE.WebGLRenderer({canvas:hcv,antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));
@@ -307,10 +339,10 @@ function init(){
  btns.forEach(b=>b.onclick=()=>pick(b.dataset.m));
  hm.querySelector('#hmx').onclick=closeHouse;
 }
-function pick(m){big.setMode(m);btns.forEach(b=>b.classList.toggle('on',b.dataset.m===m));capEl.textContent=CAP[m];tg2.set(-3,MT[m].y,1.6);goalPit=MT[m].p;
+function pick(m){big.setMode(m);btns.forEach(b=>b.classList.toggle('on',b.dataset.m===m));capEl.textContent=CAP[m];tg2.set(SOILC,MT[m].y,1.6);goalPit=MT[m].p;
  pitGoal=true}
 let goalPit=.42,pitGoal=false;
-function size(){if(!ren)return;const w=innerWidth,h=innerHeight;ren.setSize(w,h,false);cam2.aspect=w/h;cam2.updateProjectionMatrix();if(!open)return;dist=clamp(w<h?Math.max(dist,52):dist,14,70)}
+function size(){if(!ren)return;const w=innerWidth,h=innerHeight;ren.setSize(w,h,false);cam2.aspect=w/h;cam2.updateProjectionMatrix();if(!open)return;dist=clamp(w<h?Math.max(dist,60):dist,14,70)}
 function loop(now){
  if(!open)return;raf=requestAnimationFrame(loop);
  const dt=Math.min(.1,(now-lt)/1000||0),t=now/1000;lt=now;
@@ -324,7 +356,7 @@ function loop(now){
 const onKey=e=>{if(e.key==='Escape')closeHouse()};
 function openHouse(){
  if(open)return;if(!ren)init();open=true;hm.classList.add('on');
- dist=innerWidth<innerHeight?56:38;yaw=.55;pit=.42;auto=true;tgt2.set(-3,3.4,1.6);tg2.copy(tgt2);goalPit=.42;pitGoal=false;gp=null;
+ dist=innerWidth<innerHeight?64:46;yaw=.55;pit=.42;auto=true;tgt2.set(SOILC,3.4,1.6);tg2.copy(tgt2);goalPit=.42;pitGoal=false;gp=null;
  big.setMode('out',true);btns.forEach(b=>b.classList.toggle('on',b.dataset.m==='out'));capEl.textContent=CAP.out;
  size();lt=performance.now();raf=requestAnimationFrame(loop);addEventListener('keydown',onKey);
  if(typeof sayEl!=='undefined')sayEl.style.display='none'}

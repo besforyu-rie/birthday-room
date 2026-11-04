@@ -23,17 +23,25 @@ service cloud.firestore {
     match /visitors/{id} {
       function okV() {
         let d = request.resource.data;
-        return d.keys().hasOnly(['n','g','hs','hc','sc','sk','ah','gl','ts'])
+        return d.keys().hasOnly(['n','g','hs','pn','hd','hc','sc','sk','ah','gl','fc','ey','bj','cp','ac','ex','ts'])
           && d.keys().hasAll(['n','g','hs','hc','sc','sk','ah','gl','ts'])
           && id.size() <= 64
           && d.n is string && d.n.size() >= 1 && d.n.size() <= 12
           && d.g is int && d.g >= 0 && d.g <= 2
-          && d.hs is int && d.hs >= 0 && d.hs <= 5
-          && d.hc is int && d.hc >= 0 && d.hc <= 7
-          && d.sc is int && d.sc >= 0 && d.sc <= 7
+          && d.hs is int && d.hs >= 0 && d.hs <= 10
+          && d.get('pn', 0) is int && d.get('pn', 0) >= 0 && d.get('pn', 0) <= 4
+          && d.get('hd', 0) is int && d.get('hd', 0) >= 0 && d.get('hd', 0) <= 6
+          && d.hc is int && d.hc >= 0 && d.hc <= 11
+          && d.sc is int && d.sc >= 0 && d.sc <= 11
           && d.sk is int && d.sk >= 0 && d.sk <= 4
-          && d.ah is int && d.ah >= 0 && d.ah <= 4
-          && d.gl is int && d.gl >= 0 && d.gl <= 1
+          && d.ah is int && d.ah >= 0 && d.ah <= 13
+          && d.gl is int && d.gl >= 0 && d.gl <= 3
+          && d.get('fc', 0) is int && d.get('fc', 0) >= 0 && d.get('fc', 0) <= 3
+          && d.get('ey', 0) is int && d.get('ey', 0) >= 0 && d.get('ey', 0) <= 4
+          && d.get('bj', 0) is int && d.get('bj', 0) >= 0 && d.get('bj', 0) <= 4
+          && d.get('cp', 0) is int && d.get('cp', 0) >= 0 && d.get('cp', 0) <= 1
+          && d.get('ac', 0) is int && d.get('ac', 0) >= 0 && d.get('ac', 0) <= 7
+          && d.get('ex', 0) is int && d.get('ex', 0) >= 0 && d.get('ex', 0) <= 6
           && d.ts is number;
       }
       function fresh() {
@@ -46,14 +54,14 @@ service cloud.firestore {
       allow delete: if false;
     }
 
-        match /presence/{id} {
+    match /presence/{id} {
       function okP() {
         let d = request.resource.data;
         return d.keys().hasOnly(['n','r','ts'])
           && d.keys().hasAll(['n','r','ts'])
           && id.size() <= 64
           && d.n is string && d.n.size() >= 1 && d.n.size() <= 12
-          && d.r is int && d.r >= -1 && d.r <= 8
+          && d.r is int && d.r >= -1 && d.r <= 11
           && d.ts == request.time;
       }
       allow read: if true;
@@ -70,7 +78,7 @@ service cloud.firestore {
           && id.size() <= 64
           && d.n is string && d.n.size() >= 1 && d.n.size() <= 12
           && d.k in ['pet','feed','wish','sit','tv','balloon','candle','wave']
-          && d.r is int && d.r >= 0 && d.r <= 8
+          && d.r is int && d.r >= 0 && d.r <= 11
           && d.ts == request.time;
       }
       allow read: if true;
@@ -84,13 +92,13 @@ service cloud.firestore {
       allow write: if false;
     }
 
-        match /pos/{id} {
+    match /pos/{id} {
       function okPos() {
         let d = request.resource.data;
         return d.keys().hasOnly(['r','x','z','tx','tz','m','ts'])
           && d.keys().hasAll(['r','x','z','tx','tz','m','ts'])
           && id.size() <= 64
-          && d.r is int && d.r >= 0 && d.r <= 8
+          && d.r is int && d.r >= 0 && d.r <= 11
           && d.x is number && d.x >= -20 && d.x <= 20
           && d.z is number && d.z >= -20 && d.z <= 20
           && d.tx is number && d.tx >= -20 && d.tx <= 20

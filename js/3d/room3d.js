@@ -451,7 +451,7 @@ function decide(e){
   if(r<.85){const i=pickPoi(e);if(i>=0&&goPoi(e,i))return}
   const q=rndPt(0);if(!goTo(e,q.x,q.z,null))R.wait=1;return}
  const ds=DRS[rm];
- if(rm?r<.28:r<.05){const d=rm?ds[0]:ds[Math.random()*ds.length|0];e.xfer=d;if(goTo(e,d.x,d.z,null))return;e.xfer=null}
+ if(ds&&ds.length&&(rm?r<.28:r<.05)){const d=rm?ds[0]:ds[Math.random()*ds.length|0];e.xfer=d;if(goTo(e,d.x,d.z,null))return;e.xfer=null}
  if(rm===0&&on&&r<.5){const q=dancePt();if(q&&goTo(e,q.x,q.z,{dance:1,w:[7,15]}))return}
  if(r<.82){const i=pickPoi(e);if(i>=0&&goPoi(e,i))return}
  const q=rndPt(rm);if(!goTo(e,q.x,q.z,null))R.wait=1}

@@ -1,4 +1,4 @@
-/* live3d.js — HANYA untuk versi 3D (index.html). Jangan dimuat di index2d.html.
+/* live3d.js v5 (ruang 11 = Royal Mart ikut dikenali) — HANYA untuk versi 3D (index.html). Jangan dimuat di index2d.html.
    Muat PALING AKHIR, setelah wall3d.js:
      <script src="live3d.js?v=1"></script>
 
@@ -29,9 +29,10 @@ const g0=fn=>{try{return fn()}catch(e){return null}};
 if(typeof THREE==='undefined'||typeof S==='undefined'||typeof V==='undefined'||typeof did==='undefined'||
    typeof place==='undefined'||typeof say3==='undefined'||typeof paintV==='undefined')return;
 
-const ROOMN=['ruang utama','lounge','galeri kenangan','kamar tidur','ruang makan','balkon','basement','teras','taman'];
-const ENTRY={0:{x:-5.8,z:6.8},1:{x:-4,z:1.2},2:{x:-4,z:1.3},3:{x:2.9,z:1.7},4:{x:-4,z:1.5},5:{x:-2.2,z:-2.2},6:{x:1.9,z:-1},7:{x:0,z:-2.2},8:{x:-3.9,z:.5}};
-const CX={120:3,160:4,200:5,240:6,280:7,320:8}; /* posisi kamera -> nomor ruangan (lantai 2, basement, teras, taman) */
+const ROOMN=['ruang utama','lounge','galeri kenangan','kamar tidur','ruang makan','balkon','basement','teras','taman','kafe','komplek','Royal Mart'];
+const ENTRY={0:{x:-5.8,z:6.8},1:{x:-4,z:1.2},2:{x:-4,z:1.3},3:{x:2.9,z:1.7},4:{x:-4,z:1.5},5:{x:-2.2,z:-2.2},6:{x:1.9,z:-1},7:{x:0,z:-2.2},8:{x:-3.9,z:.5},9:{x:-5.9,z:1.8},10:{x:9.2,z:-2.6},11:{x:0,z:3.4}};
+const CX={120:3,160:4,200:5,240:6,280:7,320:8,360:9,420:10,480:11}; /* posisi kamera -> nomor ruangan (lantai 2, basement, teras, taman, kafe 360, komplek 420, Royal Mart 480 — sama dengan KX/MX di komplek3d.js & MX di mart3d.js) */
+const MAXR=11; /* nomor ruangan terbesar (Royal Mart). Aturan Firestore presence/pos/live yang membatasi field r juga harus sampai 11 */
 const lsg=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const isAqsaName=n=>String(n||'').trim().toLowerCase()==='aqsa';
 const qs=new URLSearchParams(location.search),TEST=+qs.get('partytest')||0;
@@ -123,10 +124,10 @@ function renderHud(){
  known=ids;
  let h='<b>●</b> '+ids.size+' online';
  if(!isAqsaName(myName())){let aq=null;on.forEach((p,id)=>{if(id!==did&&isAqsaName(p.n))aq=p});
-  if(aq)h+=' · <i>Aqsa '+(aq.r>=0&&aq.r<=8?'di '+ROOMN[aq.r]:'online')+'</i>'}
+  if(aq)h+=' · <i>Aqsa '+(aq.r>=0&&aq.r<=MAXR?'di '+ROOMN[aq.r]:'online')+'</i>'}
  if(partyTxt)h+=' · '+partyTxt;
  /* daftar siapa di ruang mana (hanya yang online) */
- const ls2=[];on.forEach((p,id)=>{if(id!==did)ls2.push(escH(p.n||'tamu')+' ('+(p.r>=0&&p.r<=8?ROOMN[p.r]:'tab tidak aktif')+')')});
+ const ls2=[];on.forEach((p,id)=>{if(id!==did)ls2.push(escH(p.n||'tamu')+' ('+(p.r>=0&&p.r<=MAXR?ROOMN[p.r]:'tab tidak aktif')+')')});
  if(ls2.length)h+='<br><span style="font-size:17px">'+ls2.slice(0,6).join(', ')+(ls2.length>6?' +'+(ls2.length-6):'')+'</span>';
  hud.innerHTML=h;hud.style.display='block'}
 
@@ -135,7 +136,7 @@ const seen=new Set();let lastE=0;
 function emit(k){
  try{
   if(!db||!fs)return;const n=myName();if(!n)return;
-  const r=myRoom();if(!(r>=0&&r<=8))return;
+  const r=myRoom();if(!(r>=0&&r<=MAXR))return;
   const now=Date.now();if(now-lastE<2600)return;lastE=now;
   fs.setDoc(fs.doc(db,'live',did),{n,k,r,ts:fs.serverTimestamp()}).catch(e=>console.warn('live',e))
  }catch(e){console.warn(e)}}
@@ -207,7 +208,7 @@ function trackOwn(){
  const key=me.room+'|'+q1(tx)+','+q1(tz)+'|'+m;
  if(key!==lastKey){lastKey=key;pendPos=true}
  const now=Date.now();
- if(pendPos&&now-lastPosW>3500&&me.room>=0&&me.room<=8){
+ if(pendPos&&now-lastPosW>3500&&me.room>=0&&me.room<=MAXR){
   pendPos=false;lastPosW=now;
   fs.setDoc(fs.doc(db,'pos',did),{r:me.room,x:q1(me.x),z:q1(me.z),tx:q1(tx),tz:q1(tz),m:(m==='sit'||m==='watch')?m:'',ts:fs.serverTimestamp()}).catch(e=>console.warn('pos',e))}}
 function applyPos(id,d){
@@ -241,7 +242,7 @@ function sync(){
   if(id===did)return;
   const p=on.get(id);
   if(!v._homed){v._homed=true;if(SPREAD&&!(p&&p.r>=0)){const hr=homeRooms();warp(v,hr[hashS(id)%hr.length])}}
-  if(p&&p.r>=0&&p.r<=8){v._pin=true;const t2=eff(p.r);if(v.room===t2){v._mvTo=null;v._lx=null}else moveRemote(v,t2,mr)}
+  if(p&&p.r>=0&&p.r<=MAXR){v._pin=true;const t2=eff(p.r);if(v.room===t2){v._mvTo=null;v._lx=null}else moveRemote(v,t2,mr)}
   else v._pin=false});
  /* ava offline mampir ke ruangan yang sedang dilihat */
  if(now>gatherAt&&now-lastG>3500){

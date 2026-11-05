@@ -39,9 +39,9 @@ const ASQ={
  letter:{title:"Surat khusus buat kamu",body:"",from:"- dari aku"},   /* from = tanda tangan di bawah surat (boleh dikosongkan) */
  /* foto: taruh file-nya sefolder dengan index.html (maks 6) */
  photos:[
-  {src:"assets/img/secret1.png",t:"foto 1",cap:"mabar zombie apocalypse"},
-  {src:"assets/img/secret2.png",t:"foto 2",cap:"ini di cafe seven eleven pas ultah mita"},
-  {src:"assets/img/secret3.png",t:"foto 3",cap:"powerpuff aja soalnya 1 nya bukan girl"}
+  {src:"assets/img/secret1.webp",t:"foto 1",cap:"mabar zombie apocalypse"},
+  {src:"assets/img/secret2.webp",t:"foto 2",cap:"ini di cafe seven eleven pas ultah mita"},
+  {src:"assets/img/secret3.webp",t:"foto 3",cap:"powerpuff aja soalnya 1 nya bukan girl"}
  ],
  /* pesan suara: file mp3 sefolder dengan index.html; t = teks cadangan / transkrip (opsional) */
  voices:[
@@ -624,12 +624,12 @@ function enter(){if(IN)return;fade(()=>{
  hid=[];S.children.forEach(o=>{if(o.isLight||o===SR)return;if(o.visible){hid.push(o);o.visible=false}});
  if(S.background&&S.background.set)S.background.set('#1a1646');amb.intensity=.72;sun.intensity=.4;lampL.intensity=0;
  Array.from(bar.children).forEach(e=>{if(e===xb||e.id==='rdo')return;e.dataset.sqd=e.style.display;e.style.display='none'});xb.style.display='';
- IN=true;mode=1;drawSign();dist=innerWidth<innerHeight?27:15;goalT.set(0,1.7,-149.6);if(typeof tgt!=='undefined')tgt.copy(goalT);
+ IN=true;window.SQ_IN=true;mode=1;drawSign();dist=innerWidth<innerHeight?27:15;goalT.set(0,1.7,-149.6);if(typeof tgt!=='undefined')tgt.copy(goalT);
  setTimeout(()=>{cap.classList.add('on');if(typeof confetti==='function')confetti();love(4,miko.g);meow(1);say3(miko.g,ASQ.welcome)},700);
  setTimeout(()=>cap.classList.remove('on'),7500)})}
 function leave(){if(!IN)return;fade(()=>{
  try{closeM()}catch(e){}voiceStop();mbStop();letterReset();clearInterval(typ);
- IN=false;mode=0;cap.classList.remove('on');sayEl.style.display='none';
+ IN=false;window.SQ_IN=false;mode=0;cap.classList.remove('on');sayEl.style.display='none';
  if(sv){if(sv.bg&&S.background&&S.background.copy)S.background.copy(sv.bg);amb.intensity=sv.amb;sun.intensity=sv.sun;lampL.intensity=sv.lamp}
  hid.forEach(o=>o.visible=true);hid=[];
  Array.from(bar.children).forEach(e=>{if(e===xb||e.id==='rdo')return;e.style.display=e.dataset.sqd||''});xb.style.display='none';
@@ -639,7 +639,7 @@ function leave(){if(!IN)return;fade(()=>{
 let last=performance.now();
 function loop(now){requestAnimationFrame(loop);
  const dt=Math.min(.1,(now-last)/1000||0),t=now/1000;last=now;
- SR.visible=IN;if(!IN)return;
+ SR.visible=IN;if(!IN)return;if(dist>34)dist=34;
  neon.material.opacity=.85+.15*Math.sin(t*3+Math.sin(t*17)*.4);
  bulbs.forEach(b=>b.scale.setScalar(.8+.35*Math.sin(t*2.4+b.userData.p)));bdUpd(t);
  sparks.forEach(s=>{const k=1+.25*Math.sin(t*4+s.userData.p);s.scale.set(.32*k,.32*k,1)});

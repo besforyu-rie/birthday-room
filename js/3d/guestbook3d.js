@@ -315,7 +315,7 @@ const stopV=()=>{if(VW){VW.stop();VW=null}};
 function viewer(cv,a0){
   let r;try{r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true})}catch(e){return null}
   const box=cv.parentNode,W=box.clientWidth||320,Hh=box.clientHeight||400;
-  r.setPixelRatio(Math.min(window.devicePixelRatio||1,2));r.setSize(W,Hh,false);r.setClearColor(0x000000,0);
+  r.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));r.setSize(W,Hh,false);r.setClearColor(0x000000,0);
   const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(28,W/Hh,.1,60);cam.position.set(0,2.4,7.6);cam.lookAt(0,1.25,0);
   rig(sc);const ped=pedestal();sc.add(ped);
   const sk=['#f2c14e','#ffffff','#8fd0f0','#f4a6c0','#f2c14e','#ffffff'].map((c,i)=>{const m=new THREE.Mesh(new THREE.OctahedronGeometry(.06,0),new THREE.MeshBasicMaterial({color:c}));sc.add(m);return m});

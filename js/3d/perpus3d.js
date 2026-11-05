@@ -227,7 +227,7 @@ const dwy=cv2(128,256,(g,W,H)=>{g.fillStyle='#07060a';g.fillRect(0,0,W,H);const 
  for(let i=0;i<8;i++){const y=vy+40+i*i*3.3+i*3;g.fillStyle=i%2?'#5a3d26':'#46301e';g.fillRect(vx-18-i*8,Math.min(y,H-3),36+i*16,3)}
  g.fillStyle='#24180f';for(let i=0;i<4;i++){const t=i/4,x=10+t*(vx-34),h=(1-t)*80+20;g.fillRect(x,vy-h,6,h*2);g.fillRect(W-x-6,vy-h,6,h*2)}
  const r=g.createRadialGradient(vx,vy+6,2,vx,vy+6,70);r.addColorStop(0,'rgba(255,224,150,1)');r.addColorStop(.35,'rgba(255,176,80,.6)');r.addColorStop(1,'rgba(255,150,50,0)');g.fillStyle=r;g.fillRect(0,0,W,H)},1);
-{const pl=new THREE.Mesh(new THREE.PlaneGeometry(1.9,2.95),new THREE.MeshBasicMaterial({map:dwy,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));pl.position.set(-.29,1.475,0);pl.rotation.y=Math.PI/2;door.add(pl);
+{const pl=new THREE.Mesh(new THREE.PlaneGeometry(1.9,2.95),new THREE.MeshBasicMaterial({map:dwy,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2}));pl.position.set(-.18,1.475,0);pl.rotation.y=Math.PI/2;door.add(pl);
  const FR='#4a2f1a';box(.16,3.1,.14,FR,-.22,1.55,-1.0,door);box(.16,3.1,.14,FR,-.22,1.55,1.0,door);box(.16,.16,2.14,FR,-.22,3.06,0,door);
  box(.18,.04,1.9,'#d9b24c',-.2,3.0,0,door);box(.34,.05,1.9,'#6e4a2a',-.12,.025,0,door);
  const sp=mesh(new THREE.PlaneGeometry(2.8,2.4),new THREE.MeshBasicMaterial({map:GLOW,color:'#ffb85a',transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}),.95,.03,0,door);sp.rotation.x=-Math.PI/2;door.userData.spill=sp;

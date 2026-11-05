@@ -90,7 +90,7 @@ function hearts(n,o){const p=new THREE.Vector3();o.getWorldPosition(p);p.y+=.9;f
 
 /* ---------- poster, beanbag, balon ---------- */
 {const p=mk(96,128,g=>{g.fillStyle='#8dbdf7';g.fillRect(0,0,96,128);g.strokeStyle='#1f3a5f';g.lineWidth=4;g.strokeRect(2,2,92,124);stk(g,'star',24,24);stk(g,'star',72,24);stk(g,'cake',48,62);stk(g,'heart',48,98);g.fillStyle='#1f3a5f';g.font='12px "Press Start 2P",monospace';g.textAlign='center';g.fillText('HBD 26',48,121)}),m=new THREE.Mesh(new THREE.PlaneGeometry(.8,1.07),new THREE.MeshBasicMaterial({map:p.t}));m.position.set(-2.3,3.5,-5.87);S.add(m);bx(.9,1.17,.04,'#4f7fb8',-2.3,3.5,-5.9)}
-const bean=new THREE.Mesh(new THREE.SphereGeometry(.55,14,10),M('#a98bd6'));bean.scale.y=.6;bean.position.set(-2.3,.33,-4.6);S.add(bean);
+const bean=new THREE.Mesh(new THREE.SphereGeometry(.55,14,10),M('#a98bd6'));bean.scale.y=.6;bean.position.set(-4.8,.33,-4.6);S.add(bean);
 act(bean,()=>{bean.scale.y=.4;setTimeout(()=>bean.scale.y=.6,250);say3(bean,'plop~')});
 const bunch=new THREE.Group();bunch.position.set(8.2,0,-5.3);S.add(bunch);cy(.2,.25,.15,'#4f7fb8',0,.08,0,bunch);bunch.userData.pop=0;
 const bbs=['#e84a5f','#f2c14e','#4f8fe8'].map((c,i)=>{const o=new THREE.Group();o.position.set((i-1)*.35,2.1+i*.15,0);bunch.add(o);const s=new THREE.Mesh(new THREE.SphereGeometry(.34,12,10),M(c));s.scale.y=1.2;o.add(s);bx(.02,1.7,.02,'#1f3a5f',0,-1,0,o);return o});
@@ -313,7 +313,7 @@ const bpk=new THREE.Group();bpk.position.set(-6.35,0,5.1);S.add(bpk);bx(.4,.75,.
 const stick=bx(.04,1.4,.04,'#8a5a34',-6.6,.7,4.45);stick.rotation.z=-.12;act(bpk,()=>say3(bpk,'siap mendaki!'));
 
 /* ---------- BONEKA PLUP (penguin biru) di beanbag ---------- */
-const plush=new THREE.Group();plush.position.set(-2.3,.62,-4.6);S.add(plush);
+const plush=new THREE.Group();plush.position.set(-4.8,.62,-4.6);S.add(plush);
 {const BL='#4f8fe8',mm=(r,c,x,y,z,sz)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,12,10),M(c));m.position.set(x,y,z);if(sz)m.scale.z=sz;plush.add(m);return m};
  mm(.27,BL,0,.27,0);mm(.22,'#ffffff',0,.25,.15,.5);mm(.2,BL,0,.62,0);
  bx(.05,.06,.03,'#1f3a5f',-.08,.66,.18,plush);bx(.05,.06,.03,'#1f3a5f',.08,.66,.18,plush);
@@ -348,7 +348,7 @@ bowl.userData.fn=()=>{hop=.72;fed++;hearts(fed>=5?6:2,cat);if(fed>=5){fed=0;say3
 /*GEO*/
 /* kotak rintangan per ruangan: [xMin,xMax,zMin,zMax] (sudah termasuk jarak aman). 0 utama, 1 lounge, 2 galeri */
 const OB=[
- [[-1.9,1.9,-.8,2.3],[-1.2,1.2,-6,-3.8],[1.3,2.05,-6,-4.9],[4.4,6.8,-2.1,-.7],[-7.2,-6,-4.4,-1.6],[-6.9,-5.5,-1.7,-.3],[-6.9,-5.4,-.2,1.2],[-6.9,-5.4,2.7,4.1],[7.6,9,.1,1.9],[-3.1,-1.5,-5.4,-3.9],[7.6,8.9,-5.8,-4.8],[-7,-5.8,4.2,5.7],[-3.8,-3,-2.8,-2],[4.5,5.9,4,4.8],[3.1,3.7,4.2,4.8]],
+ [[-1.9,1.9,-.8,2.3],[-1.2,1.2,-6,-3.8],[1.3,2.05,-6,-4.9],[4.4,6.8,-2.1,-.7],[-7.2,-6,-4.4,-1.6],[-2.55,-1.25,-5.7,-4.2],[-6.9,-5.4,-.2,1.2],[-6.9,-5.4,2.7,4.1],[7.6,9,.1,1.9],[-5.4,-4.2,-5.4,-3.9],[7.6,8.9,-5.8,-4.8],[-7,-5.8,4.2,5.7],[-3.8,-3,-2.8,-2],[4.5,5.9,4,4.8],[3.1,3.7,4.2,4.8]],
  [[-4.6,-1,-3.4,-1.8],[0,2.4,-3.4,-2.2],[3,4.8,-3.4,-2],[1.2,2,-.1,.7],[2.7,3.7,.6,1]],
  [[-1.7,1.7,-3.4,-2.1],[-4.6,-3.8,-3.4,-2.6],[4,4.6,-3.4,-2.7]]
 ];
@@ -358,9 +358,9 @@ const BND=[{x0:-6.4,x1:8.2,z0:-5.2,z1:7.4},{x0:-4.5,x1:4.7,z0:-3,z1:3.2},{x0:-4.
 const POIS=[
  [{x:-1.1,z:2.9,f:[.3,-1],w:[5,10],s:'kuenya wangi banget',max:3},{x:0,z:2.9,f:[0,-1],w:[5,10],s:'makasih ya udah dateng',max:3},{x:1.1,z:2.9,f:[-.3,-1],w:[5,10],s:'lilinnya lucu banget',max:3},
   {x:-2.4,z:.4,f:[1,0],w:[4,8],max:2},{x:2.4,z:.4,f:[-1,0],w:[4,8],max:2},
-  {x:0,z:-3.45,f:[0,-1],w:[6,12],s:'ada yang mau main pong?',max:3},{x:-4.6,z:-4.8,f:[0,-1],w:[5,9],s:'pemandangannya bagus',max:2},
+  {x:0,z:-3.45,f:[0,-1],w:[6,12],s:'ada yang mau main pong?',max:3},{x:-4.8,z:-3.3,f:[0,-1],w:[5,9],s:'pemandangannya bagus',max:2},
   {x:-5,z:.5,f:[-1,0],w:[6,12],s:'ayo main tangkap balon!',max:1},{x:-5,z:3.4,f:[-1,0],w:[4,8],s:'foto bareng yuk',max:1},
-  {x:-5.5,z:-2.8,f:[-1,0],w:[5,10],s:'mau baca buku apa ya',max:2},{x:-5.1,z:-1,f:[-1,0],w:[4,8],s:'lagunya enak',max:1},
+  {x:-5.5,z:-2.8,f:[-1,0],w:[5,10],s:'mau baca buku apa ya',max:2},{x:-1,z:-3.5,f:[-.5,-1],w:[4,8],s:'lagunya enak',max:1},
   {x:5.6,z:-.35,f:[0,-1],w:[4,8],s:'ada telepon masuk?',max:2},{x:7.1,z:1,f:[1,0],w:[4,7],s:'trofinya keren',max:1},
   {x:8.1,z:-4.2,f:[0,-1],w:[3,6],s:'balonnya lucu',max:2},{x:-2.3,z:-3.5,f:[0,-1],w:[3,6],s:'posternya lucu',max:2},
   {x:-5.3,z:5,f:[-1,0],w:[3,6],s:'ayo mendaki lagi',max:1},{cat:1,w:[4,8],s:'meong~',max:2}],

@@ -324,7 +324,7 @@ let ren=null,sc2=null,cam2=null,big=null,amb2=null,sun2=null,raf=0,open=false,lt
 let yaw=.55,pit=.42,dist=36,gp=null,auto=true;const tgt2=new THREE.Vector3(SOILC,3.2,1.6),tg2=new THREE.Vector3(SOILC,3.2,1.6);
 const MT={out:{y:3.4,p:.42},l1:{y:1.2,p:.95},l2:{y:4.4,p:.95},b:{y:-2.0,p:.95}};
 function init(){
- ren=new THREE.WebGLRenderer({canvas:hcv,antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,2));
+ ren=new THREE.WebGLRenderer({canvas:hcv,antialias:true});ren.setPixelRatio(Math.min(devicePixelRatio,1.5));
  sc2=new THREE.Scene();cam2=new THREE.PerspectiveCamera(40,1,.1,200);
  amb2=new THREE.AmbientLight(0xffffff,.8);sun2=new THREE.DirectionalLight(0xffffff,.65);sun2.position.set(8,16,12);sc2.add(amb2,sun2);
  big=buildHouse();sc2.add(big.root);

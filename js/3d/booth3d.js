@@ -1,4 +1,4 @@
-/* booth3d.js v3 — PHOTO BOOTH (v3: tiap foto bisa beda latar, pose [17], zoom, sudut kamera [6], filter [7]; ekspresi bisa ikut pose atau bawaan ava)
+/* booth3d.js v4 — PHOTO BOOTH (v4: perbaikan tampilan HP, gambar hasil tidak kepotong; v3: tiap foto bisa beda latar, pose [17], zoom, sudut kamera [6], filter [7]; ekspresi bisa ikut pose atau bawaan ava)
    --- catatan versi 2 di bawah ---
    booth3d.js v2 — PHOTO BOOTH yang bisa dimasuki + foto bareng ava (HANYA versi 3D / index.html)
    Muat PALING AKHIR (setelah interact3d.js & live3d.js; urutan dengan perpus3d.js bebas):
@@ -127,6 +127,13 @@ function picker(){
  '.bt-ch{border:3px solid var(--ink);background:#fff;color:var(--ink);padding:3px 9px;font:19px/1 VT323,monospace;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}.bt-ch:active{transform:translate(2px,2px);box-shadow:none}.bt-ch.on{outline:4px solid #f2c14e;outline-offset:1px}.bt-ch img{display:block;width:54px;height:43px}'+
  '.bt-sp{display:flex;flex-wrap:wrap;gap:6px}.bt-sk{width:42px;height:42px;padding:2px;border:3px solid var(--ink);background:#fff;cursor:pointer;font:14px "Press Start 2P",monospace;color:var(--ink);box-shadow:2px 2px 0 var(--ink)}.bt-sk img{width:100%;height:100%;display:block;object-fit:contain}.bt-sk.on{outline:4px solid #f2c14e;outline-offset:1px;background:#fff6d6}'+
  '.bt-bar{position:sticky;bottom:-18px;background:var(--cream);padding:8px 0 4px;margin-top:8px;z-index:2}.bt-bar .row{margin-top:0}';document.head.appendChild(cs2)}
+/* ---- v4: perbaikan tampilan HP — gambar hasil (polaroid / grid 2x2 / strip) tidak lagi kepotong atau bikin scroll ke kanan ---- */
+{const cs3=document.createElement('style');cs3.textContent='#md{overflow-x:hidden;-webkit-overflow-scrolling:touch}'+
+ '#md img,#md canvas,#md video{max-width:100%}'+
+ '#md img.big{max-width:100%!important;height:auto;object-fit:contain!important;margin-left:auto;margin-right:auto}'+
+ '#md .row,#md .bt-row,#md .bt-sp{min-width:0;max-width:100%}'+
+ '@media (max-width:520px){#ov{padding:8px}#md{padding:14px 12px;border-width:4px}#md img.big{max-height:58vh!important}.bt-bar{bottom:-14px}}';
+ document.head.appendChild(cs3)}
 
 /* ======================================================================
    4) TEMA LATAR, POSE, KERTAS, FONT
@@ -338,7 +345,7 @@ function compose(ws){
  return c}
 function showResult(){
  const th2=ST.shots.map(s=>{const c=document.createElement('canvas');c.width=108;c.height=86;c.getContext('2d').drawImage(s,0,0,108,86);return c.toDataURL()});
- mb.innerHTML=`<h2>your photo!</h2><img class="big" id="brs" style="max-height:44vh;width:auto;margin:0 auto" alt="hasil foto">`+
+ mb.innerHTML=`<h2>your photo!</h2><img class="big" id="brs" style="max-height:44vh;max-width:100%;width:auto;height:auto;margin:0 auto" alt="hasil foto">`+
   `<div class="bt-bar" style="margin-top:6px"><div class="row"><a class="btn" id="bdl" style="text-decoration:none" download="photobooth.png" href="#">download</a><button class="btn" id="se">edit stiker</button><button class="btn" id="bsv">simpan ke galeri</button><button class="btn alt" id="re">retake</button><button class="btn alt" id="bk">ganti peserta</button></div></div>`+
   `<div class="bt-l">bentuk</div><div class="bt-row" id="bly"></div><div id="bpkw"><div class="bt-l">pilih foto</div><div class="bt-row" id="bpk"></div></div>`+
   `<div class="bt-l">kertas</div><div class="bt-row" id="bpp"></div>`+
@@ -442,5 +449,5 @@ function editor(){
  $('#bed').onclick=()=>{$('#bed').href=c.toDataURL('image/png')}}
 
 window.BOOTH3D={enter,leave,state:ST};
-console.log('booth3d.js v3 (photo booth: latar/pose/zoom/sudut/filter per foto, ekspresi bawaan ava, kertas, caption, stiker 3D) loaded');
+console.log('booth3d.js v4 (photo booth: latar/pose/zoom/sudut/filter per foto, ekspresi bawaan ava, kertas, caption, stiker 3D) loaded');
 })();

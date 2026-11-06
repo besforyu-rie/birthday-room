@@ -91,7 +91,7 @@ Object.assign(A,{tv:0,neon:true,fl:false,flw:0,coffee:0,kettle:0,toast:0,micro:0
 const BED=new THREE.Group();BED.position.set(120,0,0);S.add(BED);BED.visible=false;
 const woodTex=mkWood([5,3.5],['#d9b98a','#cfae7c','#dcbf92','#c9a876'],'#b8925f');
 const loungeTex=mkWood([5*EXT/10,3.5],['#efe3d0','#e6d8c1','#f2e8d6','#e2d3ba'],'#c9b89a');
-shell(BED,{floorMat:new THREE.MeshLambertMaterial({map:woodTex}),wallB:'#c4b2ee',wallL:'#d3c6f3',trim:'#efe6ff',ext:EXT,extFloorMat:new THREE.MeshLambertMaterial({map:loungeTex}),extWallB:'#f3d3e3',extTrim:'#fff0f7'});
+shell(BED,{floorMat:new THREE.MeshLambertMaterial({map:woodTex}),wallB:'#b3d4f5',wallL:'#c4def8',trim:'#e9f4ff',ext:EXT,extFloorMat:new THREE.MeshLambertMaterial({map:loungeTex}),extWallB:'#bcdcf6',extTrim:'#eef7ff'});
 windowAt(BED,3.3,3.1,1.7,1.3);
 /* lampu tali di dinding belakang */
 const fairy=[];for(let i=0;i<17;i++){const u=i/16,b=sp(.06,['#f2c14e','#f4a6c0','#8fd0f0','#ffffff','#8fd18a'][i%5],-4.8+u*9.6,4.6-.25*Math.sin(u*Math.PI*4)*.5,-3.4,BED,true);fairy.push(b)}
@@ -340,13 +340,18 @@ windowAt(DIN,.2,3.15,1.4,1.1);
 /* karpet bawah meja */
 [[2.2,'#f2c14e'],[1.8,'#fff6c8']].forEach(([r,c],i)=>{const m=cy(r,r,.02,c,.8,.012+i*.004,.9,DIN);m.scale.z=.7});
 /* kabinet dapur sepanjang dinding belakang */
-bx(7.8,.9,.8,'#4f7fb8',.9,.45,-3.1,DIN);bx(7.9,.08,.9,'#e8d8b0',.9,.94,-3.08,DIN);
+/* kabinet & meja dapur dipotong di lebar kompor (x 1.95..3.25) supaya badan biru tidak menembus/berlapis dengan kompor */
+bx(4.95,.9,.8,'#4f7fb8',-.525,.45,-3.1,DIN);bx(1.55,.9,.8,'#4f7fb8',4.025,.45,-3.1,DIN);
+bx(2.75,.08,.9,'#e8d8b0',-1.675,.94,-3.08,DIN);bx(1.25,.08,.9,'#e8d8b0',1.325,.94,-3.08,DIN);/* kiri & kanan wastafel */
+bx(1.0,.08,.22,'#e8d8b0',.2,.94,-2.74,DIN);bx(1.0,.08,.18,'#e8d8b0',.2,.94,-3.44,DIN);/* depan & belakang lubang wastafel (x -.3..0.7) */bx(1.6,.08,.9,'#e8d8b0',4.05,.94,-3.08,DIN);
 [-2.4,-1.1,3.9,4.4].forEach(x=>{bx(.03,.8,.02,'#2e527f',x,.45,-2.69,DIN);bx(.2,.04,.04,'#cfd6e0',x+.3,.7,-2.67,DIN)});
-bx(1.2,1.0,.5,'#8dbdf7',-1.4,3.2,-3.25,DIN);bx(1.2,1.0,.5,'#8dbdf7',4.1,3.2,-3.25,DIN);bx(.04,.9,.02,'#2e527f',-1.4,3.2,-2.99,DIN);bx(.04,.9,.02,'#2e527f',4.1,3.2,-2.99,DIN);
+bx(1.2,1.0,.5,'#8dbdf7',-1.85,3.2,-3.25,DIN);bx(1.2,1.0,.5,'#8dbdf7',4.1,3.2,-3.25,DIN);bx(.04,.9,.02,'#2e527f',-1.85,3.2,-2.99,DIN);bx(.04,.9,.02,'#2e527f',4.1,3.2,-2.99,DIN);
 /* wastafel */
-const sinkG=grp(.2,0,-3.1,DIN);bx(1.0,.04,.5,'#9fb4cc',0,.99,0,sinkG);bx(.9,.02,.4,'#7f95b0',0,1.0,0,sinkG);
-cy(.03,.03,.5,'#cfd6e0',0,1.2,-.25,sinkG);bx(.03,.03,.3,'#cfd6e0',0,1.43,-.1,sinkG);
-const stream=cy(.012,.012,.43,'#8fd0f0',0,1.2,.05,sinkG);stream.visible=false;
+const sinkG=grp(.2,0,-3.1,DIN);bx(1.0,.01,.5,'#7f95b0',0,.905,0,sinkG);cy(.04,.04,.008,'#4a5568',0,.912,0,sinkG);/* dasar bak + lubang buang */
+[-.245,.245].forEach(z=>bx(1.0,.08,.01,'#9fb4cc',0,.94,z,sinkG));[-.495,.495].forEach(x=>bx(.01,.08,.5,'#9fb4cc',x,.94,0,sinkG));/* dinding bak */
+[-.275,.275].forEach(z=>bx(1.1,.025,.05,'#cfd6e0',0,.99,z,sinkG));[-.525,.525].forEach(x=>bx(.05,.025,.5,'#cfd6e0',x,.99,0,sinkG));/* bingkai atas */
+cy(.03,.03,.5,'#cfd6e0',0,1.2,-.34,sinkG);bx(.03,.03,.3,'#cfd6e0',0,1.43,-.19,sinkG);
+const stream=cy(.012,.012,.5,'#8fd0f0',0,1.16,-.05,sinkG);stream.visible=false;
 lact(sinkG,()=>{A.water=1.6;say3(sinkG,'cuci piring dulu~')});
 /* kompor + wajan (tap = masak) */
 const stG=grp(2.6,0,-3.1,DIN);bx(1.3,.9,.8,'#cfd6e0',0,.45,0,stG);bx(1.3,.06,.8,'#2a3a52',0,.96,0,stG);bx(.9,.5,.02,'#10203d',0,.4,.41,stG);bx(.9,.04,.04,'#8a97ab',0,.72,.43,stG);
@@ -383,15 +388,106 @@ const pie=(r,a0,a1,h,c,x,y,z,p)=>{const sh=new THREE.Shape();sh.moveTo(0,0);sh.a
 const frD=grp(-.65,0,.45,fr);bx(1.3,3.0,.08,'#d9e2ef',.65,1.5,.04,frD);bx(.05,.6,.08,'#8a97ab',1.15,1.7,.1,frD);bx(1.3,.9,.09,'#e6f6ff',.65,2.55,.05,frD);
 bx(1.0,.03,.12,'#cfe0f6',.65,1.2,-.06,frD);cy(.04,.04,.2,'#d72f52',.4,1.32,-.06,frD);cy(.012,.012,.05,'#d72f52',.4,1.45,-.06,frD);cy(.04,.04,.2,'#f2c14e',.55,1.32,-.06,frD);cy(.045,.045,.26,'#7a3b1f',.75,1.35,-.06,frD);cy(.045,.045,.26,'#cfe9ff',.9,1.35,-.06,frD);cy(.03,.03,.03,'#4f8fe8',.9,1.5,-.06,frD);
 lact(fr,()=>{A.frT=A.frT?0:1;say3(fr,A.frT?'isinya sisa kue ultah!':'kulkas ditutup')});
+/* ===== MODEL BUAH, BUNGA & MAKANAN (dipakai meja makan + buffet) ===== */
+const shade=(c,k)=>'#'+[16,8,0].map(s=>Math.max(0,Math.min(255,Math.round(((parseInt(c.slice(1),16)>>s)&255)*k))).toString(16).padStart(2,'0')).join('');
+const flat=(m,x,y,z)=>{m.scale.set(x,y,z);return m};
+const tor=(R,r,c,x,y,z,p,arc)=>{const m=new THREE.Mesh(new THREE.TorusGeometry(R,r,6,16,arc||Math.PI*2),M(c));m.position.set(x,y,z);m.rotation.x=-Math.PI/2;p.add(m);return m};
+const leaf=(p,x,y,z,rz,ry)=>{const l=flat(sp(.022,'#4fa05a',x,y,z,p),1.7,.3,.8);l.rotation.set(0,ry||0,rz||0);return l};
+/* --- buah: apel (bentuk hati + tangkai + daun), jeruk, pir, pisang, anggur, stroberi --- */
+function apple(p,x,y,z,c){const g=grp(x,y,z,p);flat(sp(.055,c,-.02,0,0,g),1,.92,1);flat(sp(.055,c,.02,0,0,g),1,.92,1);sp(.05,c,0,-.012,0,g);
+ sp(.014,shade(c,.6),0,.052,0,g);cy(.004,.005,.045,'#6b4423',0,.06,0,g);leaf(g,.026,.078,0,.4);return g}
+function orange(p,x,y,z){const g=grp(x,y,z,p);sp(.066,'#f58b2a',0,0,0,g);flat(sp(.018,'#4fa05a',0,.064,0,g),1.4,.4,1.4);leaf(g,.03,.07,0,.4);
+ [[.03,.045,.035],[-.04,.03,.04],[.04,.02,-.05],[-.02,.05,-.03]].forEach(([a,b,d])=>sp(.006,'#d9701c',a,b,d,g));return g}
+function pear(p,x,y,z,c){const g=grp(x,y,z,p);sp(.066,c,0,0,0,g);flat(sp(.045,c,0,.08,0,g),1,1.25,1);cy(.004,.005,.04,'#6b4423',0,.15,0,g);leaf(g,.022,.14,0,.4);return g}
+function banana(p,x,y,z,ry,s){const g=grp(x,y,z,p,ry);if(s)g.scale.setScalar(s);
+ const P=[[-.13,.03],[-.07,-.005],[0,-.02],[.07,-.005],[.13,.03]].map(([a,b])=>V3(a,b,0));
+ for(let i=0;i<4;i++)limb(P[i],P[i+1],.024,'#f6d34a',g,.024);
+ P.slice(1,4).forEach(q=>sp(.024,'#f6d34a',q.x,q.y,q.z,g));
+ sp(.016,'#6b4423',-.135,.033,0,g);cy(.01,.013,.035,'#8a7a2e',.14,.045,0,g).rotation.z=-.4;return g}
+function grapes(p,x,y,z,rz,c){const g=grp(x,y,z,p);g.rotation.z=rz||0;c=c||'#7a3b9a';
+ [[.06,6,0],[.042,5,-.045],[.024,3,-.09]].forEach(([r,n,yy],li)=>{for(let k=0;k<n;k++){const a=k*Math.PI*2/n+li*.6;sp(.03,(k+li)%2?c:shade(c,1.3),Math.cos(a)*r,yy,Math.sin(a)*r,g)}});
+ sp(.03,c,0,-.125,0,g);sp(.03,shade(c,1.3),0,-.04,0,g);cy(.004,.005,.07,'#6b4423',0,.065,0,g);leaf(g,.03,.085,0,.3);return g}
+function berry(p,x,y,z){const g=grp(x,y,z,p);cy(.04,.006,.075,'#e0243a',0,0,0,g);flat(sp(.04,'#e0243a',0,.022,0,g),1,.55,1);
+ for(let k=0;k<8;k++){const a=k*.8,r=.034-(k%2)*.012;bx(.008,.008,.008,'#f6d34a',Math.cos(a)*r,.012-(k%2)*.022,Math.sin(a)*r,g)}
+ for(let k=0;k<5;k++){const a=k*Math.PI*2/5,l=flat(sp(.02,'#3f9150',Math.cos(a)*.02,.046,Math.sin(a)*.02,g),1.5,.3,.8);l.rotation.y=-a}
+ cy(.004,.005,.03,'#3f9150',0,.06,0,g);return g}
+
+/* --- vas bunga: badan keramik berleher, pita emas, titik-titik, buket mawar + daisy + tulip + baby's breath --- */
+function flowerVase(p,x,y,z,s){const g=grp(x,y,z,p);g.scale.setScalar(s||1);
+ cy(.09,.09,.02,'#6fa3d9',0,.01,0,g);flat(sp(.13,'#8dbdf7',0,.17,0,g),1,1.1,1);
+ cy(.13,.128,.015,'#f2c14e',0,.12,0,g);
+ for(let k=0;k<10;k++){const a=k*Math.PI/5;sp(.014,'#ffffff',Math.cos(a)*.124,.22,Math.sin(a)*.124,g)}
+ cy(.05,.085,.12,'#8dbdf7',0,.325,0,g);cy(.07,.05,.03,'#6fa3d9',0,.4,0,g);cy(.072,.072,.008,'#f2c14e',0,.413,0,g);
+ const S0=V3(0,.41,0),GR='#3f9150';
+ [[.1,.5,.04,.5],[-.1,.52,-.03,-.5],[.04,.49,-.1,.3],[-.05,.48,.1,-.3],[.0,.58,.03,.1]].forEach(([a,b,c,r],i)=>{const l=flat(sp(.04,'#4fa05a',a,b,c,g),1.8,.25,.8);l.rotation.set(0,i*1.1,r)});
+ const stem=(a,b,c)=>limb(S0,V3(a,b-.03,c),.011,GR,g,.009);
+ const rose=(a,b,c,col)=>{stem(a,b,c);const q=grp(a,b,c,g);sp(.05,col,0,0,0,q);
+  for(let k=0;k<5;k++){const t=k*Math.PI*2/5;flat(sp(.034,shade(col,1.12),Math.cos(t)*.04,.004,Math.sin(t)*.04,q),1,.8,1)}
+  sp(.034,shade(col,.78),0,.03,0,q);sp(.018,shade(col,.62),0,.05,0,q);flat(sp(.03,GR,0,-.042,0,q),1.2,.4,1.2)};
+ const dai=(a,b,c)=>{stem(a,b,c);const q=grp(a,b,c,g);q.rotation.set(.6,0,a>0?-.3:.3);
+  for(let k=0;k<8;k++){const t=k*Math.PI/4,pt=flat(sp(.03,'#ffffff',Math.cos(t)*.055,0,Math.sin(t)*.055,q),1.7,.3,.8);pt.rotation.y=-t}
+  flat(sp(.035,'#f2c14e',0,.006,0,q),1,.7,1)};
+ const tul=(a,b,c,col)=>{stem(a,b,c);const q=grp(a,b,c,g);flat(sp(.048,col,0,0,0,q),1,1.3,1);
+  [0,1,2].forEach(k=>{const t=k*Math.PI*2/3,cn=cy(0,.032,.05,shade(col,1.15),Math.cos(t)*.022,.058,Math.sin(t)*.022,q);cn.rotation.set(Math.sin(t)*.3,0,-Math.cos(t)*.3)})};
+ rose(0,.82,0,'#e84a5f');rose(.15,.7,.06,'#f4a6c0');rose(-.14,.68,-.05,'#e84a5f');
+ dai(.14,.63,-.14);dai(-.14,.61,.12);tul(-.05,.76,.14,'#f2c14e');tul(.06,.76,-.15,'#b27bd6');
+ [[.2,.54,.02],[-.19,.52,-.04],[.02,.58,.19],[-.03,.56,-.2],[.17,.6,-.1]].forEach(([a,b,c])=>{limb(S0,V3(a,b-.02,c),.006,GR,g,.005);
+  for(let k=0;k<4;k++)sp(.015,'#ffffff',a+Math.cos(k*1.57)*.02,b+(k%2)*.015,c+Math.sin(k*1.57)*.02,g)});
+ return g}
+
+/* --- makanan di piring --- */
+const foodRice=pg=>{flat(sp(.12,'#ecc072',0,.03,0,pg),1,.5,1);
+ const dot=(r,a,c)=>{const y=.03+.06*Math.sqrt(Math.max(0,1-(r/.12)**2));sp(.014,c,Math.cos(a)*r,y+.002,Math.sin(a)*r,pg)};
+ [[.03,0],[.07,1.2],[.05,2.4],[.08,3.5],[.04,4.3],[.09,5.4],[.02,3]].forEach(([r,a],i)=>dot(r,a,['#f58b2a','#8fd18a','#a8622a'][i%3]));
+ flat(sp(.07,'#ffffff',.04,.082,.03,pg),1.15,.2,1).rotation.y=.4;sp(.027,'#f9b623',.04,.093,.03,pg);
+ cy(.03,.03,.008,'#9bd18a',-.14,.04,.07,pg);cy(.022,.022,.009,'#dff3cf',-.14,.04,.07,pg);cy(.03,.03,.008,'#e0412e',-.12,.04,-.1,pg);
+ cy(.06,.06,.006,'#f6d99a',.12,.06,-.1,pg).rotation.z=.5};
+const foodPasta=pg=>{[[.075,.045],[.06,.06],[.045,.074]].forEach(([R,y],i)=>tor(R,.016,i%2?'#f4c869':'#efc062',0,y,0,pg));
+ flat(sp(.05,'#f4c869',0,.065,0,pg),1,.5,1);flat(sp(.058,'#d9332a',0,.09,0,pg),1,.45,1);
+ [[.03,0],[-.025,.03],[0,-.035]].forEach(([x,z])=>sp(.027,'#7a3b1f',x,.108,z,pg));
+ leaf(pg,.005,.118,.005,.3,.5);leaf(pg,-.015,.12,.0,-.3,2.2);
+ for(let k=0;k<5;k++)flat(sp(.012,'#fff6e0',Math.cos(k*1.3)*.04,.097,Math.sin(k*1.3)*.04,pg),1.5,.4,1)};
+const foodBurger=pg=>{const b=grp(-.05,.03,0,pg);
+ cy(.075,.07,.022,'#e0a050',0,.011,0,b);cy(.088,.088,.01,'#6fc67a',0,.027,0,b);cy(.07,.07,.012,'#e0412e',0,.038,0,b);cy(.078,.078,.03,'#5a3320',0,.059,0,b);
+ bx(.17,.008,.17,'#f9c93d',0,.077,0,b).rotation.y=.785;flat(sp(.08,'#e8a855',0,.077,0,b),1,.62,1);
+ [[.02,0],[.045,1.4],[.03,2.6],[.05,3.8],[.015,4.6],[.04,5.5]].forEach(([r,a])=>{const y=.077+.0496*Math.sqrt(Math.max(0,1-(r/.08)**2))+.002;flat(sp(.008,'#fff3cf',Math.cos(a)*r,y,Math.sin(a)*r,b),1,.5,1)});
+ bx(.07,.04,.035,'#e0412e',.115,.05,.09,pg);
+ for(let k=0;k<7;k++){const f=bx(.012,.07,.012,'#f6d34a',.115+(k-3)*.01,.085,.09,pg);f.rotation.z=(k-3)*.1;f.rotation.x=(k%3-1)*.1}
+ sp(.013,'#e0243a',.06,.034,-.09,pg)};
+const foodPancake=pg=>{[0,1,2,3].forEach(i=>cy(.1-i*.002,.1-i*.002,.018,i%2?'#f0cf90':'#e7b870',i%2?.004:-.003,.04+i*.019,i%2?-.003:.004,pg));
+ cy(.095,.095,.006,'#a8531e',0,.107,0,pg);
+ for(let k=0;k<5;k++)flat(sp(.016,'#a8531e',Math.cos(k*1.4)*.097,.075+(k%2)*.02,Math.sin(k*1.4)*.097,pg),1,1.6,1);
+ bx(.045,.02,.045,'#fff0a0',0,.12,0,pg).rotation.y=.4;berry(pg,.11,.065,.1);berry(pg,-.11,.065,.09);
+ [[.05,-.12],[.11,-.07],[-.08,-.12]].forEach(([x,z])=>sp(.018,'#4a5fb8',x,.05,z,pg))};
+function plateAt(x,z,food){const pg=grp(x,1.065,z,tb);cy(.23,.19,.025,'#ffffff',0,.0125,0,pg);cy(.195,.195,.004,'#8dbdf7',0,.027,0,pg);cy(.16,.16,.006,'#f4f8fc',0,.028,0,pg);food(pg);return pg}
+function cutlery(x,z){const g=grp(x,1.066,z,tb,z<0?Math.PI:0);
+ const kn=grp(.28,0,0,g);bx(.016,.008,.07,'#2a3a52',0,.004,.05,kn);bx(.014,.005,.09,'#e6edf5',0,.004,-.04,kn);
+ const fk=grp(-.28,0,0,g);bx(.014,.008,.07,'#2a3a52',0,.004,.05,fk);bx(.03,.005,.03,'#e6edf5',0,.004,-.012,fk);[-.01,0,.01].forEach(a=>bx(.005,.005,.045,'#e6edf5',a,.004,-.05,fk))}
+function glassAt(x,z){const g=grp(x,1.065,z,tb);const o=cy(.04,.032,.11,'#e6f6ff',0,.055,0,g);o.material=new THREE.MeshLambertMaterial({color:'#e6f6ff',transparent:true,opacity:.35});
+ cy(.037,.031,.075,'#f58b2a',0,.04,0,g);cy(.005,.005,.15,'#e84a5f',.012,.09,0,g).rotation.z=-.2;cy(.025,.025,.008,'#f58b2a',.036,.106,0,g).rotation.x=Math.PI/2}
+/* --- mangkuk buah berkaki + keranjang roti --- */
+function fruitBowl(p,x,y,z){const fb=grp(x,y,z,p);
+ cy(.09,.11,.025,'#d9a640',0,.0125,0,fb);cy(.04,.05,.05,'#d9a640',0,.05,0,fb);cy(.25,.1,.08,'#f2c14e',0,.115,0,fb);cy(.255,.255,.012,'#f7d878',0,.155,0,fb);
+ apple(fb,-.11,.2,.03,'#e0412e');orange(fb,.12,.2,-.04);apple(fb,.02,.2,.13,'#8fd18a');pear(fb,0,.2,-.13,'#d6e06a');
+ banana(fb,-.01,.31,0,.2);banana(fb,.02,.325,.04,-.35);
+ grapes(fb,.13,.27,.09,1.25);berry(fb,-.16,.2,-.1);berry(fb,.19,.2,.08);return fb}
+function breadBasket(p,x,y,z){const bb=grp(x,y,z,p);
+ cy(.17,.13,.09,'#c98b52',0,.045,0,bb);[.025,.06].forEach(h=>cy(.172,.172,.01,'#a8743f',0,h,0,bb));
+ const bg=cy(.035,.035,.3,'#d9a05b',0,.125,0,bb);bg.rotation.set(0,.4,Math.PI/2);
+ [-.09,0,.09].forEach(t=>flat(sp(.014,'#f2d9a0',t*Math.cos(.4),.155,-t*Math.sin(.4),bb),1.4,.4,.8));
+ const cr=new THREE.Mesh(new THREE.TorusGeometry(.05,.024,8,12,Math.PI*1.2),M('#e0a050'));cr.position.set(.07,.12,.075);cr.rotation.set(-Math.PI/2,0,.6);bb.add(cr);
+ flat(sp(.05,'#e0a050',-.08,.12,-.07,bb),1,.8,1);flat(sp(.012,'#f2d9a0',-.08,.16,-.07,bb),1.6,.4,1);return bb}
 /* meja makan + kursi + isi meja */
 const tb=grp(.8,0,.9,DIN);bx(3.0,.12,1.5,'#c98b52',0,1.0,0,tb);bx(2.6,.02,.5,'#f4a6c0',0,1.07,0,tb);
 [[-1.3,-.6],[1.3,-.6],[-1.3,.6],[1.3,.6]].forEach(([x,z])=>bx(.14,1.0,.14,'#8a5a34',x,.5,z,tb));
-[[-.7,-.45],[.7,-.45],[-.7,.45],[.7,.45]].forEach(([x,z])=>{cy(.22,.2,.03,'#ffffff',x,1.09,z,tb);cy(.1,.1,.02,'#8dbdf7',x,1.11,z,tb)});
-cy(.1,.14,.3,'#8dbdf7',0,1.22,0,tb);[[0,1.5,0,'#e84a5f'],[.1,1.42,.04,'#f2c14e'],[-.1,1.44,-.03,'#f4a6c0']].forEach(([x,y,z,c])=>{cy(.01,.01,.3,'#4fa05a',x*.5,1.33,z,tb);sp(.07,c,x,y,z,tb)});
-cy(.25,.15,.14,'#f2c14e',.75,1.14,0,tb);[[.7,1.28],[.8,1.25],[.76,1.3]].forEach(([x,y],i)=>sp(.08,i%2?'#e84a5f':'#8fd18a',x,y,(i-1)*.06,tb));
+/* isi meja: taplak, vas bunga, 4 piring (nasi goreng, burger+kentang, spaghetti, pancake) + sendok garpu + jus, mangkuk buah, keranjang roti */
+cy(.19,.19,.008,'#fff6e8',0,1.084,0,tb);flowerVase(tb,0,1.085,0,1);
+[[-.7,-.45,foodRice],[.7,-.45,foodBurger],[-.7,.45,foodPasta],[.7,.45,foodPancake]].forEach(([x,z,f])=>{plateAt(x,z,f);cutlery(x,z)});
+[[-.4,-.64],[.4,-.64],[-.4,.64],[.4,.64]].forEach(([x,z])=>glassAt(x,z));
+fruitBowl(tb,.75,1.08,0);breadBasket(tb,-.75,1.08,0);
 function chair(g,x,z,ry){const c=grp(x,0,z,g,ry);bx(.7,.1,.7,'#4f8fe8',0,.6,0,c);bx(.7,.8,.1,'#3b7dd8',0,1.05,-.3,c);[[-.28,-.28],[.28,-.28],[-.28,.28],[.28,.28]].forEach(([a,b])=>bx(.08,.6,.08,'#2e527f',a,.3,b,c));lact(c,()=>say3(c,pick(['kursinya nyaman','duduk sini~','makan bareng yuk!'])));return c}
 chair(DIN,.1,-.2,0);chair(DIN,1.5,-.2,0);chair(DIN,.1,2.0,Math.PI);chair(DIN,1.5,2.0,Math.PI);
-const TBSAY=['makan bareng yuk!','laper... kapan kuenya?','meja udah rapi nih'];
+const TBSAY=['makan bareng yuk!','laper... kapan kuenya?','meja udah rapi nih','bunganya wangi~','buahnya seger banget','pancake-nya manis~','spaghettinya masih hangat'];
 lact(tb,()=>say3(tb,pick(TBSAY)));
 /* lampu gantung di atas meja (tap = nyala/mati) */
 const pend=grp(.8,0,.9,DIN);cy(.015,.015,1.7,'#2a3a52',0,4.15,0,pend);
@@ -485,8 +581,9 @@ lact(wc,()=>{const d=new Date();say3(wc,'sekarang jam '+d.getHours()+'.'+String(
 const bf=grp(-4.55,0,-.1,DIN,Math.PI/2);
 bx(1.5,.9,.55,'#4f7fb8',0,.45,0,bf);bx(1.56,.06,.6,'#e8d8b0',0,.93,0,bf);
 [-.37,.37].forEach(x=>{bx(.68,.7,.02,'#5f8fc8',x,.45,.285,bf);sp(.03,'#f2c14e',x>0?.07:-.07,.45,.3,bf)});
-cy(.2,.16,.12,'#c98b52',-.5,1.02,0,bf);[['#e0412e',-.55,0],['#f58b2a',-.45,.06],['#8fd18a',-.5,-.07],['#f2c14e',-.42,-.05]].forEach(([c,x,z])=>sp(.07,c,x,1.1,z,bf));
-cy(.06,.05,.2,'#8dbdf7',-.15,1.06,0,bf);[['#e84a5f',-.02],['#f2c14e',.02],['#f4a6c0',0]].forEach(([c,o],i)=>{cy(.008,.008,.2,'#4fa05a',-.15+o,1.25,0,bf);sp(.05,c,-.15+o,1.37+i*.02,0,bf)});
+cy(.2,.16,.12,'#c98b52',-.5,1.02,0,bf);
+apple(bf,-.56,1.13,0,'#e0412e');orange(bf,-.43,1.13,.06);apple(bf,-.5,1.13,-.08,'#8fd18a');banana(bf,-.5,1.2,.02,.4,.8);
+flowerVase(bf,-.15,.96,0,.75);
 bx(.32,.05,.2,'#c9304f',.2,.985,0,bf);bx(.08,.3,.1,'#c9304f',.12,1.15,0,bf);bx(.28,.12,.12,'#c9304f',.2,1.32,0,bf);cy(.11,.08,.1,'#cfd6e0',.28,1.05,0,bf);
 cy(.17,.17,.22,'#fffdf3',.58,1.07,0,bf);sp(.17,'#fffdf3',.58,1.18,0,bf).scale.y=.45;sp(.02,'#e84a5f',.58,1.1,.17,bf,true);
 lact(bf,()=>say3(bf,pick(['nasinya udah matang','kue-kue di sini enak','buah segar buat dessert','vas bunganya cantik~'])));

@@ -29,7 +29,11 @@ const X2P=x=>clamp(((x-bp.x)/RX+.5)*100,0,100),Y2P=y=>clamp((.5-(y-CY)/RY)*100,0
 .wav{width:46px;height:46px;border:3px solid var(--ink);display:grid;place-items:center;font:15px 'Press Start 2P',monospace;color:#fff;text-shadow:2px 2px 0 var(--ink);flex:none}
 .wnm{font-size:11px;line-height:1.5;display:block;word-break:break-word;color:#3d2f14}
 .wno{opacity:.6;font-size:21px;display:block;color:#3d2f14}
-.wnew{margin-left:auto;font:9px 'Press Start 2P',monospace;background:#e84a5f;color:#fff;padding:6px 8px;transform:rotate(6deg);box-shadow:2px 2px 0 var(--ink);flex:none}
+.wnew{position:absolute;top:-12px;right:14px;font:9px 'Press Start 2P',monospace;background:#e84a5f;color:#fff;padding:6px 8px;transform:rotate(6deg);box-shadow:2px 2px 0 var(--ink)}
+.wmid{min-width:0;flex:1}
+.wdt{margin-left:auto;text-align:right;flex:none;color:#3d2f14;line-height:1.1}.wdt .px{display:block;font-size:10px;text-transform:lowercase;margin-bottom:3px}.wdt small{display:block;font-size:22px;opacity:.7}
+.wph{background-size:230%;background-position:50% 46%;background-repeat:no-repeat;image-rendering:auto}
+.wph2{background-size:cover;background-position:center;background-repeat:no-repeat;image-rendering:pixelated}
 .wrt{font-size:31px;line-height:34px;color:#3d2f14;white-space:pre-wrap;word-break:break-word;max-height:min(44vh,360px);overflow:auto;padding-bottom:2px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 33px,rgba(61,47,20,.16) 33px,rgba(61,47,20,.16) 34px)}
 .wft{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:16px;min-height:34px}
 .wfrom{font-size:27px;color:#3d2f14;opacity:.85;text-align:right;margin-left:auto}
@@ -159,11 +163,31 @@ saveMove=async function(m){const n=m.userData.n,x=Math.round(X2P(m.position.x)*1
 const freeSpot=()=>{const pts=noteHits.map(m=>({x:X2P(m.position.x),y:Y2P(m.position.y)}));let best={x:50,y:50},bd=-1;
  for(let k=0;k<90;k++){const c={x:8+Math.random()*84,y:8+Math.random()*84};let d=1e9;pts.forEach(p=>{d=Math.min(d,Math.hypot((p.x-c.x)*RX,(p.y-c.y)*RY))});if(d>bd){bd=d;best=c}}
  return{x:Math.round(best.x*10)/10,y:Math.round(best.y*10)/10}};
-saveNote=async function(n){n={...n,...freeSpot()};
- if(db){try{await fs.addDoc(fs.collection(db,'notes'),{from:n.from,t:n.t,color:n.color,x:n.x,y:n.y,createdAt:fs.serverTimestamp()});return}catch(e){console.warn(e)}}
+saveNote=async function(n){n={...n,...freeSpot(),by:String(did),ts:Date.now()};
+ if(db){const base={from:n.from,t:n.t,color:n.color,x:n.x,y:n.y,createdAt:fs.serverTimestamp()};
+  try{await fs.addDoc(fs.collection(db,'notes'),{...base,by:n.by,ts:n.ts});return}catch(e){console.warn('note+by ditolak, coba bentuk lama',e)}
+  try{await fs.addDoc(fs.collection(db,'notes'),base);return}catch(e){console.warn(e)}}
  cloud.push(n);ls('bday-notes',JSON.stringify(cloud));renderWall()};
 
 /* ---- kartu baca ucapan (dipakai tap satu note & mode baca semua) ---- */
+/* ---- tanggal & hari note, foto ava pengirim ---- */
+const DAYS=['minggu','senin','selasa','rabu','kamis','jumat','sabtu'],MONS=['jan','feb','mar','apr','mei','jun','jul','agu','sep','okt','nov','des'];
+const toMs=v=>{if(v==null||v==='')return 0;
+ if(typeof v==='object'){if(typeof v.toMillis==='function')return v.toMillis();if(typeof v.toDate==='function')return +v.toDate();if(v instanceof Date)return +v;if(typeof v.seconds==='number')return v.seconds*1000;return 0}
+ if(typeof v==='number')return v<1e11?v*1000:v;
+ const p=Date.parse(v);return isNaN(p)?0:p};
+const noteTs=n=>toMs(n.createdAt)||toMs(n.ts)||toMs(n.date)||toMs(n.time)||0;   /* note lama yang tidak punya data tanggal -> tampil "tanggal tidak tercatat" */
+const DEFAV={g:2,hs:0,pn:0,hd:0,hc:1,sc:3,sk:0,ah:0,gl:0,fc:0,ey:0,bj:0,cp:0,ac:0,ex:0};   /* ava default (sama dengan awal editor ava) */
+const avOf=n=>{let a=null;if(n.by){try{const v=V.get(n.by);if(v&&v.a)a=v.a}catch(e){}if(!a){try{a=remote.find(x=>x.id===n.by)||null}catch(e){}}if(!a&&n.by===did){try{a=own||null}catch(e){}}}return a};
+const avPic=n=>{const a=avOf(n)||DEFAV;
+ if(typeof snap==='function'){try{const u=snap(a,'head');if(u)return{u,d3:true}}catch(e){console.warn('wall3d: ava 3D gagal, pakai ava 2D',e)}}
+ try{if(typeof draw==='function'){const s=document.createElement('canvas');s.width=16;s.height=24;draw(s.getContext('2d'),a,0);
+  const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.imageSmoothingEnabled=false;g.drawImage(s,1,0,14,14,0,0,64,64);return{u:c.toDataURL(),d3:false}}}catch(e){console.warn('wall3d: ava 2D gagal',e)}
+ return null};
+const thumbFree=()=>{try{thumbOff()}catch(e){}};
+/* dipakai upgrade3d.js (kartu zoom papan): hari, tanggal, dan foto ava pengirim */
+window.wallInfo=n=>{const ts=noteTs(n),d=ts?new Date(ts):null;return{day:d?DAYS[d.getDay()]:null,date:d?d.getDate()+' '+MONS[d.getMonth()]+' '+d.getFullYear():null,pic:avPic(n)}};
+   /* lepas konteks WebGL kecil setelah kartu ditutup */
 const canRead=()=>ls('bday-aqsa')==='1'; /* flag yang diset secret3d.js saat kode kamar rahasia benar */
 const RK='bday-read-notes',rs=()=>{try{return new Set(JSON.parse(ls(RK)||'[]'))}catch(e){return new Set()}};
 const unread=()=>{const s=rs();return all().filter(n=>!s.has(key(n))).length};
@@ -176,17 +200,19 @@ function openCards(L,start,nav){
  const show=k=>{i=clamp(k,0,L.length-1);const n=L[i],kk=key(n),fresh=nav&&!seen.has(kk),nm=(n.from||'anon');
   if(nav&&!rs().has(kk)){const s=rs();s.add(kk);ls(RK,JSON.stringify([...s]))}
   const p=document.createElement('div');p.className='wcard';p.style.background=n.color||'#f7e27a';p.style.setProperty('--wd',dirn*28+'px');
-  p.innerHTML='<i class="wtape"></i><div class="wtop"><div class="wav"></div><div><b class="px wnm"></b><small class="wno">untuk Aqsa</small></div>'+(fresh?'<span class="wnew">baru</span>':'')+'</div><div class="wrt"></div><div class="wft"><span class="wst"></span><span class="wfrom"></span></div>';
-  const av=p.querySelector('.wav');av.textContent=nm.trim().charAt(0).toUpperCase()||'?';av.style.background=AVC[hash(n)%5];
+  p.innerHTML='<i class="wtape"></i><div class="wtop"><div class="wav"></div><div class="wmid"><b class="px wnm"></b><small class="wno">untuk Aqsa</small></div><div class="wdt"></div>'+(fresh?'<span class="wnew">baru</span>':'')+'</div><div class="wrt"></div><div class="wft"><span class="wst"></span><span class="wfrom"></span></div>';
+  const av=p.querySelector('.wav');av.textContent=nm.trim().charAt(0).toUpperCase()||'?';av.style.backgroundColor=AVC[hash(n)%5];
+  {const r=avPic(n);if(r){av.textContent='';av.style.backgroundImage='url('+r.u+')';av.classList.add(r.d3?'wph':'wph2')}}   /* foto = ava pengirim, atau ava default kalau belum bikin */
+  {const ts=noteTs(n),dt=p.querySelector('.wdt');if(ts){const d=new Date(ts);dt.innerHTML='<b class="px"></b><small></small>';dt.firstChild.textContent=DAYS[d.getDay()];dt.lastChild.textContent=d.getDate()+' '+MONS[d.getMonth()]+' '+d.getFullYear()}else{dt.innerHTML='<b class="px"></b><small></small>';dt.firstChild.textContent='tanggal';dt.lastChild.textContent='tidak tercatat';console.warn('wall3d: note tanpa tanggal',{from:n.from,createdAt:n.createdAt,ts:n.ts})}}
   p.querySelector('.wnm').textContent=nm;p.querySelector('.wrt').textContent=n.t||'';p.querySelector('.wfrom').textContent='- '+nm;
   if(n.s&&ST[n.s])p.querySelector('.wst').appendChild(spr(ST[n.s],4));
   $('#rc').replaceChildren(p);
   if(nav){$('#rn').textContent=(i+1)+' / '+L.length;$('#rbar').style.width=((i+1)/L.length*100)+'%'}};
- if(!nav){onClose=()=>label();show(start);return}
+ if(!nav){onClose=()=>{thumbFree();label()};show(start);return}
  $('#rb').onclick=()=>{dirn=-1;show(i-1)};$('#rf').onclick=()=>{dirn=1;show(i+1)};
  const rc=$('#rc');rc.ontouchstart=e=>tx=e.touches[0].clientX;rc.ontouchend=e=>{const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50){dirn=d<0?1:-1;show(i+dirn)}};
  const kd=e=>{if(e.key==='ArrowLeft'){dirn=-1;show(i-1)}if(e.key==='ArrowRight'){dirn=1;show(i+1)}};addEventListener('keydown',kd);
- onClose=()=>{removeEventListener('keydown',kd);label()};show(start)}
+ onClose=()=>{removeEventListener('keydown',kd);thumbFree();label()};show(start)}
 function reader(){
  if(!canRead())return;
  const L=all().slice().reverse();
@@ -197,4 +223,5 @@ function reader(){
 let lt=0;(function loop(t){requestAnimationFrame(loop);rbtn.style.display=canRead()?$('#sticky').style.display:'none';if(t-lt>500){lt=t;ph++;drawH()}})(0);
 if(document.fonts){document.fonts.load('46px "Press Start 2P"').then(drawH);document.fonts.load('54px VT323').then(()=>{drawP();renderWall()})}
 renderWall();
+console.log('wall3d.js v5 (tanggal + hari + ava pengirim, dibagikan ke kartu zoom) loaded');
 })();

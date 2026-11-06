@@ -118,6 +118,8 @@ function zoomBoard(){let hid=[];zin({tgt:board.position.clone().add(new V3(0,.3,
 if(board)act(board,zoomBoard);
 function noteCard(m){const n=m.userData.n,pages=chunk(n.t||'',CFG.NOTE_PAGE||280);let pg=0,C;const bp=board.position,CW=2.5,CH=2.7,ky=-CH/2+.17;
  const nav=d=>{pg=cl(pg+d,0,pages.length-1);C.F.r()},keys=pages.length>1?[{l:'<',c:'#3b7dd8',fg:'#fff',fn:()=>nav(-1),x:-.98,y:ky,w:.34,h:.24,pad:.14},{l:'>',c:'#f2b84b',fg:'#1f3a5f',fn:()=>nav(1),x:-.38,y:ky,w:.34,h:.24,pad:.14}]:[];
+ let wi=null,avImg=null,avOk=false;try{wi=window.wallInfo?window.wallInfo(n):null}catch(e){console.warn('upgrade3d: wallInfo gagal',e)}
+ if(wi&&wi.pic){avImg=new Image();avImg.onload=()=>{avOk=true;try{C.F.r()}catch(e){}};avImg.src=wi.pic.u}
  C=slip({w:CW,h:CH,thick:.05,tape:1,kin:1,swipe:nav,rot:((n.t||'').length%5-2)*.025,keys,edge:'#d9cfae',pos:new V3(bp.x,bp.y,bp.z+1.0),from:m.position.clone(),
   front:(g,W,H)=>{const col=n.color||'#f7e27a',nm=n.from||'anon',ink='#3d2f14',AV=['#3b7dd8','#e84a5f','#2e9d6a','#8a5bd0','#e08a1e'],multi=pages.length>1;
    let hh=0;for(const ch of nm)hh=(hh*31+ch.charCodeAt(0))>>>0;
@@ -127,9 +129,17 @@ function noteCard(m){const n=m.userData.n,pages=chunk(n.t||'',CFG.NOTE_PAGE||280
    g.strokeStyle='rgba(61,47,20,.4)';g.lineWidth=6;g.strokeRect(3,3,W-6,H-6);
    /* header: avatar inisial + nama pengirim + stiker */
    g.fillStyle=AV[hh%5];g.fillRect(26,22,60,60);g.strokeStyle='#1f3a5f';g.lineWidth=5;g.strokeRect(26,22,60,60);
-   g.font='24px '+FN;g.textAlign='center';g.textBaseline='middle';const ini=nm.trim().charAt(0).toUpperCase()||'?';g.fillStyle='#1f3a5f';g.fillText(ini,58,56);g.fillStyle='#fff';g.fillText(ini,56,54);
-   g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle=ink;{let f=15;const room=W-106-96;g.font=f+'px '+FN;while(f>9&&g.measureText(nm).width>room){f--;g.font=f+'px '+FN}g.fillText(nm,106,52)}
+   g.font='24px '+FN;g.textAlign='center';g.textBaseline='middle';if(avOk){g.save();g.beginPath();g.rect(26,22,60,60);g.clip();
+    if(wi.pic.d3){const q=avImg.width/112;g.imageSmoothingEnabled=true;g.drawImage(avImg,31.7*q,29.1*q,48.7*q,48.7*q,26,22,60,60)}else{g.imageSmoothingEnabled=false;g.drawImage(avImg,26,22,60,60)}
+    g.restore();g.strokeStyle='#1f3a5f';g.lineWidth=5;g.strokeRect(26,22,60,60)}
+   else{const ini=nm.trim().charAt(0).toUpperCase()||'?';g.fillStyle='#1f3a5f';g.fillText(ini,58,56);g.fillStyle='#fff';g.fillText(ini,56,54)}
+   g.textAlign='left';g.textBaseline='alphabetic';g.fillStyle=ink;{let f=15;const hasS=typeof stk==='function'&&typeof ST!=='undefined'&&n.s&&ST[n.s],room=W-106-(hasS?96:150);g.font=f+'px '+FN;while(f>9&&g.measureText(nm).width>room){f--;g.font=f+'px '+FN}g.fillText(nm,106,52)}
    g.font='28px '+VT;g.globalAlpha=.6;g.fillText('untuk Aqsa',106,84);g.globalAlpha=1;
+   /* tanggal + hari di kanan atas */
+   {const hs=typeof stk==='function'&&typeof ST!=='undefined'&&n.s&&ST[n.s];g.textAlign='right';g.fillStyle=ink;
+    if(wi&&wi.date){if(hs){g.font='26px '+VT;g.globalAlpha=.75;g.fillText(wi.day+', '+wi.date,W-26,116)}else{g.font='13px '+FN;g.globalAlpha=1;g.fillText(wi.day,W-26,46);g.font='32px '+VT;g.globalAlpha=.75;g.fillText(wi.date,W-26,82)}}
+    else{g.font='24px '+VT;g.globalAlpha=.5;g.fillText('tanpa tanggal',W-26,hs?116:70)}
+    g.globalAlpha=1;g.textAlign='left'}
    if(typeof stk==='function'&&typeof ST!=='undefined'&&n.s&&ST[n.s]){g.save();g.scale(2,2);stk(g,n.s,W/2-34,18);g.restore()}
    /* isi: huruf terbesar yang muat, garis buku sejajar baris */
    const top=124,avail=H-104-top;let px=52,L,lh;for(;;){g.font=px+'px '+VT;L=wrap(g,pages[pg],W-64);lh=px*1.1;if(L.length*lh<=avail||px<=22)break;px-=2}

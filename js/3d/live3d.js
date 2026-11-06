@@ -1,4 +1,4 @@
-/* live3d.js v5 (ruang 11 = Royal Mart ikut dikenali) — HANYA untuk versi 3D (index.html). Jangan dimuat di index2d.html.
+/* live3d.js v7 (window.LIVE3D.online() untuk booth3d.js; ruang 12 = perpustakaan rahasia dikenali sebagai ruang PRIBADI: ava-mu ikut, tidak disiarkan ke teman; ruang 11 = Royal Mart) — HANYA untuk versi 3D (index.html). Jangan dimuat di index2d.html.
    Muat PALING AKHIR, setelah wall3d.js:
      <script src="live3d.js?v=1"></script>
 
@@ -29,9 +29,9 @@ const g0=fn=>{try{return fn()}catch(e){return null}};
 if(typeof THREE==='undefined'||typeof S==='undefined'||typeof V==='undefined'||typeof did==='undefined'||
    typeof place==='undefined'||typeof say3==='undefined'||typeof paintV==='undefined')return;
 
-const ROOMN=['ruang utama','lounge','galeri kenangan','kamar tidur','ruang makan','balkon','basement','teras','taman','kafe','komplek','Royal Mart'];
-const ENTRY={0:{x:-5.8,z:6.8},1:{x:-4,z:1.2},2:{x:-4,z:1.3},3:{x:2.9,z:1.7},4:{x:-4,z:1.5},5:{x:-2.2,z:-2.2},6:{x:1.9,z:-1},7:{x:0,z:-2.2},8:{x:-3.9,z:.5},9:{x:-5.9,z:1.8},10:{x:9.2,z:-2.6},11:{x:0,z:3.4}};
-const CX={120:3,160:4,200:5,240:6,280:7,320:8,360:9,420:10,480:11}; /* posisi kamera -> nomor ruangan (lantai 2, basement, teras, taman, kafe 360, komplek 420, Royal Mart 480 — sama dengan KX/MX di komplek3d.js & MX di mart3d.js) */
+const ROOMN=['ruang utama','lounge','galeri kenangan','kamar tidur','ruang makan','balkon','basement','teras','taman','kafe','komplek','Royal Mart','perpustakaan'];
+const ENTRY={0:{x:-5.8,z:6.8},1:{x:-4,z:1.2},2:{x:-4,z:1.3},3:{x:2.9,z:1.7},4:{x:-4,z:1.5},5:{x:-2.2,z:-2.2},6:{x:1.9,z:-1},7:{x:0,z:-2.2},8:{x:-3.9,z:.5},9:{x:-5.9,z:1.8},10:{x:9.2,z:-2.6},11:{x:0,z:3.4},12:{x:4.2,z:1.7}};
+const CX={120:3,160:4,200:5,240:6,280:7,320:8,360:9,420:10,480:11,540:12}; /* posisi kamera -> nomor ruangan (lantai 2, basement, teras, taman, kafe 360, komplek 420, Royal Mart 480 — sama dengan KX/MX di komplek3d.js & MX di mart3d.js) */
 const MAXR=11; /* nomor ruangan terbesar (Royal Mart). Aturan Firestore presence/pos/live yang membatasi field r juga harus sampai 11 */
 const lsg=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
 const isAqsaName=n=>String(n||'').trim().toLowerCase()==='aqsa';
@@ -106,13 +106,16 @@ let lastP={n:null,r:null},lastPW=0,pT=0;
 function pub(force){
  if(!db||!fs)return;
  const n=myName();if(!n)return;
- const r=document.hidden?-1:myRoom(),now=Date.now();
+ let r=document.hidden?-1:myRoom();const now=Date.now();
+ if(r>MAXR)r=0; /* perpustakaan rahasia: ke teman terlihat seperti di ruang utama (jalan masuknya), bukan nomor ruang 12 */
  if(!force&&n===lastP.n&&r===lastP.r&&now-lastPW<HB)return;
  if(now-lastPW<3600){if(!pT)pT=setTimeout(()=>{pT=0;pub(true)},3700-(now-lastPW));return}
  lastP={n,r};lastPW=now;
  fs.setDoc(fs.doc(db,'presence',did),{n,r,ts:fs.serverTimestamp()}).catch(e=>console.warn('presence',e))}
 const fresh=p=>serverNow()-p.ms<ONLINE_MS;
 function onlineMap(){const m=new Map();P.forEach((p,id)=>{if(fresh(p))m.set(id,p)});return m}
+/* dipakai booth3d.js: daftar id yang lagi online (termasuk kamu) */
+window.LIVE3D={online:()=>{const s=new Set(onlineMap().keys());if(myName()&&lastP.n)s.add(did);return s}};
 
 const escH=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function renderHud(){
@@ -234,7 +237,7 @@ function homeRooms(){const a=[0,1];if(window.GRP)a.push(2);return a} /* ruang la
 const ambient=()=>[...V.entries()].filter(([id,v])=>id!==did&&!v._pin);
 function sync(){
  const mr=myRoom(),tr=eff(mr),me=V.get(did),now=Date.now();
- if(netOn&&subRoom!==tr)subPos(tr);
+ if(netOn&&tr<=MAXR&&subRoom!==tr)subPos(tr);
  if(mr!==lastMr){lastMr=mr;gatherAt=now+1200}
  if(me&&me.room!==tr)warp(me,tr);
  const on=onlineMap();

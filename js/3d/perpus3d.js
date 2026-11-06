@@ -1,4 +1,4 @@
-/* perpus3d.js v1 — PERPUSTAKAAN RAHASIA
+/* perpus3d.js v2 (ava pemain ikut masuk perpustakaan, lewat interact3d.js & live3d.js) — PERPUSTAKAAN RAHASIA
    Muat PALING AKHIR (setelah upgrade3d.js, dan setelah komplek3d.js / mart3d.js kalau ada):
      <script src="js/3d/perpus3d.js?v=1"></script>
    Cara kerja:
@@ -75,6 +75,9 @@ const BAND=['#d9b24c','#e8dcc0','#c9a14a'];
 const LIB=new THREE.Group();LIB.position.set(LX,0,0);S.add(LIB);LIB.visible=false;
 const RX=5.4,Z0=-4.6,Z1=3.4,WH=5.2,ZC=(Z0+Z1)/2,DZ=Z1-Z0;
 const anim={fire:[],flick:[],orbs:[],steam:[],dust:null,cat:null,globe:null,spin:0};
+/* titik berdiri/duduk avatar PEMAIN untuk tiap benda (dibaca interact3d.js lewat window.PERPUS3D.spots).
+   ps(benda, xBerdiri, zBerdiri, [hadapX,hadapZ], ucapan, [detikMin,detikMax], stage) — kalau stage diisi = tempat DUDUK (x,z = pusat kursi, stage = titik jalan di depannya) */
+const PS=[];const ps=(o,x,z,f,say,w,sit)=>{if(o)PS.push({o,x,z,f,say,w,sit})};
 
 /* lantai kayu + karpet */
 {const wood=cv2(128,128,g=>{for(let r=0;r<8;r++)for(let k=-1;k<3;k++){const x=(r*37)%64+k*64;g.fillStyle=['#5a3a22','#4d311c','#654226','#53371f'][(r+k+8)%4];g.fillRect(x,r*16,64,16);g.fillStyle='#2e1b0e';g.fillRect(x,r*16,64,1);g.fillRect(x,r*16,1,16)}},1,[5,4]);
@@ -123,17 +126,21 @@ function bookcase(cx,cz,ry,w,h,seed){const g=grp(cx,0,cz,LIB,ry),D=.55,rows=5,rn
  const nm=CFG.title.split(' '),l1=nm.slice(0,Math.ceil(nm.length/2)).join(' '),l2=nm.slice(Math.ceil(nm.length/2)).join(' ');
  const t=cv2(320,110,(g,W,H)=>{g.fillStyle='#1c2438';g.fillRect(0,0,W,H);g.strokeStyle='#d9b24c';g.lineWidth=6;g.strokeRect(4,4,W-8,H-8);g.lineWidth=2;g.strokeRect(14,14,W-28,H-28);g.fillStyle='#f0cf6a';g.textAlign='center';g.textBaseline='middle';g.font='20px '+PX;g.fillText(l1,W/2,H/2-14);g.font='24px '+PX;g.fillText(l2,W/2,H/2+20)},1);
  bplane(3.0,1.03,t,0,3.9,-.4,f);box(3.1,1.13,.06,'#d9b24c',0,3.9,-.44,f);
- lact(f,()=>say3(f,pick(['hangat... perapiannya nyala terus','krek krek~ suara kayu terbakar','tempat paling nyaman se-rumah'])))}
+ lact(f,()=>say3(f,pick(['hangat... perapiannya nyala terus','krek krek~ suara kayu terbakar','tempat paling nyaman se-rumah'])));
+ ps(f,0,-2.25,[0,-1],'hangat banget di sini~',[14,22])}
 
-bookcase(-3.15,Z0+.3,0,3.3,4.6,11);bookcase(3.15,Z0+.3,0,3.3,4.6,23);
-const lcase=bookcase(-RX+.3,-1.95,Math.PI/2,4.2,4.6,37);bookcase(RX-.3,-2.3,-Math.PI/2,3.4,4.6,51);
+const bcA=bookcase(-3.15,Z0+.3,0,3.3,4.6,11),bcB=bookcase(3.15,Z0+.3,0,3.3,4.6,23);
+const lcase=bookcase(-RX+.3,-1.95,Math.PI/2,4.2,4.6,37),bcD=bookcase(RX-.3,-2.3,-Math.PI/2,3.4,4.6,51);
+ps(bcA,-2.4,-2.9,[0,-1],'buku apa ya yang menarik',[12,20]);ps(bcB,2.6,-2.9,[0,-1],'wangi kertas tua~',[12,20]);
+ps(lcase,-4.4,-.4,[-1,0],'banyak banget bukunya',[12,20]);ps(bcD,4.4,-1.5,[1,0],'ssst... jangan berisik',[12,20]);
 
 /* tangga perpustakaan bersandar di rak kiri */
 {const g=grp(-RX+1.35,0,-1.4,LIB,Math.PI/2);const W=.9,TN=Math.tan(.17);
  [-1,1].forEach(s=>{const r=box(.07,3.9,.07,'#a8743f',s*W/2,1.95,-1.95*TN,g);r.rotation.x=-.17});
  for(let i=0;i<8;i++){const y=.4+i*.46;box(W,.05,.1,'#c98b52',0,y,-(y*TN),g)}
  box(W+.1,.07,.1,'#d9b24c',0,3.75,-3.75*TN,g);[-1,1].forEach(s=>cyl(.05,.05,.07,'#d9b24c',s*W/2,.03,.05,g,8));
- lact(g,()=>say3(g,pick(['tangga rak, jangan dipanjat ya','buat ngambil buku yang paling atas'])))}
+ lact(g,()=>say3(g,pick(['tangga rak, jangan dipanjat ya','buat ngambil buku yang paling atas'])));
+ ps(g,-3.4,-1.4,[-1,0],'tinggi banget raknya',[8,14])}
 
 /* meja bulat + lampu baca + buku terbuka + cangkir */
 {const t=grp(0,0,-.1,LIB);cyl(.85,.85,.09,'#6b4326',0,.85,0,t,24);cyl(.1,.16,.8,'#4a2f1a',0,.42,0,t,10);cyl(.45,.5,.08,'#4a2f1a',0,.04,0,t,16);
@@ -142,22 +149,23 @@ const lcase=bookcase(-RX+.3,-1.95,Math.PI/2,4.2,4.6,37);bookcase(RX-.3,-2.3,-Mat
  glow('#ffe9a0',1.1,-.3,1.25,-.1,t,.65);glow('#ffe9a0',2.6,-.3,.95,-.1,t,.22);
  const cup=grp(.5,.9,-.3,t);cyl(.09,.07,.1,'#f4efe4',0,.05,0,cup,12);cyl(.075,.075,.01,'#7a4a2a',0,.1,0,cup,12);
  for(let i=0;i<3;i++)anim.steam.push(glow('#ffffff',.2,0,.2,0,cup,.3));
- lact(t,()=>say3(t,pick(['teh-nya masih anget','lampu hijau ini bikin betah baca'])));
+ lact(t,()=>say3(t,pick(['teh-nya masih anget','lampu hijau ini bikin betah baca'])));ps(t,0,1.3,[0,-1],'teh-nya masih anget',[10,18]);
  /* buku terbuka di atas meja (dipisah dari grup meja supaya tap-nya sendiri) */
  const bk=grp(.22,.91,.02,LIB);box(.33,.03,.42,'#7b2a35',-.17,0,0,bk);box(.33,.03,.42,'#7b2a35',.17,0,0,bk);box(.3,.03,.4,'#efe6cf',-.17,.03,0,bk).rotation.z=.06;box(.3,.03,.4,'#efe6cf',.17,.03,0,bk).rotation.z=-.06;
  for(let i=0;i<5;i++){box(.2,.002,.012,'#8a7a66',-.17,.05,-.12+i*.06,bk);box(.2,.002,.012,'#8a7a66',.17,.05,-.12+i*.06,bk)}
- zone(.7,.25,.5,0,.1,0,bk);lact(bk,()=>readModal(CFG.book.title,CFG.book.text))}
+ zone(.7,.25,.5,0,.1,0,bk);lact(bk,()=>readModal(CFG.book.title,CFG.book.text));ps(bk,.35,1.3,[0,-1],null,[10,16])}
 
 /* dua kursi tangan */
 function armchair(x,z,ry,c,d){const g=grp(x,0,z,LIB,ry);box(1.15,.28,1.0,c,0,.4,0,g);box(1.15,1.0,.26,c,0,.95,-.46,g);[-1,1].forEach(s=>{box(.22,.5,1.0,d,s*.6,.55,.02,g);box(.26,.06,1.0,'#d9b24c',s*.6,.82,.02,g)});
  box(.9,.14,.8,d,0,.58,.08,g);[[-.5,-.45],[.5,-.45],[-.5,.45],[.5,.45]].forEach(([a,b])=>cyl(.05,.04,.18,'#3a2414',a,.09,b,g,6));
  lact(g,()=>say3(g,pick(['empuk banget','kursi paling enak buat baca'])));return g}
-armchair(-2.5,.2,Math.PI/2,'#7b2a35','#5e1f2a');armchair(2.5,.2,-Math.PI/2,'#2f5d46','#234a38');
+const acL=armchair(-2.5,.2,Math.PI/2,'#7b2a35','#5e1f2a'),acR=armchair(2.5,.2,-Math.PI/2,'#2f5d46','#234a38');
+ps(acL,-2.45,.2,[1,0],'empuk banget~',null,{x:-1.55,z:.2});ps(acR,2.45,.2,[-1,0],'enak buat baca~',null,{x:1.55,z:.2});
 
 /* lampu lantai + meja kecil (kiri) */
 {const g=grp(-3.55,0,1.2,LIB);cyl(.2,.24,.06,'#d9b24c',0,.03,0,g,12);cyl(.03,.03,2.0,'#d9b24c',0,1.0,0,g,6);
  mesh(new THREE.CylinderGeometry(.22,.38,.5,12,1,true),new THREE.MeshLambertMaterial({color:'#f6e3b0',emissive:'#ffcf7a',emissiveIntensity:.6,side:THREE.DoubleSide}),0,2.15,0,g);
- glow('#ffd98a',1.6,0,2.1,0,g,.7);glow('#ffd98a',3.4,0,1.2,0,g,.18);lact(g,()=>say3(g,'lampu baca, selalu nyala'))}
+ glow('#ffd98a',1.6,0,2.1,0,g,.7);glow('#ffd98a',3.4,0,1.2,0,g,.18);lact(g,()=>say3(g,'lampu baca, selalu nyala'));ps(g,-2.9,1.5,[-1,-.2],'lampunya hangat',[8,14])}
 
 /* meja tulis + surat rahasia */
 {const d=grp(-3.55,0,-3.2,LIB,Math.PI/2);box(1.6,.08,.8,'#6b4326',0,.85,0,d);[[-.7,-.3],[.7,-.3],[-.7,.3],[.7,.3]].forEach(([a,b])=>box(.08,.82,.08,'#4a2f1a',a,.41,b,d));
@@ -167,20 +175,20 @@ armchair(-2.5,.2,Math.PI/2,'#7b2a35','#5e1f2a');armchair(2.5,.2,-Math.PI/2,'#2f5
  const q=grp(.45,.9,.15,d);const qs=cyl(.008,.008,.55,'#e8dcc0',0,.12,0,q,5);qs.rotation.z=.9;box(.04,.18,.004,'#f4efe4',.22,.28,0,q).rotation.z=-.6;
  cyl(.07,.06,.12,'#1c2438',.55,.06,-.2,d,10);
  glow('#ffe9a0',.5,-.1,1.0,0,d,.35);
-zone(.7,.5,.6,-.1,1.0,0,d);lact(d,()=>readModal(CFG.letter.title,CFG.letter.text))}
+zone(.7,.5,.6,-.1,1.0,0,d);lact(d,()=>readModal(CFG.letter.title,CFG.letter.text));ps(d,-2.8,-2.8,[-1,0],null,[10,16])}
 
 /* globe */
 {const g=grp(3.95,0,-3.0,LIB);cyl(.28,.32,.06,'#4a2f1a',0,.03,0,g,12);cyl(.04,.05,.9,'#d9b24c',0,.5,0,g,6);
  const gt=cv2(128,64,(c,W,H)=>{c.fillStyle='#2a5f9e';c.fillRect(0,0,W,H);c.fillStyle='#5aa65c';[[18,18,22,12],[50,26,18,16],[80,14,26,10],[96,38,16,12],[30,44,16,9],[64,48,22,7]].forEach(([x,y,w,h])=>{c.fillRect(x,y,w,h)});c.fillStyle='#e8f4ff';c.fillRect(0,0,W,4);c.fillRect(0,H-4,W,4)},1);
  const pv=grp(0,1.2,0,g);pv.rotation.z=.4;const gs=mesh(new THREE.SphereGeometry(.42,16,12),new THREE.MeshLambertMaterial({map:gt}),0,0,0,pv);anim.globe=gs;
  mesh(new THREE.TorusGeometry(.5,.025,6,24,Math.PI*1.7),LM('#d9b24c'),0,0,0,pv).rotation.y=Math.PI/2;
- lact(g,()=>{anim.spin=4;say3(g,pick(['wuuush~ dunia berputar','mau ke mana dulu?']))})}
+ lact(g,()=>{anim.spin=4;say3(g,pick(['wuuush~ dunia berputar','mau ke mana dulu?']))});ps(g,3.3,-2.5,[1,-.5],null,[8,14])}
 
 /* kucing tidur di bantal */
 {const g=grp(1.35,.02,1.35,LIB,-.5);cyl(.5,.5,.1,'#a8283a',0,.05,0,g,16);cyl(.46,.46,.03,'#d9b24c',0,.115,0,g,16).scale.y=.4;
  const body=sph(.32,'#efe2c8',0,.36,0,g);body.scale.set(1.2,.7,1);const head=sph(.2,'#efe2c8',.34,.32,.05,g);cone(.06,.12,'#4b3426',.4,.5,.12,g,4);cone(.06,.12,'#4b3426',.4,.5,-.02,g,4);
  box(.35,.1,.1,'#4b3426',-.32,.28,.1,g);sph(.07,'#4b3426',.4,.28,.17,g);anim.cat=body;
- lact(g,()=>say3(g,pick(['zzz... (Miko versi perpustakaan)','purr... purr...','jangan dibangunin~'])))}
+ lact(g,()=>say3(g,pick(['zzz... (Miko versi perpustakaan)','purr... purr...','jangan dibangunin~'])));ps(g,.55,1.7,[1,-.3],null,[10,16])}
 
 /* melayang: bola cahaya + debu */
 for(let i=0;i<4;i++){const o=grp(-1.4+i*.95,2.1,-.5+(i%2)*.4,LIB);sph(.07,i%2?'#bfe6ff':'#ffe9a0',0,0,0,o).material=BM(i%2?'#bfe6ff':'#ffe9a0');glow(i%2?'#8fd0f0':'#ffd98a',.7,0,0,0,o,.7);anim.orbs.push({g:o,y:2.1+(i%3)*.25,p:i*1.7})}
@@ -288,7 +296,8 @@ function enterLib(fromSeq){
   else dist=Math.min(40,(mainDist||dist)*CFG.ZOOM)}
  goalT.set(LX,2.2,0);if(typeof tgt!=='undefined'&&tgt&&tgt.copy)tgt.copy(goalT);
  lgbD=lgb.style.display;hideBar();lgb.style.display='none';btnBack.style.display='';btnBack.textContent='keluar';
- const sk=document.getElementById('sticky');if(sk)sk.style.display='none';quiet();chime()}
+ const sk=document.getElementById('sticky');if(sk)sk.style.display='none';quiet();chime();
+ try{window.dispatchEvent(new Event('perpus3d-enter'))}catch(e){}}   /* interact3d.js: ava-mu muncul di perpustakaan */
 function resetShelf(){setOpen(0);sh.position.copy(P0);sh.rotation.y=R0;doorOn=false;door.visible=false;
  if(SB.ok){SB.g.rotation.z=0;SB.g.position.copy(SB.base)}
  door.userData.spill.material.opacity=0;door.userData.gl.material.opacity=0}
@@ -301,6 +310,7 @@ function exitLib(){trans(()=>{
  fixCam();
  try{if(typeof room!=='undefined')room=1;if(lgb.onclick)lgb.onclick();else if(typeof goRoom==='function')goRoom(0)}catch(e){console.warn('perpus3d: keluar',e)}
  fixCam();exitFix=4;   /* pasang ulang beberapa frame, kalau goRoom() menimpa jarak kamera */
+ try{window.dispatchEvent(new Event('perpus3d-exit'))}catch(e){}   /* interact3d.js: ava-mu balik ke ruang utama */
  LIB.visible=false;resetShelf();restoreBar();btnBack.style.display='none';lgb.style.display=lgbD;quiet()})}
 function goDirect(){trans(()=>{enterLib(false)})}
 
@@ -359,8 +369,18 @@ function step(dt){
  if(anim.dust){const a=anim.dust.p.geometry.attributes.position.array,b=anim.dust.b;for(let i=0;i<anim.dust.N;i++){a[i*3]=b[i*3]+Math.sin(t*.25+i)*.35;a[i*3+1]=b[i*3+1]+Math.sin(t*.4+i*1.7)*.25;a[i*3+2]=b[i*3+2]+Math.cos(t*.22+i*.6)*.3}anim.dust.p.geometry.attributes.position.needsUpdate=true}}
 {const _w=winFx;winFx=function(dt){_w(dt);try{step(dt)}catch(e){console.warn('perpus3d',e)}}}
 
+/* ===== RUANG 12 untuk avatar pemain (dibaca interact3d.js & live3d.js; pola sama dengan window.MART3D) =====
+   Hanya ava-MU yang muncul di sini. Ava teman / ava offline tidak pernah dikirim ke ruang 12 (tidak ada pintu, tidak ada ambient).
+   obs = rintangan [xMin,xMax,zMin,zMax] (lokal perpustakaan). bnd = batas jalan. entry = titik muncul. rbd = area keliling. */
+window.PERPUS3D={group:LIB,
+ obs:[[-1.8,1.8,-4,-2.5],[-.95,.95,-1.05,.85],[-3.1,-1.95,-.45,.85],[1.95,3.1,-.45,.85],[-3.85,-3.25,.9,1.5],[-3.95,-3.15,-4,-2.4],[3.6,4.3,-3.35,-2.65],[.85,1.85,.85,1.85],[-4.5,-3.85,-1.9,-.9]],
+ bnd:{x0:-4.5,x1:4.6,z0:-3.0,z1:3.0},
+ pois:[{x:0,z:-2.25,f:[0,-1],w:[10,16],max:1},{x:0,z:1.3,f:[0,-1],w:[8,14],max:1},{x:-2.8,z:-2.8,f:[-1,0],w:[8,14],max:1},{x:3.3,z:-2.5,f:[1,-.5],w:[6,10],max:1},{x:4.4,z:-1.5,f:[1,0],w:[6,10],max:1}],
+ entry:{x:4.2,z:1.7},rbd:{x0:-3,x1:3.5,z0:-2,z1:2.6},spots:PS};
+try{window.dispatchEvent(new Event('perpus3d-ready'))}catch(e){}
+
 window.PERPUS={go:goDirect,exit:exitLib,pull:startSeq,cfg:CFG,
  /* untuk cek posisi buku rahasia: PERPUS.where() */
  where:()=>SB.ok?{x:SB.base.x,y:SB.base.y,z:SB.base.z}:null};
-console.log('perpus3d.js v1 (perpustakaan rahasia: tarik buku hijau di rak) loaded');
+console.log('perpus3d.js v2 (perpustakaan rahasia: tarik buku hijau di rak) loaded');
 })();

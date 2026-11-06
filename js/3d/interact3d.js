@@ -10,6 +10,7 @@
 
    Ruangan: 0 utama, 1 lounge, 2 galeri kenangan, 3 kamar tidur (lantai 2), 4 ruang makan (lantai 2), 5 balkon (lantai 2), 6 basement, 7 teras, 8 taman.
    Basement/teras/taman butuh basement3d.js & outdoor3d.js dimuat sebelum file ini.
+   v15: 12 perpustakaan rahasia (dari perpus3d.js; window.PERPUS3D). Hanya ava PEMAIN yang muncul di sana: otomatis saat masuk lewat rak, balik ke ruang utama saat keluar. Tidak ada pintu / ava lain ke ruang 12.
    v14: 11 Royal Mart (interior minimarket dari mart3d.js; dipasang otomatis lewat window.MART3D, urutan muat bebas). Rintangan, titik berdiri & pintunya ikut dikirim mart3d.js.
    v12: 9 kafe pribadi & 10 komplek (dari komplek3d.js; dipasang otomatis begitu komplek3d.js termuat, urutan muat bebas). Atur jalan/rintangan/tempat duduk di ROOMS[9] & ROOMS[10].
    Mau ubah titik berdiri / ucapan? Cari bagian "EDIT" di bawah.
@@ -143,10 +144,22 @@ function regMart(){
  g0(()=>{DRS[11]=[]});g0(()=>{RBD[11]=M.rbd})}
 try{regMart()}catch(e){console.warn('interact3d mart',e)}
 addEventListener('mart3d-ready',()=>{try{regMart();scanMart()}catch(e){console.warn('interact3d mart',e)}});
+/* ===== Perpustakaan rahasia (ruang 12, dari perpus3d.js): dipasang begitu window.PERPUS3D ada (urutan muat bebas) ===== */
+let HASP=false;
+function regPerpus(){
+ if(HASP)return;const L=window.PERPUS3D;if(!L||!L.group)return;
+ R3.addRoom(12,L.obs,L.bnd,L.pois);
+ HASP=true;RG[12]=L.group;ENTRY[12]=L.entry;
+ g0(()=>{DRS[12]=[]});g0(()=>{RBD[12]=L.rbd})}
+try{regPerpus()}catch(e){console.warn('interact3d perpus',e)}
+addEventListener('perpus3d-ready',()=>{try{regPerpus();scanPerpus()}catch(e){console.warn('interact3d perpus',e)}});
+/* masuk / keluar perpustakaan: ava pemain ikut pindah (ava lain TIDAK) */
+addEventListener('perpus3d-enter',()=>{try{regPerpus();const v=own();if(v&&HASP&&v.room!==12){clearV(v);warp(v,12)}}catch(e){console.warn('interact3d perpus',e)}});
+addEventListener('perpus3d-exit',()=>{try{const v=own();if(v&&v.room===12){clearV(v);warp(v,0)}}catch(e){console.warn('interact3d perpus',e)}});
 {
  const _place=place;
  place=function(v,r){
-  if(r>=9){try{regKomp();regMart()}catch(e){console.warn('interact3d reg',e)}}
+  if(r>=9){try{regKomp();regMart();regPerpus()}catch(e){console.warn('interact3d reg',e)}}
   const G=RG[r];if(!G)return _place(v,r);
   unplace(v);v.room=r;G.add(v.g,v.tg);lh.push(v.g);v.g.visible=v.tg.visible=true};
 }
@@ -525,6 +538,13 @@ function scanMart(){
  regMart();if(!HASM)return;
  window.MART3D.spots.forEach(s=>{if(s.o&&!s._w){s._w=1;wrap(s.o,st(11,s.x,s.z,s.f,s.say,s.w))}})}
 
+/* --- Perpustakaan (12): tiap benda perpus3d.js membawa titik berdiri / duduk sendiri (PERPUS3D.spots). Pintu keluar tidak dibungkus: tap = keluar --- */
+function scanPerpus(){
+ regPerpus();if(!HASP)return;
+ (window.PERPUS3D.spots||[]).forEach(s=>{if(!s.o||s._w)return;s._w=1;
+  if(s.sit){const p={x:s.x,z:s.z,st:s.sit,f:s.f};wrap(s.o,sitPick(12,[p],s.say),{replace:true,full:'kursinya sudah dipakai'})}
+  else wrap(s.o,st(12,s.x,s.z,s.f,s.say,s.w))})}
+
 /* ===== KUNCI ARAH HADAP saat duduk di kursi meja teh (teras) =====
    Engine avatar menimpa arah hadap saat duduk, jadi diatur ulang TEPAT SEBELUM render (sama seperti postAv ayunan).
    Kursi kiri (x=.4) menghadap kanan (+x) ke meja, kursi kanan (x=2.4) menghadap kiri (-x). */
@@ -533,12 +553,15 @@ if(typeof REN!=='undefined'&&REN&&typeof REN.render==='function'&&!REN._chairFac
   /* ruang santai (kamar tidur): sofa & beanbag menghadap TV, kursi baca & bangku catur saling berhadapan */
   {r:3,x:9.63,z:-2.8,a:0},{r:3,x:10.77,z:-2.8,a:0},{r:3,x:7.0,z:-1.35,a:Math.PI},{r:3,x:8.2,z:-1.15,a:Math.PI},{r:3,x:6.2,z:.8,a:Math.PI/2},{r:3,x:7.5,z:2.2,a:Math.PI/2},{r:3,x:9.7,z:2.2,a:-Math.PI/2},
   /* kursi meja makan (ruang 4) */
-  {r:4,x:.1,z:-.2,a:0},{r:4,x:1.5,z:-.2,a:0},{r:4,x:.1,z:2.0,a:Math.PI},{r:4,x:1.5,z:2.0,a:Math.PI}].concat(SEATS9);   /* + kursi/sofa/bangku bar kafe (9) & bangku taman komplek (10) */
+  {r:4,x:.1,z:-.2,a:0},{r:4,x:1.5,z:-.2,a:0},{r:4,x:.1,z:2.0,a:Math.PI},{r:4,x:1.5,z:2.0,a:Math.PI},
+  /* kursi tangan perpustakaan (12): menghadap meja bulat */
+  {r:12,x:-2.45,z:.2,a:Math.PI/2},{r:12,x:2.45,z:.2,a:-Math.PI/2}].concat(SEATS9);   /* + kursi/sofa/bangku bar kafe (9) & bangku taman komplek (10) */
  REN.render=function(a,b){try{V.forEach(v=>{if(v.mode!=='sit'||!v.g)return;
    const c=CH.find(c=>c.r===v.room&&Math.hypot(v.x-c.x,v.z-c.z)<.5);if(c){v.g.rotation.y=c.a;if(v.R)v.R.fa=c.a}})}catch(e){}
   return _rc.call(this,a,b)}}
 try{scan()}catch(e){console.warn('interact3d',e)}
 try{scanKomp()}catch(e){console.warn('interact3d kafe/komplek',e)}
 try{scanMart()}catch(e){console.warn('interact3d mart',e)}
-setInterval(()=>{try{scan()}catch(e){}try{scanKomp()}catch(e){}try{scanMart()}catch(e){}},4000);
+try{scanPerpus()}catch(e){console.warn('interact3d perpus',e)}
+setInterval(()=>{try{scan()}catch(e){}try{scanKomp()}catch(e){}try{scanMart()}catch(e){}try{scanPerpus()}catch(e){}},4000);
 })();
